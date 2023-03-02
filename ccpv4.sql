@@ -17,6 +17,65 @@
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hr_sub_task`
+--
+
+CREATE TABLE `hr_sub_task` (
+  `id` int(11) NOT NULL,
+  `hr_task_id` int(11) NOT NULL,
+  `subtask_name` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hr_sub_task`
+--
+
+INSERT INTO `hr_sub_task` (`id`, `hr_task_id`, `subtask_name`, `start_date`, `end_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'Post job openings on job portals', '2022-02-01 10:00:00', '2022-02-03 18:00:00', NULL, '2023-03-01 03:55:59', NULL),
+(2, 1, 'Screen resumes and shortlist candidates', '2022-02-04 10:00:00', '2022-02-07 18:00:00', NULL, NULL, NULL),
+(3, 2, 'Send offer letter and employment contract', '2022-03-01 10:00:00', '2022-03-03 18:00:00', NULL, NULL, NULL),
+(4, 2, 'Arrange for employee induction and orientation', '2022-03-04 10:00:00', '2022-03-07 18:00:00', NULL, NULL, NULL),
+(5, 3, 'Schedule and conduct performance reviews', '2022-04-01 10:00:00', '2022-04-15 18:00:00', NULL, NULL, NULL),
+(6, 3, 'Provide feedback and coaching to employees', '2022-04-16 10:00:00', '2022-04-30 18:00:00', NULL, NULL, NULL),
+(7, 4, 'Conduct exit interviews', '2022-05-01 10:00:00', '2022-05-07 18:00:00', NULL, NULL, NULL),
+(8, 4, 'Complete necessary paperwork and exit formalities', '2022-05-08 10:00:00', '2022-05-14 18:00:00', NULL, NULL, NULL),
+(9, 4, 'Communicate with concerned teams and handover responsibilities', '2022-05-15 10:00:00', '2022-05-31 18:00:00', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `hr_task`
+--
+
+CREATE TABLE `hr_task` (
+  `id` int(11) NOT NULL,
+  `task_name` varchar(255) NOT NULL,
+  `start_date` datetime NOT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `hr_task`
+--
+
+INSERT INTO `hr_task` (`id`, `task_name`, `start_date`, `end_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Recruitment', '2022-02-01 10:00:00', '2022-02-28 18:00:00', NULL, '2023-03-02 06:51:34', NULL),
+(2, 'Employee Onboarding', '2022-03-01 10:00:00', '2022-03-31 18:00:00', NULL, NULL, NULL),
+(3, 'Performance Reviews', '2022-04-01 10:00:00', '2022-04-30 18:00:00', NULL, NULL, NULL),
+(4, 'Employee Exit Process', '2022-05-01 10:00:00', '2022-05-31 18:00:00', NULL, '2023-02-28 07:19:37', NULL),
+(5, 'Things to keep ready before the Candidat', '0000-00-00 00:00:00', NULL, '2023-03-01 02:09:53', '2023-03-01 02:09:53', NULL);
+
 -- ----------------------------
 -- Table structure for tbl_cities
 -- ----------------------------

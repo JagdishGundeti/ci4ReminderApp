@@ -45,6 +45,20 @@
               
                     </ul><!--//.nav nav-treeview -->
                 </li><!--//.nav-item has-treeview -->
+                <li class="nav-item has-treeview menu-open">
+                    <a href="#" class="nav-link active">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>
+                            Jobs
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        
+                        <?= view('_partials/_leftSidebarJobsContent'); ?>
+              
+                    </ul><!--//.nav nav-treeview -->
+                </li><!--//.nav-item has-treeview -->
             </ul><!--//.nav nav-pills nav-sidebar flex-column -->
         </nav>
         <!-- /.sidebar-menu -->

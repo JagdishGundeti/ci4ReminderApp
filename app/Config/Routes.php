@@ -54,6 +54,30 @@ $routes->get('people/edit/(:num)', 'PeopleController::edit/$1', ['as' => 'editPe
 $routes->post('people/edit/(:num)', 'PeopleController::edit/$1', ['as' => 'updatePerson']);
 $routes->get('people/delete/(:num)', 'PeopleController::delete/$1', ['as' => 'deletePerson']);
 
+
+$routes->get('hrTask', 'HRTaskController::index', ['as' => 'hrTask']);
+$routes->get('hrTask/index', 'HRTaskController::index', ['as' => 'hrTaskIndex']);
+$routes->get('hrTask/list', 'HRTaskController::index', ['as' => 'hrTaskList']);
+$routes->get('hrTask/add', 'HRTaskController::add', ['as' => 'newHRTask']);
+$routes->post('hrTask/add', 'HRTaskController::add', ['as' => 'createHRTask']);
+$routes->get('hrTask/edit/(:num)', 'HRTaskController::edit/$1', ['as' => 'editHRTask']);
+$routes->post('hrTask/edit/(:num)', 'HRTaskController::edit/$1', ['as' => 'updateHRTask']);
+$routes->get('ci4sampleapp/public/hrTask/delete/(:num)', 'HRTaskController::delete/$1', ['as' => 'deleteHRTask']);
+$routes->get('hrTask/delete/(:num)', 'HRTaskController::delete/$1', ['as' => 'deleteHRTask']);
+
+
+$routes->get('hrSubTask', 'HRSubTaskController::index', ['as' => 'hrSubTask']);
+$routes->get('hrSubTask/index', 'HRSubTaskController::index', ['as' => 'hrSubTaskIndex']);
+$routes->get('hrSubTask/list', 'HRSubTaskController::index', ['as' => 'hrSubTaskList']);
+$routes->get('hrSubTask/add', 'HRSubTaskController::add', ['as' => 'newHRSubTask']);
+$routes->post('hrSubTask/add', 'HRSubTaskController::add', ['as' => 'createHRSubTask']);
+$routes->get('hrSubTask/edit/(:num)', 'HRSubTaskController::edit/$1', ['as' => 'editHRSubTask']);
+$routes->post('hrSubTask/edit/(:num)', 'HRSubTaskController::edit/$1', ['as' => 'updateHRSubTask']);
+$routes->get('ci4sampleapp/public/hrSubTask/delete/(:num)', 'HRSubTaskController::delete/$1', ['as' => 'deleteHRSubTask']);
+$routes->get('hrSubTask/delete/(:num)', 'HRSubTaskController::delete/$1', ['as' => 'deleteHRSubTask']);
+
+
+
 /**
  * --------------------------------------------------------------------
  * Additional Routing

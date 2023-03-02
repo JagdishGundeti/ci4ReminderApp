@@ -24,6 +24,8 @@ class Home extends BaseController {
 
 		$personModel = new \App\Models\PersonModel();
 
+		$hrTaskModel = new \App\Models\HRTaskModel();
+
 		$this->viewData['totalNrOfCountries'] = $countryModel->getCount();
 
 		$this->viewData['countryList'] = $countryModel->findAll(5);
@@ -33,6 +35,7 @@ class Home extends BaseController {
 		$this->viewData['cityList'] = $cityModel->findAll(5);
 
 		$this->viewData['totalNrOfPeople'] = $personModel->getCount();
+		$this->viewData['totalNrOfHRTask'] = $hrTaskModel->getCount();
 
 		$this->viewData['personList'] = $personModel->findAll(5);
 

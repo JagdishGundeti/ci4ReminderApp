@@ -1,5 +1,7 @@
 <?php
 
+
+$_SERVER['CI_ENVIRONMENT'] = 'development';
 /*
  | --------------------------------------------------------------------
  | App Namespace

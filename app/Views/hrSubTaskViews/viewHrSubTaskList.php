@@ -27,7 +27,7 @@
 							<tr>
 								<th class="text-nowrap">Action</th>
 								<th>Sub Task ID</th>
-								<th>Main Task ID</th>
+								<th>Main Task</th>
 								<th>Task Name</th>
 								<th>Start Date</th>
 								<th>End Date</th>
@@ -45,7 +45,7 @@
 									<?=$item->id ?>
 								</td>
 								<td class="align-middle">
-									<?= esc($item->hr_task_id) ?>
+									<?= esc($item->task_name) ?>
 								</td>
 								<td class="align-middle">
 									<?= esc($item->subtask_name) ?>

@@ -26,7 +26,7 @@ use CodeIgniter\Config\BaseConfig;
 
 class Basics extends BaseConfig {
 
-	public $appName = 'Countries Cities People';
+	public $appName = 'Reminder';
 
 	public $i18n = 'English'; 
 
@@ -68,7 +68,7 @@ class Basics extends BaseConfig {
 		'bg'   => 'gray-dark',
 		'logo' => [
 		'icon'   => 'favicon.ico', // path to image | this example icon on public root folder.
-		'text'   => 'Countries Cities People',
+		'text'   => 'Reminder',
 		'shadow' => 2,
 		],
 	],

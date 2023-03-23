@@ -29,6 +29,7 @@
 								<th>Sub Task ID</th>
 								<th>Main Task</th>
 								<th>Task Name</th>
+								<th>Priority</th>
 								<th>Start Date</th>
 								<th>End Date</th>
 								<th class="text-nowrap">Action</th>
@@ -49,6 +50,9 @@
 								</td>
 								<td class="align-middle">
 									<?= esc($item->subtask_name) ?>
+								</td>
+								<td class="align-middle">
+									<?= esc($item->priority) ?>
 								</td>
 								<td class="align-middle">
 									<?= esc($item->start_date) ?>

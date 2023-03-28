@@ -77,6 +77,32 @@ $routes->get('ci4sampleapp/public/hrSubTask/delete/(:num)', 'HRSubTaskController
 $routes->get('hrSubTask/delete/(:num)', 'HRSubTaskController::delete/$1', ['as' => 'deleteHRSubTask']);
 
 
+$routes->get('candidate', 'CandidateController::index', ['as' => 'candidate']);
+$routes->get('candidate/index', 'CandidateController::index', ['as' => 'candidateIndex']);
+$routes->get('candidate/list', 'CandidateController::index', ['as' => 'candidateList']);
+$routes->get('candidate/add', 'CandidateController::add', ['as' => 'newCandidate']);
+$routes->post('candidate/add', 'CandidateController::add', ['as' => 'createCandidate']);
+$routes->get('candidate/edit/(:num)', 'CandidateController::edit/$1', ['as' => 'editCandidate']);
+$routes->post('candidate/edit/(:num)', 'CandidateController::edit/$1', ['as' => 'updateCandidate']);
+$routes->get('ci4sampleapp/public/candidate/delete/(:num)', 'CandidateController::delete/$1', ['as' => 'deleteCandidate']);
+$routes->get('candidate/delete/(:num)', 'CandidateController::delete/$1', ['as' => 'deleteCandidate']);
+
+
+
+$routes->get('process', 'ProcessController::index', ['as' => 'process']);
+$routes->get('process/index', 'ProcessController::index', ['as' => 'processIndex']);
+$routes->get('process/list', 'ProcessController::index', ['as' => 'processList']);
+$routes->get('process/add', 'ProcessController::add', ['as' => 'newProcess']);
+$routes->post('process/add', 'ProcessController::add', ['as' => 'createProcess']);
+$routes->get('process/edit/(:num)', 'ProcessController::edit/$1', ['as' => 'editProcess']);
+$routes->post('process/edit/(:num)', 'ProcessController::edit/$1', ['as' => 'updateProcess']);
+$routes->get('ci4sampleapp/public/process/delete/(:num)', 'ProcessController::delete/$1', ['as' => 'deleteProcess']);
+$routes->get('process/delete/(:num)', 'ProcessController::delete/$1', ['as' => 'deleteProcess']);
+//$routes->get('process/addEntries/:any/:any', 'ProcessController::addEntries/$1/$2', ['as' => 'addEntries']);
+$routes->get('process/addEntries/(:num)/(:any)', 'ProcessController::addEntries/$1/$2', ['as' => 'addEntries']);
+
+
+
 
 /**
  * --------------------------------------------------------------------

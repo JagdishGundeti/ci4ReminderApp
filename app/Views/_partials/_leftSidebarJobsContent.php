@@ -1,7 +1,4 @@
-		<li class="nav-item">
-			<?= anchor(route_to('employee'), '<i class="far fa-circle nav-icon"></i> Employee', ['class' => 'nav-link'.($currentModule == strtolower('employee') ? ' active' : '')]); ?>
 
-		</li>
 		<li class="nav-item">
 			<?= anchor(route_to('hrTask'), '<i class="far fa-circle nav-icon"></i> HR Task', ['class' => 'nav-link'.($currentModule == strtolower('hrTask') ? ' active' : '')]); ?>
 
@@ -9,5 +6,15 @@
 
 		<li class="nav-item">
 			<?= anchor(route_to('hrSubTask'), '<i class="far fa-circle nav-icon"></i> HR Sub Task', ['class' => 'nav-link'.($currentModule == strtolower('hrSubTask') ? ' active' : '')]); ?>
+
+		</li>
+
+		<li class="nav-item">
+			<?= anchor(route_to('candidate'), '<i class="far fa-circle nav-icon"></i> Candidate', ['class' => 'nav-link'.($currentModule == strtolower('candidate') ? ' active' : '')]); ?>
+
+		</li>
+
+		<li class="nav-item">
+			<?= anchor(route_to('process'), '<i class="far fa-circle nav-icon"></i> Process', ['class' => 'nav-link'.($currentModule == strtolower('process') ? ' active' : '')]); ?>
 
 		</li>

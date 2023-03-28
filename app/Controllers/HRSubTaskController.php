@@ -127,9 +127,7 @@ class HRSubTaskController extends GoBaseController {
         endif; // ($requestMethod === 'post')
         
         $this->viewData['hrSubTask'] = $hrSubTask ?? new HRSubTask();
-		$this->viewData['cityList'] = $this->getCityListItems();
 		$this->viewData['hrSubTaskTypeList'] = $this->getHRSubTaskTypeOptions();
-		$this->viewData['sexList'] = $this->getSexOptions();
 
 
         $this->viewData['formAction'] = route_to('createHRSubTask');
@@ -225,27 +223,14 @@ class HRSubTaskController extends GoBaseController {
         endif; // ($requestMethod === 'post')
 
         $this->viewData['hrSubTask'] = $hrSubTask;
-		//$this->viewData['cityList'] = $this->getCityListItems();
 		$this->viewData['hrSubTaskTypeList'] = $this->getHRSubTaskTypeOptions();
-		//$this->viewData['sexList'] = $this->getSexOptions();
 
         
         $theId = $id;
 		$this->viewData['formAction'] = route_to('updateHRSubTask', $theId);
 
-        
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
-
-	protected function getCityListItems() { 
-		$cityModel = new CityModel();
-		$onlyActiveOnes = true;
-		$data = $cityModel->getAllForMenu('id, city_name','city_name', $onlyActiveOnes );
-
-		return $data;
-	}
-
-
 
 	protected function getHRSubTaskTypeOptions() { 
 		$hrSubTaskTypeOptions = [ 
@@ -260,15 +245,6 @@ class HRSubTaskController extends GoBaseController {
 	}
 
 
-
-	protected function getSexOptions() { 
-		$sexOptions = [ 
-				'' => 'Please select...',
-				'F' => 'Female',
-				'M' => 'Male',
-			];
-		return $sexOptions;
-	}
 
 
 }

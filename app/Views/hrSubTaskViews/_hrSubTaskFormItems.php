@@ -11,6 +11,15 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+					<label for="hr_task_id" class="col-md-4 col-form-label">
+						HR Task id
+					</label>
+					<div class="col-md-8">
+						<input type="text" id="hr_task_id" name="hr_task_id" required maxLength="40" class="form-control" value="<?=old('hr_task_id', $hrSubTask->hr_task_id) ?>">
+					</div><!--//.col -->
+				</div><!--//.form-group -->
+
+				<div class="form-group row">
 					<label for="start_date" class="col-md-4 col-form-label">
 						Start Date
 					</label>

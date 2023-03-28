@@ -3,47 +3,53 @@
 
 use App\Models\CityModel;
 
-use App\Models\HRTaskModel;
-use App\Entities\HRTask;
+use App\Models\ProcessModel;
+use App\Entities\Process;
 
-class HRTaskController extends GoBaseController { 
+class ProcessController extends GoBaseController { 
 
-    protected static $primaryModelName = 'HRTaskModel';
-    protected static $singularObjectName = 'HRTask';
-    protected static $singularObjectNameCc = 'hrTask';
-    protected static $singularObjectNameSc = 'hrTask';
-    protected static $pluralObjectName = 'HRTask';
-    protected static $pluralObjectNameCc = 'hrTask';
-    protected static $pluralObjectNameSc = 'hrTask';
-    protected static $controllerSlug = 'hrTask';
+    protected static $primaryModelName = 'ProcessModel';
+    protected static $singularObjectName = 'Process';
+    protected static $singularObjectNameCc = 'process';
+    protected static $singularObjectNameSc = 'process';
+    protected static $pluralObjectName = 'Process';
+    protected static $pluralObjectNameCc = 'process';
+    protected static $pluralObjectNameSc = 'process';
+    protected static $controllerSlug = 'process';
 
-    protected static $viewPath = 'hrTaskViews/';
+    protected static $viewPath = 'processViews/';
 
-    protected $indexRoute = 'hrTask';
+    protected $indexRoute = 'process';
 
     protected $formValidationRules = [
+    /*
+		'notes' => 'trim|max_length[16313]',
+		'first_name' => 'trim|required|max_length[40]',
+		'birth_date' => 'valid_date|permit_empty',
+		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
+		'last_name' => 'trim|required|max_length[50]',
+		'phone_number' => 'trim|max_length[20]',
+		'sex' => 'trim',
+		'score' => 'decimal|permit_empty',
+		'middle_name' => 'trim|max_length[40]',
+		'process_type' => 'max_length[31]',
+		*/
 		];
 
     public function index() {
 
          $this->viewData['usingClientSideDataTable'] = true;
-	 $this->viewData['hrTaskList'] = $this->primaryModel->findAllWithCities('*');
-/*
-         $viewData = [
-                'pageTitle' => 'HR Task',
-                'pageSubTitle' => 'Manage HR Task',
-                'hrTaskList' => $this->primaryModel->findAllWithCities('*'),
-            ];
-    
-         $viewData = array_merge($this->viewData, $viewData);
-*/
+         
+		 $this->viewData['pendingAssignmnet'] = $this->primaryModel->findAllWithCities('*');
+		 $this->viewData['processList'] = $this->primaryModel->findAllProcessList('*');
+
          parent::index();
 
     }
 
     public function add() {
 
-        $hrTaskModel = $this->primaryModel; // = new HRTaskModel();
+        $processModel = $this->primaryModel; // = new ProcessModel();
 
         $requestMethod = $this->request->getMethod();
 
@@ -57,7 +63,7 @@ class HRTaskController extends GoBaseController {
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
 
-            $hrTask = new HRTask($sanitizedData);
+            $process = new Process($sanitizedData);
             
 
             $noException = true;
@@ -66,7 +72,7 @@ class HRTaskController extends GoBaseController {
             
             if ($formValid) :
                 try {
-                    $successfulResult = $hrTaskModel->save($hrTask);
+                    $successfulResult = $processModel->save($process);
                 } catch (\Exception $e) {
                     $noException = false;
                     $successfulResult = false;
@@ -88,7 +94,7 @@ class HRTaskController extends GoBaseController {
                 $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
 
-            // if ($formValid && !$successfulResult && !is_numeric($hrTask->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
+            // if ($formValid && !$successfulResult && !is_numeric($process->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
 			if ($formValid && !$successfulResult && $noException) :
 			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
 			endif;
@@ -100,8 +106,8 @@ class HRTaskController extends GoBaseController {
                 $insertedId = $this->primaryModel->db->insertID();
                 $theId = $insertedId;
 
-                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $hrTask->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
-                $message .= anchor(route_to('editHRTask', $theId), 'Continue editing?');
+                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $process->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
+                $message .= anchor(route_to('editProcess', $theId), 'Continue editing?');
 
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
@@ -125,13 +131,47 @@ class HRTaskController extends GoBaseController {
         
         endif; // ($requestMethod === 'post')
         
-        $this->viewData['hrTask'] = $hrTask ?? new HRTask();
-		$this->viewData['hrTaskTypeList'] = $this->getHRTaskTypeOptions();
+        $this->viewData['process'] = $process ?? new Process();
+		$this->viewData['processTypeList'] = $this->getProcessTypeOptions();
 
 
-        $this->viewData['formAction'] = route_to('createHRTask');
+        $this->viewData['formAction'] = route_to('createProcess');
 
         $this->displayForm(__METHOD__);
+    }
+    public function addEntries($param1, $param2) {
+
+        $processModel = $this->primaryModel; // = new ProcessModel();
+        $requestMethod = $this->request->getMethod();
+
+		// Call the before event and check for a return
+		$eventData = [
+			'hr_sub_task_id' => $param1,
+			'process_group_id'   => $param2,
+			'process_group'   => 'CAND',
+		];
+
+        $sanitizedData = [];
+        foreach ($eventData as $k => $v) :
+            $sanitizationResult = goSanitize($v);
+            $sanitizedData[$k] = $sanitizationResult[0];
+        endforeach;
+        $process = new Process($sanitizedData);
+
+        $noException = true;
+
+        $formValid = $this->canValidate();
+        
+        if ($formValid) :
+            try {
+                $successfulResult = $processModel->save($process);
+                return $this->redirect2listView();
+            } catch (\Exception $e) {
+		}
+        else:
+            $successfulResult = false;
+            $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
+        endif;
     }
 
     public function edit($requestedId = null) {
@@ -140,10 +180,10 @@ class HRTaskController extends GoBaseController {
             return $this->redirect2listView();
         endif;
         $id = filter_var($requestedId, FILTER_SANITIZE_URL);
-        $hrTask = $this->primaryModel->find($id);
+        $process = $this->primaryModel->find($id);
 
-        if ($hrTask == false) :
-            $message = 'No such hrTask ( with identifier ' . $id . ') was found in the database.';
+        if ($process == false) :
+            $message = 'No such process ( with identifier ' . $id . ') was found in the database.';
             return $this->redirect2listView("errorMessage", $message);
         endif;
 
@@ -190,15 +230,15 @@ class HRTaskController extends GoBaseController {
                 $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
         
-            $hrTask = $hrTask->mergeAttributes($sanitizedData);
+            $process = $process->mergeAttributes($sanitizedData);
 
             $thenRedirect = true;
 
             if ($successfulResult) :
-                $theId = $hrTask->id;
-                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $hrTask->{$this->primaryModel::$labelField} . '</b>' : '');
+                $theId = $process->id;
+                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $process->{$this->primaryModel::$labelField} . '</b>' : '');
                 $message .= ' was successfully updated. ';
-                $message .= anchor(route_to('editHRTask', $theId), 'Continue editing?');
+                $message .= anchor(route_to('editProcess', $theId), 'Continue editing?');
 
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
@@ -221,37 +261,33 @@ class HRTaskController extends GoBaseController {
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
 
-        $this->viewData['hrTask'] = $hrTask;
-		$this->viewData['hrTaskTypeList'] = $this->getHRTaskTypeOptions();
+        $this->viewData['process'] = $process;
+		$this->viewData['processTypeList'] = $this->getProcessTypeOptions();
+		//$this->viewData['sexList'] = $this->getSexOptions();
 
         
         $theId = $id;
-		$this->viewData['formAction'] = route_to('updateHRTask', $theId);
+		$this->viewData['formAction'] = route_to('updateProcess', $theId);
 
         
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
 
-    public function delete($requestedId, bool $deletePermanently = true) {
-        if ($requestedId == null) :
-            return $this->redirect2listView();
-        endif;
-        $this->displayForm(__METHOD__, $id);
-    
-    } // function edit(...)
 
 
-
-	protected function getHRTaskTypeOptions() { 
-		$hrTaskTypeOptions = [ 
+	protected function getProcessTypeOptions() { 
+		$processTypeOptions = [ 
 				'' => 'Please select...',
 				'unspecified' => 'unspecified',
 				'colleague' => 'colleague',
-				'hrTask' => 'hrTask',
+				'process' => 'process',
 				'customer' => 'customer',
 				'friend' => 'friend',
 			];
-		return $hrTaskTypeOptions;
+		return $processTypeOptions;
 	}
+
+
+
 
 }

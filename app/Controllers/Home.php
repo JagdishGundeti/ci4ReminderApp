@@ -26,18 +26,21 @@ class Home extends BaseController {
 
 		$hrTaskModel = new \App\Models\HRTaskModel();
 
-		$this->viewData['totalNrOfCountries'] = $countryModel->getCount();
+		$this->viewData['totalNrOfCountries'] = 0;
 
-		$this->viewData['countryList'] = $countryModel->findAll(5);
+		$this->viewData['countryList'] = 0;
 
-		$this->viewData['totalNrOfCities'] = $cityModel->getCount();
+		$this->viewData['totalNrOfCities'] = 0;
 
-		$this->viewData['cityList'] = $cityModel->findAll(5);
+		$this->viewData['cityList'] = 0;
 
-		$this->viewData['totalNrOfPeople'] = $personModel->getCount();
+		$this->viewData['totalNrOfPeople'] = 0;
+
+		$this->viewData['totalNrOfEmployee'] = 0;
+
 		$this->viewData['totalNrOfHRTask'] = $hrTaskModel->getCount();
 
-		$this->viewData['personList'] = $personModel->findAll(5);
+		$this->viewData['personList'] = 0;
 
 		return view('dashboardHome', $this->viewData);
 	}

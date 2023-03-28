@@ -8,6 +8,7 @@ class HRSubTaskModel extends GoBaseModel
  
 	protected $allowedFields = [
 			'id',
+			'hr_task_id',
 			'subtask_name',
 			'task_name',
 			'start_date',

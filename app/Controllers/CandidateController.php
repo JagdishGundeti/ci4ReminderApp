@@ -3,47 +3,52 @@
 
 use App\Models\CityModel;
 
-use App\Models\HRTaskModel;
-use App\Entities\HRTask;
+use App\Models\CandidateModel;
+use App\Entities\Candidate;
 
-class HRTaskController extends GoBaseController { 
+class CandidateController extends GoBaseController { 
 
-    protected static $primaryModelName = 'HRTaskModel';
-    protected static $singularObjectName = 'HRTask';
-    protected static $singularObjectNameCc = 'hrTask';
-    protected static $singularObjectNameSc = 'hrTask';
-    protected static $pluralObjectName = 'HRTask';
-    protected static $pluralObjectNameCc = 'hrTask';
-    protected static $pluralObjectNameSc = 'hrTask';
-    protected static $controllerSlug = 'hrTask';
+    protected static $primaryModelName = 'CandidateModel';
+    protected static $singularObjectName = 'Candidate';
+    protected static $singularObjectNameCc = 'candidate';
+    protected static $singularObjectNameSc = 'candidate';
+    protected static $pluralObjectName = 'Candidate';
+    protected static $pluralObjectNameCc = 'candidate';
+    protected static $pluralObjectNameSc = 'candidate';
+    protected static $controllerSlug = 'candidate';
 
-    protected static $viewPath = 'hrTaskViews/';
+    protected static $viewPath = 'candidateViews/';
 
-    protected $indexRoute = 'hrTask';
+    protected $indexRoute = 'candidate';
 
     protected $formValidationRules = [
+    /*
+		'notes' => 'trim|max_length[16313]',
+		'first_name' => 'trim|required|max_length[40]',
+		'birth_date' => 'valid_date|permit_empty',
+		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
+		'last_name' => 'trim|required|max_length[50]',
+		'phone_number' => 'trim|max_length[20]',
+		'sex' => 'trim',
+		'score' => 'decimal|permit_empty',
+		'middle_name' => 'trim|max_length[40]',
+		'candidate_type' => 'max_length[31]',
+		*/
 		];
 
     public function index() {
 
          $this->viewData['usingClientSideDataTable'] = true;
-	 $this->viewData['hrTaskList'] = $this->primaryModel->findAllWithCities('*');
-/*
-         $viewData = [
-                'pageTitle' => 'HR Task',
-                'pageSubTitle' => 'Manage HR Task',
-                'hrTaskList' => $this->primaryModel->findAllWithCities('*'),
-            ];
-    
-         $viewData = array_merge($this->viewData, $viewData);
-*/
+         
+		 $this->viewData['candidateList'] = $this->primaryModel->findAllWithCities('*');
+
          parent::index();
 
     }
 
     public function add() {
 
-        $hrTaskModel = $this->primaryModel; // = new HRTaskModel();
+        $candidateModel = $this->primaryModel; // = new CandidateModel();
 
         $requestMethod = $this->request->getMethod();
 
@@ -57,7 +62,7 @@ class HRTaskController extends GoBaseController {
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
 
-            $hrTask = new HRTask($sanitizedData);
+            $candidate = new Candidate($sanitizedData);
             
 
             $noException = true;
@@ -66,7 +71,7 @@ class HRTaskController extends GoBaseController {
             
             if ($formValid) :
                 try {
-                    $successfulResult = $hrTaskModel->save($hrTask);
+                    $successfulResult = $candidateModel->save($candidate);
                 } catch (\Exception $e) {
                     $noException = false;
                     $successfulResult = false;
@@ -88,7 +93,7 @@ class HRTaskController extends GoBaseController {
                 $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
 
-            // if ($formValid && !$successfulResult && !is_numeric($hrTask->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
+            // if ($formValid && !$successfulResult && !is_numeric($candidate->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
 			if ($formValid && !$successfulResult && $noException) :
 			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
 			endif;
@@ -100,8 +105,8 @@ class HRTaskController extends GoBaseController {
                 $insertedId = $this->primaryModel->db->insertID();
                 $theId = $insertedId;
 
-                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $hrTask->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
-                $message .= anchor(route_to('editHRTask', $theId), 'Continue editing?');
+                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $candidate->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
+                $message .= anchor(route_to('editCandidate', $theId), 'Continue editing?');
 
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
@@ -125,11 +130,11 @@ class HRTaskController extends GoBaseController {
         
         endif; // ($requestMethod === 'post')
         
-        $this->viewData['hrTask'] = $hrTask ?? new HRTask();
-		$this->viewData['hrTaskTypeList'] = $this->getHRTaskTypeOptions();
+        $this->viewData['candidate'] = $candidate ?? new Candidate();
+		$this->viewData['candidateTypeList'] = $this->getCandidateTypeOptions();
 
 
-        $this->viewData['formAction'] = route_to('createHRTask');
+        $this->viewData['formAction'] = route_to('createCandidate');
 
         $this->displayForm(__METHOD__);
     }
@@ -140,10 +145,10 @@ class HRTaskController extends GoBaseController {
             return $this->redirect2listView();
         endif;
         $id = filter_var($requestedId, FILTER_SANITIZE_URL);
-        $hrTask = $this->primaryModel->find($id);
+        $candidate = $this->primaryModel->find($id);
 
-        if ($hrTask == false) :
-            $message = 'No such hrTask ( with identifier ' . $id . ') was found in the database.';
+        if ($candidate == false) :
+            $message = 'No such candidate ( with identifier ' . $id . ') was found in the database.';
             return $this->redirect2listView("errorMessage", $message);
         endif;
 
@@ -190,15 +195,15 @@ class HRTaskController extends GoBaseController {
                 $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
         
-            $hrTask = $hrTask->mergeAttributes($sanitizedData);
+            $candidate = $candidate->mergeAttributes($sanitizedData);
 
             $thenRedirect = true;
 
             if ($successfulResult) :
-                $theId = $hrTask->id;
-                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $hrTask->{$this->primaryModel::$labelField} . '</b>' : '');
+                $theId = $candidate->id;
+                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $candidate->{$this->primaryModel::$labelField} . '</b>' : '');
                 $message .= ' was successfully updated. ';
-                $message .= anchor(route_to('editHRTask', $theId), 'Continue editing?');
+                $message .= anchor(route_to('editCandidate', $theId), 'Continue editing?');
 
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
@@ -221,37 +226,28 @@ class HRTaskController extends GoBaseController {
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
 
-        $this->viewData['hrTask'] = $hrTask;
-		$this->viewData['hrTaskTypeList'] = $this->getHRTaskTypeOptions();
+        $this->viewData['candidate'] = $candidate;
+		$this->viewData['candidateTypeList'] = $this->getCandidateTypeOptions();
 
         
         $theId = $id;
-		$this->viewData['formAction'] = route_to('updateHRTask', $theId);
+		$this->viewData['formAction'] = route_to('updateCandidate', $theId);
 
         
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
 
-    public function delete($requestedId, bool $deletePermanently = true) {
-        if ($requestedId == null) :
-            return $this->redirect2listView();
-        endif;
-        $this->displayForm(__METHOD__, $id);
-    
-    } // function edit(...)
 
-
-
-	protected function getHRTaskTypeOptions() { 
-		$hrTaskTypeOptions = [ 
+	protected function getCandidateTypeOptions() { 
+		$candidateTypeOptions = [ 
 				'' => 'Please select...',
 				'unspecified' => 'unspecified',
 				'colleague' => 'colleague',
-				'hrTask' => 'hrTask',
+				'candidate' => 'candidate',
 				'customer' => 'customer',
 				'friend' => 'friend',
 			];
-		return $hrTaskTypeOptions;
+		return $candidateTypeOptions;
 	}
 
 }

@@ -9,7 +9,7 @@ class CandidateModel extends GoBaseModel
 			'name',
 			'email',
 			'phone',
-			'start_date',
+			'joining_date',
 			'department',
 			'job_title',
 			'manager_id',

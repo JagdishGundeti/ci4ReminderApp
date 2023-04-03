@@ -1,21 +1,68 @@
-/*
- Navicat Premium Data Transfer
+-- phpMyAdmin SQL Dump
+-- version 5.1.3
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Mar 28, 2023 at 12:07 PM
+-- Server version: 10.4.22-MariaDB
+-- PHP Version: 7.4.28
 
- Source Server         : localhostM
- Source Server Type    : MySQL
- Source Server Version : 50726
- Source Host           : localhost:3306
- Source Schema         : ccpv4
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
- Target Server Type    : MySQL
- Target Server Version : 50726
- File Encoding         : 65001
 
- Date: 12/03/2021 14:28:35
-*/
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
+--
+-- Database: `ccpv4`
+--
+
+DELIMITER $$
+--
+-- Functions
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `TOTAL_WEEKDAYS` (`date1` DATE, `date2` DATE) RETURNS INT(11)  RETURN ABS(DATEDIFF(date2, date1)) + 1
+     - ABS(DATEDIFF(ADDDATE(date2, INTERVAL 1 - DAYOFWEEK(date2) DAY),
+                    ADDDATE(date1, INTERVAL 1 - DAYOFWEEK(date1) DAY))) / 7 * 2
+     - (DAYOFWEEK(IF(date1 < date2, date1, date2)) = 1)
+     - (DAYOFWEEK(IF(date1 > date2, date1, date2)) = 7)$$
+
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `candidate`
+--
+
+CREATE TABLE `candidate` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `joining_date` date DEFAULT NULL,
+  `department` varchar(255) DEFAULT NULL,
+  `job_title` varchar(255) DEFAULT NULL,
+  `manager_id` int(11) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `candidate`
+--
+
+INSERT INTO `candidate` (`id`, `name`, `email`, `phone`, `joining_date`, `department`, `job_title`, `manager_id`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Alex Brown', 'alice.brown@example.com', '555-555-4545', '2023-03-16', 'Sales', 'Sales Manager', NULL, NULL, '2023-03-14 08:01:39', NULL),
+(2, 'Bob Green', 'bob.green@example.com', '555-555-5656', '2022-02-01', 'Marketing', 'Marketing Manager', NULL, NULL, '2023-02-28 05:56:15', NULL),
+(3, 'Charlie Black', 'charlie.black@example.com', '555-555-6767', '2022-03-01', 'Engineering', 'Senior Software Engineer', 4, NULL, '2023-02-28 05:56:15', NULL),
+(4, 'David White', 'david.white@example.com', '555-555-7878', '2022-04-04', 'Engineering', 'Engineering Manager', NULL, NULL, '2023-03-23 12:44:49', NULL),
+(5, 'David Ora', 'david.ora@example.com', '666-666-7878', '2021-04-11', 'Dev', NULL, NULL, '2023-02-28 01:05:04', '2023-03-23 12:44:55', NULL);
 
 -- --------------------------------------------------------
 
@@ -27,6 +74,8 @@ CREATE TABLE `hr_sub_task` (
   `id` int(11) NOT NULL,
   `hr_task_id` int(11) NOT NULL,
   `subtask_name` varchar(255) NOT NULL,
+  `priority` int(3) NOT NULL,
+  `no_of_days` int(11) NOT NULL DEFAULT 1,
   `start_date` datetime NOT NULL,
   `end_date` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -38,16 +87,9 @@ CREATE TABLE `hr_sub_task` (
 -- Dumping data for table `hr_sub_task`
 --
 
-INSERT INTO `hr_sub_task` (`id`, `hr_task_id`, `subtask_name`, `start_date`, `end_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 1, 'Post job openings on job portals', '2022-02-01 10:00:00', '2022-02-03 18:00:00', NULL, '2023-03-01 03:55:59', NULL),
-(2, 1, 'Screen resumes and shortlist candidates', '2022-02-04 10:00:00', '2022-02-07 18:00:00', NULL, NULL, NULL),
-(3, 2, 'Send offer letter and employment contract', '2022-03-01 10:00:00', '2022-03-03 18:00:00', NULL, NULL, NULL),
-(4, 2, 'Arrange for employee induction and orientation', '2022-03-04 10:00:00', '2022-03-07 18:00:00', NULL, NULL, NULL),
-(5, 3, 'Schedule and conduct performance reviews', '2022-04-01 10:00:00', '2022-04-15 18:00:00', NULL, NULL, NULL),
-(6, 3, 'Provide feedback and coaching to employees', '2022-04-16 10:00:00', '2022-04-30 18:00:00', NULL, NULL, NULL),
-(7, 4, 'Conduct exit interviews', '2022-05-01 10:00:00', '2022-05-07 18:00:00', NULL, NULL, NULL),
-(8, 4, 'Complete necessary paperwork and exit formalities', '2022-05-08 10:00:00', '2022-05-14 18:00:00', NULL, NULL, NULL),
-(9, 4, 'Communicate with concerned teams and handover responsibilities', '2022-05-15 10:00:00', '2022-05-31 18:00:00', NULL, NULL, NULL);
+INSERT INTO `hr_sub_task` (`id`, `hr_task_id`, `subtask_name`, `priority`, `no_of_days`, `start_date`, `end_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 1, 'HR to coordinate with the respective HOD', 1, -2, '0000-00-00 00:00:00', NULL, NULL, '2023-03-14 06:02:35', NULL),
+(2, 1, 'HR to mail the respective HOD', 2, -2, '0000-00-00 00:00:00', NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -59,4366 +101,4407 @@ CREATE TABLE `hr_task` (
   `id` int(11) NOT NULL,
   `task_name` varchar(255) NOT NULL,
   `start_date` datetime NOT NULL,
+  `priority` int(11) NOT NULL,
   `end_date` datetime DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `hr_task`
 --
 
-INSERT INTO `hr_task` (`id`, `task_name`, `start_date`, `end_date`, `created_at`, `updated_at`, `deleted_at`) VALUES
-(1, 'Recruitment', '2022-02-01 10:00:00', '2022-02-28 18:00:00', NULL, '2023-03-02 06:51:34', NULL),
-(2, 'Employee Onboarding', '2022-03-01 10:00:00', '2022-03-31 18:00:00', NULL, NULL, NULL),
-(3, 'Performance Reviews', '2022-04-01 10:00:00', '2022-04-30 18:00:00', NULL, NULL, NULL),
-(4, 'Employee Exit Process', '2022-05-01 10:00:00', '2022-05-31 18:00:00', NULL, '2023-02-28 07:19:37', NULL),
-(5, 'Things to keep ready before the Candidat', '0000-00-00 00:00:00', NULL, '2023-03-01 02:09:53', '2023-03-01 02:09:53', NULL);
+INSERT INTO `hr_task` (`id`, `task_name`, `start_date`, `priority`, `end_date`, `created_at`, `updated_at`, `deleted_at`, `is_active`) VALUES
+(1, 'Things to keep ready before the Candidate\'s DOJ', '0000-00-00 00:00:00', 1, NULL, '2023-03-01 02:09:53', '2023-03-28 01:29:36', NULL, 1);
 
--- ----------------------------
--- Table structure for tbl_cities
--- ----------------------------
-DROP TABLE IF EXISTS `tbl_cities`;
-CREATE TABLE `tbl_cities` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `city_name` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
-  `country_code` char(2) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT '0',
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `status_info`
+--
+
+CREATE TABLE `status_info` (
+  `status_info_id` int(11) NOT NULL,
+  `text` varchar(255) NOT NULL,
+  `active` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `status_info`
+--
+
+INSERT INTO `status_info` (`status_info_id`, `text`, `active`) VALUES
+(0, 'No Status', 1),
+(100, 'Pending', 1),
+(200, 'In Progress', 1),
+(800, 'Completed', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `task_to_process`
+--
+
+CREATE TABLE `task_to_process` (
+  `id` int(11) NOT NULL,
+  `hr_sub_task_id` int(11) NOT NULL,
+  `process_group_id` int(11) NOT NULL,
+  `process_group` varchar(4) NOT NULL DEFAULT 'CAND',
+  `note` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `ind_unique_city_name` (`city_name`,`country_code`) USING BTREE,
-  KEY `fk_city_4_country` (`country_code`) USING BTREE,
-  CONSTRAINT `fk_city_4_country` FOREIGN KEY (`country_code`) REFERENCES `tbl_countries` (`iso_code`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4080 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `status_info_id` int(2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ----------------------------
--- Records of tbl_cities
--- ----------------------------
-BEGIN;
-INSERT INTO `tbl_cities` VALUES (1, 'Kabul', 'AF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2, 'Qandahar', 'AF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3, 'Herat', 'AF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4, 'Mazar-e-Sharif', 'AF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (5, 'Amsterdam', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (6, 'Rotterdam', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (7, 'Haag', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (8, 'Utrecht', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (9, 'Eindhoven', 'NL', 1, '2021-03-08 16:29:15', NULL);
-INSERT INTO `tbl_cities` VALUES (10, 'Tilburg', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (11, 'Groningen', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (12, 'Breda', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (13, 'Apeldoorn', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (14, 'Nijmegen', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (15, 'Enschede', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (16, 'Haarlem', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (17, 'Almere', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (18, 'Arnhem', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (19, 'Zaanstad', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (20, '\'s-Hertogenbosch', 'NL', 1, '2021-03-08 16:40:40', NULL);
-INSERT INTO `tbl_cities` VALUES (21, 'Amersfoort', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (22, 'Maastricht', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (23, 'Dordrecht', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (24, 'Leiden', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (25, 'Haarlemmermeer', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (26, 'Zoetermeer', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (27, 'Emmen', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (28, 'Zwolle', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (29, 'Ede', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (30, 'Delft', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (31, 'Heerlen', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (32, 'Alkmaar', 'NL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (33, 'Willemstad', 'AN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (34, 'Tirana', 'AL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (35, 'Alger', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (36, 'Oran', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (37, 'Constantine', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (38, 'Annaba', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (39, 'Batna', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (40, 'Sétif', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (41, 'Sidi Bel Abbès', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (42, 'Skikda', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (43, 'Biskra', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (44, 'Blida (el-Boulaida)', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (45, 'Béjaïa', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (46, 'Mostaganem', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (47, 'Tébessa', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (48, 'Tlemcen (Tilimsen)', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (49, 'Béchar', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (50, 'Tiaret', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (51, 'Ech-Chleff (el-Asnam)', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (52, 'Ghardaïa', 'DZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (53, 'Tafuna', 'AS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (54, 'Fagatogo', 'AS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (55, 'Andorra la Vella', 'AD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (56, 'Luanda', 'AO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (57, 'Huambo', 'AO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (58, 'Lobito', 'AO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (59, 'Benguela', 'AO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (60, 'Namibe', 'AO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (61, 'South Hill', 'AI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (62, 'The Valley', 'AI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (63, 'Saint John´s', 'AG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (64, 'Dubai', 'AE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (65, 'Abu Dhabi', 'AE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (66, 'Sharja', 'AE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (67, 'al-Ayn', 'AE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (68, 'Ajman', 'AE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (69, 'Buenos Aires', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (70, 'La Matanza', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (71, 'Córdoba', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (72, 'Rosario', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (73, 'Lomas de Zamora', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (74, 'Quilmes', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (75, 'Almirante Brown', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (76, 'La Plata', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (77, 'Mar del Plata', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (78, 'San Miguel de Tucumán', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (79, 'Lanús', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (80, 'Merlo', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (81, 'General San Martín', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (82, 'Salta', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (83, 'Moreno', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (84, 'Santa Fé', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (85, 'Avellaneda', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (86, 'Tres de Febrero', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (87, 'Morón', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (88, 'Florencio Varela', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (89, 'San Isidro', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (90, 'Tigre', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (91, 'Malvinas Argentinas', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (92, 'Vicente López', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (93, 'Berazategui', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (94, 'Corrientes', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (95, 'San Miguel', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (96, 'Bahía Blanca', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (97, 'Esteban Echeverría', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (98, 'Resistencia', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (99, 'José C. Paz', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (100, 'Paraná', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (101, 'Godoy Cruz', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (102, 'Posadas', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (103, 'Guaymallén', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (104, 'Santiago del Estero', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (105, 'San Salvador de Jujuy', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (106, 'Hurlingham', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (107, 'Neuquén', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (108, 'Ituzaingó', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (109, 'San Fernando', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (110, 'Formosa', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (111, 'Las Heras', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (112, 'La Rioja', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (113, 'San Fernando del Valle de Cata', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (114, 'Río Cuarto', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (115, 'Comodoro Rivadavia', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (116, 'Mendoza', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (117, 'San Nicolás de los Arroyos', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (118, 'San Juan', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (119, 'Escobar', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (120, 'Concordia', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (121, 'Pilar', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (122, 'San Luis', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (123, 'Ezeiza', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (124, 'San Rafael', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (125, 'Tandil', 'AR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (126, 'Yerevan', 'AM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (127, 'Gjumri', 'AM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (128, 'Vanadzor', 'AM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (129, 'Oranjestad', 'AW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (130, 'Sydney', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (131, 'Melbourne', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (132, 'Brisbane', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (133, 'Perth', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (134, 'Adelaide', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (135, 'Canberra', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (136, 'Gold Coast', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (137, 'Newcastle', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (138, 'Central Coast', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (139, 'Wollongong', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (140, 'Hobart', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (141, 'Geelong', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (142, 'Townsville', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (143, 'Cairns', 'AU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (144, 'Baku', 'AZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (145, 'Gäncä', 'AZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (146, 'Sumqayit', 'AZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (147, 'Mingäçevir', 'AZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (148, 'Nassau', 'BS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (149, 'al-Manama', 'BH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (150, 'Dhaka', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (151, 'Chittagong', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (152, 'Khulna', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (153, 'Rajshahi', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (154, 'Narayanganj', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (155, 'Rangpur', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (156, 'Mymensingh', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (157, 'Barisal', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (158, 'Tungi', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (159, 'Jessore', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (160, 'Comilla', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (161, 'Nawabganj', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (162, 'Dinajpur', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (163, 'Bogra', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (164, 'Sylhet', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (165, 'Brahmanbaria', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (166, 'Tangail', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (167, 'Jamalpur', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (168, 'Pabna', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (169, 'Naogaon', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (170, 'Sirajganj', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (171, 'Narsinghdi', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (172, 'Saidpur', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (173, 'Gazipur', 'BD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (174, 'Bridgetown', 'BB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (175, 'Antwerpen', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (176, 'Gent', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (177, 'Charleroi', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (178, 'Liège', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (179, 'Bruxelles [Brussel]', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (180, 'Brugge', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (181, 'Schaerbeek', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (182, 'Namur', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (183, 'Mons', 'BE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (184, 'Belize City', 'BZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (185, 'Belmopan', 'BZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (186, 'Cotonou', 'BJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (187, 'Porto-Novo', 'BJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (188, 'Djougou', 'BJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (189, 'Parakou', 'BJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (190, 'Saint George', 'BM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (191, 'Hamilton', 'BM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (192, 'Thimphu', 'BT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (193, 'Santa Cruz de la Sierra', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (194, 'La Paz', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (195, 'El Alto', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (196, 'Cochabamba', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (197, 'Oruro', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (198, 'Sucre', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (199, 'Potosí', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (200, 'Tarija', 'BO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (201, 'Sarajevo', 'BA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (202, 'Banja Luka', 'BA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (203, 'Zenica', 'BA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (204, 'Gaborone', 'BW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (205, 'Francistown', 'BW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (206, 'São Paulo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (207, 'Rio de Janeiro', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (208, 'Salvador', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (209, 'Belo Horizonte', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (210, 'Fortaleza', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (211, 'Brasília', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (212, 'Curitiba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (213, 'Recife', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (214, 'Porto Alegre', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (215, 'Manaus', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (216, 'Belém', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (217, 'Guarulhos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (218, 'Goiânia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (219, 'Campinas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (220, 'São Gonçalo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (221, 'Nova Iguaçu', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (222, 'São Luís', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (223, 'Maceió', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (224, 'Duque de Caxias', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (225, 'São Bernardo do Campo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (226, 'Teresina', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (227, 'Natal', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (228, 'Osasco', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (229, 'Campo Grande', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (230, 'Santo André', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (231, 'João Pessoa', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (232, 'Jaboatão dos Guararapes', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (233, 'Contagem', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (234, 'São José dos Campos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (235, 'Uberlândia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (236, 'Feira de Santana', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (237, 'Ribeirão Preto', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (238, 'Sorocaba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (239, 'Niterói', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (240, 'Cuiabá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (241, 'Juiz de Fora', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (242, 'Aracaju', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (243, 'São João de Meriti', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (244, 'Londrina', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (245, 'Joinville', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (246, 'Belford Roxo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (247, 'Santos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (248, 'Ananindeua', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (249, 'Campos dos Goytacazes', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (250, 'Mauá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (251, 'Carapicuíba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (252, 'Olinda', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (253, 'Campina Grande', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (254, 'São José do Rio Preto', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (255, 'Caxias do Sul', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (256, 'Moji das Cruzes', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (257, 'Diadema', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (258, 'Aparecida de Goiânia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (259, 'Piracicaba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (260, 'Cariacica', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (261, 'Vila Velha', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (262, 'Pelotas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (263, 'Bauru', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (264, 'Porto Velho', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (265, 'Serra', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (266, 'Betim', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (267, 'Jundíaí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (268, 'Canoas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (269, 'Franca', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (270, 'São Vicente', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (271, 'Maringá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (272, 'Montes Claros', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (273, 'Anápolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (274, 'Florianópolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (275, 'Petrópolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (276, 'Itaquaquecetuba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (277, 'Vitória', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (278, 'Ponta Grossa', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (279, 'Rio Branco', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (280, 'Foz do Iguaçu', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (281, 'Macapá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (282, 'Ilhéus', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (283, 'Vitória da Conquista', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (284, 'Uberaba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (285, 'Paulista', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (286, 'Limeira', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (287, 'Blumenau', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (288, 'Caruaru', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (289, 'Santarém', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (290, 'Volta Redonda', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (291, 'Novo Hamburgo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (292, 'Caucaia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (293, 'Santa Maria', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (294, 'Cascavel', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (295, 'Guarujá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (296, 'Ribeirão das Neves', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (297, 'Governador Valadares', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (298, 'Taubaté', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (299, 'Imperatriz', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (300, 'Gravataí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (301, 'Embu', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (302, 'Mossoró', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (303, 'Várzea Grande', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (304, 'Petrolina', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (305, 'Barueri', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (306, 'Viamão', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (307, 'Ipatinga', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (308, 'Juazeiro', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (309, 'Juazeiro do Norte', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (310, 'Taboão da Serra', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (311, 'São José dos Pinhais', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (312, 'Magé', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (313, 'Suzano', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (314, 'São Leopoldo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (315, 'Marília', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (316, 'São Carlos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (317, 'Sumaré', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (318, 'Presidente Prudente', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (319, 'Divinópolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (320, 'Sete Lagoas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (321, 'Rio Grande', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (322, 'Itabuna', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (323, 'Jequié', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (324, 'Arapiraca', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (325, 'Colombo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (326, 'Americana', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (327, 'Alvorada', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (328, 'Araraquara', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (329, 'Itaboraí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (330, 'Santa Bárbara d´Oeste', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (331, 'Nova Friburgo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (332, 'Jacareí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (333, 'Araçatuba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (334, 'Barra Mansa', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (335, 'Praia Grande', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (336, 'Marabá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (337, 'Criciúma', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (338, 'Boa Vista', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (339, 'Passo Fundo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (340, 'Dourados', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (341, 'Santa Luzia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (342, 'Rio Claro', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (343, 'Maracanaú', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (344, 'Guarapuava', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (345, 'Rondonópolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (346, 'São José', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (347, 'Cachoeiro de Itapemirim', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (348, 'Nilópolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (349, 'Itapevi', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (350, 'Cabo de Santo Agostinho', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (351, 'Camaçari', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (352, 'Sobral', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (353, 'Itajaí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (354, 'Chapecó', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (355, 'Cotia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (356, 'Lages', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (357, 'Ferraz de Vasconcelos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (358, 'Indaiatuba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (359, 'Hortolândia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (360, 'Caxias', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (361, 'São Caetano do Sul', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (362, 'Itu', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (363, 'Nossa Senhora do Socorro', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (364, 'Parnaíba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (365, 'Poços de Caldas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (366, 'Teresópolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (367, 'Barreiras', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (368, 'Castanhal', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (369, 'Alagoinhas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (370, 'Itapecerica da Serra', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (371, 'Uruguaiana', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (372, 'Paranaguá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (373, 'Ibirité', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (374, 'Timon', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (375, 'Luziânia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (376, 'Macaé', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (377, 'Teófilo Otoni', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (378, 'Moji-Guaçu', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (379, 'Palmas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (380, 'Pindamonhangaba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (381, 'Francisco Morato', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (382, 'Bagé', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (383, 'Sapucaia do Sul', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (384, 'Cabo Frio', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (385, 'Itapetininga', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (386, 'Patos de Minas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (387, 'Camaragibe', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (388, 'Bragança Paulista', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (389, 'Queimados', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (390, 'Araguaína', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (391, 'Garanhuns', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (392, 'Vitória de Santo Antão', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (393, 'Santa Rita', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (394, 'Barbacena', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (395, 'Abaetetuba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (396, 'Jaú', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (397, 'Lauro de Freitas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (398, 'Franco da Rocha', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (399, 'Teixeira de Freitas', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (400, 'Varginha', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (401, 'Ribeirão Pires', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (402, 'Sabará', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (403, 'Catanduva', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (404, 'Rio Verde', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (405, 'Botucatu', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (406, 'Colatina', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (407, 'Santa Cruz do Sul', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (408, 'Linhares', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (409, 'Apucarana', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (410, 'Barretos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (411, 'Guaratinguetá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (412, 'Cachoeirinha', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (413, 'Codó', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (414, 'Jaraguá do Sul', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (415, 'Cubatão', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (416, 'Itabira', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (417, 'Itaituba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (418, 'Araras', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (419, 'Resende', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (420, 'Atibaia', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (421, 'Pouso Alegre', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (422, 'Toledo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (423, 'Crato', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (424, 'Passos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (425, 'Araguari', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (426, 'São José de Ribamar', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (427, 'Pinhais', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (428, 'Sertãozinho', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (429, 'Conselheiro Lafaiete', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (430, 'Paulo Afonso', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (431, 'Angra dos Reis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (432, 'Eunápolis', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (433, 'Salto', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (434, 'Ourinhos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (435, 'Parnamirim', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (436, 'Jacobina', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (437, 'Coronel Fabriciano', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (438, 'Birigui', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (439, 'Tatuí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (440, 'Ji-Paraná', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (441, 'Bacabal', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (442, 'Cametá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (443, 'Guaíba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (444, 'São Lourenço da Mata', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (445, 'Santana do Livramento', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (446, 'Votorantim', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (447, 'Campo Largo', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (448, 'Patos', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (449, 'Ituiutaba', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (450, 'Corumbá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (451, 'Palhoça', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (452, 'Barra do Piraí', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (453, 'Bento Gonçalves', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (454, 'Poá', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (455, 'Águas Lindas de Goiás', 'BR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (456, 'London', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (457, 'Birmingham', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (458, 'Glasgow', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (459, 'Liverpool', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (460, 'Edinburgh', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (461, 'Sheffield', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (462, 'Manchester', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (463, 'Leeds', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (464, 'Bristol', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (465, 'Cardiff', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (466, 'Coventry', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (467, 'Leicester', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (468, 'Bradford', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (469, 'Belfast', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (470, 'Nottingham', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (471, 'Kingston upon Hull', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (472, 'Plymouth', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (473, 'Stoke-on-Trent', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (474, 'Wolverhampton', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (475, 'Derby', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (476, 'Swansea', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (477, 'Southampton', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (478, 'Aberdeen', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (479, 'Northampton', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (480, 'Dudley', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (481, 'Portsmouth', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (482, 'Newcastle upon Tyne', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (483, 'Sunderland', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (484, 'Luton', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (485, 'Swindon', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (486, 'Southend-on-Sea', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (487, 'Walsall', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (488, 'Bournemouth', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (489, 'Peterborough', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (490, 'Brighton', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (491, 'Blackpool', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (492, 'Dundee', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (493, 'West Bromwich', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (494, 'Reading', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (495, 'Oldbury/Smethwick (Warley)', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (496, 'Middlesbrough', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (497, 'Huddersfield', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (498, 'Oxford', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (499, 'Poole', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (500, 'Bolton', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (501, 'Blackburn', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (502, 'Newport', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (503, 'Preston', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (504, 'Stockport', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (505, 'Norwich', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (506, 'Rotherham', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (507, 'Cambridge', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (508, 'Watford', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (509, 'Ipswich', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (510, 'Slough', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (511, 'Exeter', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (512, 'Cheltenham', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (513, 'Gloucester', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (514, 'Saint Helens', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (515, 'Sutton Coldfield', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (516, 'York', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (517, 'Oldham', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (518, 'Basildon', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (519, 'Worthing', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (520, 'Chelmsford', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (521, 'Colchester', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (522, 'Crawley', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (523, 'Gillingham', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (524, 'Solihull', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (525, 'Rochdale', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (526, 'Birkenhead', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (527, 'Worcester', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (528, 'Hartlepool', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (529, 'Halifax', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (530, 'Woking/Byfleet', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (531, 'Southport', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (532, 'Maidstone', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (533, 'Eastbourne', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (534, 'Grimsby', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (535, 'Saint Helier', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (536, 'Douglas', 'GB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (537, 'Road Town', 'VG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (538, 'Bandar Seri Begawan', 'BN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (539, 'Sofija', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (540, 'Plovdiv', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (541, 'Varna', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (542, 'Burgas', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (543, 'Ruse', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (544, 'Stara Zagora', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (545, 'Pleven', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (546, 'Sliven', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (547, 'Dobric', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (548, 'Šumen', 'BG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (549, 'Ouagadougou', 'BF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (550, 'Bobo-Dioulasso', 'BF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (551, 'Koudougou', 'BF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (552, 'Bujumbura', 'BI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (553, 'George Town', 'KY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (554, 'Santiago de Chile', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (555, 'Puente Alto', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (556, 'Viña del Mar', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (557, 'Valparaíso', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (558, 'Talcahuano', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (559, 'Antofagasta', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (560, 'San Bernardo', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (561, 'Temuco', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (562, 'Concepción', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (563, 'Rancagua', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (564, 'Arica', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (565, 'Talca', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (566, 'Chillán', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (567, 'Iquique', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (568, 'Los Angeles', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (569, 'Puerto Montt', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (570, 'Coquimbo', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (571, 'Osorno', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (572, 'La Serena', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (573, 'Calama', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (574, 'Valdivia', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (575, 'Punta Arenas', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (576, 'Copiapó', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (577, 'Quilpué', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (578, 'Curicó', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (579, 'Ovalle', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (580, 'Coronel', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (581, 'San Pedro de la Paz', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (582, 'Melipilla', 'CL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (583, 'Avarua', 'CK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (584, 'San José', 'CR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (585, 'Djibouti', 'DJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (586, 'Roseau', 'DM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (587, 'Santo Domingo de Guzmán', 'DO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (588, 'Santiago de los Caballeros', 'DO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (589, 'La Romana', 'DO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (590, 'San Pedro de Macorís', 'DO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (591, 'San Francisco de Macorís', 'DO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (592, 'San Felipe de Puerto Plata', 'DO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (593, 'Guayaquil', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (594, 'Quito', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (595, 'Cuenca', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (596, 'Machala', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (597, 'Santo Domingo de los Colorados', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (598, 'Portoviejo', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (599, 'Ambato', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (600, 'Manta', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (601, 'Duran [Eloy Alfaro]', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (602, 'Ibarra', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (603, 'Quevedo', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (604, 'Milagro', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (605, 'Loja', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (606, 'Ríobamba', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (607, 'Esmeraldas', 'EC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (608, 'Cairo', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (609, 'Alexandria', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (610, 'Giza', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (611, 'Shubra al-Khayma', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (612, 'Port Said', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (613, 'Suez', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (614, 'al-Mahallat al-Kubra', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (615, 'Tanta', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (616, 'al-Mansura', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (617, 'Luxor', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (618, 'Asyut', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (619, 'Bahtim', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (620, 'Zagazig', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (621, 'al-Faiyum', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (622, 'Ismailia', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (623, 'Kafr al-Dawwar', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (624, 'Assuan', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (625, 'Damanhur', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (626, 'al-Minya', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (627, 'Bani Suwayf', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (628, 'Qina', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (629, 'Sawhaj', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (630, 'Shibin al-Kawm', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (631, 'Bulaq al-Dakrur', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (632, 'Banha', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (633, 'Warraq al-Arab', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (634, 'Kafr al-Shaykh', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (635, 'Mallawi', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (636, 'Bilbays', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (637, 'Mit Ghamr', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (638, 'al-Arish', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (639, 'Talkha', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (640, 'Qalyub', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (641, 'Jirja', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (642, 'Idfu', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (643, 'al-Hawamidiya', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (644, 'Disuq', 'EG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (645, 'San Salvador', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (646, 'Santa Ana', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (647, 'Mejicanos', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (648, 'Soyapango', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (649, 'San Miguel', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (650, 'Nueva San Salvador', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (651, 'Apopa', 'SV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (652, 'Asmara', 'ER', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (653, 'Madrid', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (654, 'Barcelona', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (655, 'Valencia', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (656, 'Sevilla', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (657, 'Zaragoza', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (658, 'Málaga', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (659, 'Bilbao', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (660, 'Las Palmas de Gran Canaria', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (661, 'Murcia', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (662, 'Palma de Mallorca', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (663, 'Valladolid', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (664, 'Córdoba', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (665, 'Vigo', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (666, 'Alicante [Alacant]', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (667, 'Gijón', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (668, 'L´Hospitalet de Llobregat', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (669, 'Granada', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (670, 'A Coruña (La Coruña)', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (671, 'Vitoria-Gasteiz', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (672, 'Santa Cruz de Tenerife', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (673, 'Badalona', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (674, 'Oviedo', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (675, 'Móstoles', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (676, 'Elche [Elx]', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (677, 'Sabadell', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (678, 'Santander', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (679, 'Jerez de la Frontera', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (680, 'Pamplona [Iruña]', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (681, 'Donostia-San Sebastián', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (682, 'Cartagena', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (683, 'Leganés', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (684, 'Fuenlabrada', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (685, 'Almería', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (686, 'Terrassa', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (687, 'Alcalá de Henares', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (688, 'Burgos', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (689, 'Salamanca', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (690, 'Albacete', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (691, 'Getafe', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (692, 'Cádiz', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (693, 'Alcorcón', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (694, 'Huelva', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (695, 'León', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (696, 'Castellón de la Plana [Castell', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (697, 'Badajoz', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (698, '[San Cristóbal de] la Laguna', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (699, 'Logroño', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (700, 'Santa Coloma de Gramenet', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (701, 'Tarragona', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (702, 'Lleida (Lérida)', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (703, 'Jaén', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (704, 'Ourense (Orense)', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (705, 'Mataró', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (706, 'Algeciras', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (707, 'Marbella', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (708, 'Barakaldo', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (709, 'Dos Hermanas', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (710, 'Santiago de Compostela', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (711, 'Torrejón de Ardoz', 'ES', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (712, 'Cape Town', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (713, 'Soweto', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (714, 'Johannesburg', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (715, 'Port Elizabeth', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (716, 'Pretoria', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (717, 'Inanda', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (718, 'Durban', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (719, 'Vanderbijlpark', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (720, 'Kempton Park', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (721, 'Alberton', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (722, 'Pinetown', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (723, 'Pietermaritzburg', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (724, 'Benoni', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (725, 'Randburg', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (726, 'Umlazi', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (727, 'Bloemfontein', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (728, 'Vereeniging', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (729, 'Wonderboom', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (730, 'Roodepoort', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (731, 'Boksburg', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (732, 'Klerksdorp', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (733, 'Soshanguve', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (734, 'Newcastle', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (735, 'East London', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (736, 'Welkom', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (737, 'Kimberley', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (738, 'Uitenhage', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (739, 'Chatsworth', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (740, 'Mdantsane', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (741, 'Krugersdorp', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (742, 'Botshabelo', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (743, 'Brakpan', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (744, 'Witbank', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (745, 'Oberholzer', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (746, 'Germiston', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (747, 'Springs', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (748, 'Westonaria', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (749, 'Randfontein', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (750, 'Paarl', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (751, 'Potchefstroom', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (752, 'Rustenburg', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (753, 'Nigel', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (754, 'George', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (755, 'Ladysmith', 'ZA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (756, 'Addis Abeba', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (757, 'Dire Dawa', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (758, 'Nazret', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (759, 'Gonder', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (760, 'Dese', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (761, 'Mekele', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (762, 'Bahir Dar', 'ET', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (763, 'Stanley', 'FK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (764, 'Suva', 'FJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (765, 'Quezon', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (766, 'Manila', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (767, 'Kalookan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (768, 'Davao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (769, 'Cebu', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (770, 'Zamboanga', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (771, 'Pasig', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (772, 'Valenzuela', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (773, 'Las Piñas', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (774, 'Antipolo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (775, 'Taguig', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (776, 'Cagayan de Oro', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (777, 'Parañaque', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (778, 'Makati', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (779, 'Bacolod', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (780, 'General Santos', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (781, 'Marikina', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (782, 'Dasmariñas', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (783, 'Muntinlupa', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (784, 'Iloilo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (785, 'Pasay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (786, 'Malabon', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (787, 'San José del Monte', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (788, 'Bacoor', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (789, 'Iligan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (790, 'Calamba', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (791, 'Mandaluyong', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (792, 'Butuan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (793, 'Angeles', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (794, 'Tarlac', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (795, 'Mandaue', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (796, 'Baguio', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (797, 'Batangas', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (798, 'Cainta', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (799, 'San Pedro', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (800, 'Navotas', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (801, 'Cabanatuan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (802, 'San Fernando', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (803, 'Lipa', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (804, 'Lapu-Lapu', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (805, 'San Pablo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (806, 'Biñan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (807, 'Taytay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (808, 'Lucena', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (809, 'Imus', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (810, 'Olongapo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (811, 'Binangonan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (812, 'Santa Rosa', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (813, 'Tagum', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (814, 'Tacloban', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (815, 'Malolos', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (816, 'Mabalacat', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (817, 'Cotabato', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (818, 'Meycauayan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (819, 'Puerto Princesa', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (820, 'Legazpi', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (821, 'Silang', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (822, 'Ormoc', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (823, 'San Carlos', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (824, 'Kabankalan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (825, 'Talisay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (826, 'Valencia', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (827, 'Calbayog', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (828, 'Santa Maria', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (829, 'Pagadian', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (830, 'Cadiz', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (831, 'Bago', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (832, 'Toledo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (833, 'Naga', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (834, 'San Mateo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (835, 'Panabo', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (836, 'Koronadal', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (837, 'Marawi', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (838, 'Dagupan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (839, 'Sagay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (840, 'Roxas', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (841, 'Lubao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (842, 'Digos', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (843, 'San Miguel', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (844, 'Malaybalay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (845, 'Tuguegarao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (846, 'Ilagan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (847, 'Baliuag', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (848, 'Surigao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (850, 'San Juan del Monte', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (851, 'Tanauan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (852, 'Concepcion', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (853, 'Rodriguez (Montalban)', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (854, 'Sariaya', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (855, 'Malasiqui', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (856, 'General Mariano Alvarez', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (857, 'Urdaneta', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (858, 'Hagonoy', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (859, 'San Jose', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (860, 'Polomolok', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (861, 'Santiago', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (862, 'Tanza', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (863, 'Ozamis', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (864, 'Mexico', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (866, 'Silay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (867, 'General Trias', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (868, 'Tabaco', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (869, 'Cabuyao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (870, 'Calapan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (871, 'Mati', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (872, 'Midsayap', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (873, 'Cauayan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (874, 'Gingoog', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (875, 'Dumaguete', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (877, 'Arayat', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (878, 'Bayawan (Tulong)', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (879, 'Kidapawan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (880, 'Daraga (Locsin)', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (881, 'Marilao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (882, 'Malita', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (883, 'Dipolog', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (884, 'Cavite', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (885, 'Danao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (886, 'Bislig', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (887, 'Talavera', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (888, 'Guagua', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (889, 'Bayambang', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (890, 'Nasugbu', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (891, 'Baybay', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (892, 'Capas', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (893, 'Sultan Kudarat', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (894, 'Laoag', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (895, 'Bayugan', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (896, 'Malungon', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (897, 'Santa Cruz', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (898, 'Sorsogon', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (899, 'Candelaria', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (900, 'Ligao', 'PH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (901, 'Tórshavn', 'FO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (902, 'Libreville', 'GA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (903, 'Serekunda', 'GM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (904, 'Banjul', 'GM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (905, 'Tbilisi', 'GE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (906, 'Kutaisi', 'GE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (907, 'Rustavi', 'GE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (908, 'Batumi', 'GE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (909, 'Sohumi', 'GE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (910, 'Accra', 'GH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (911, 'Kumasi', 'GH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (912, 'Tamale', 'GH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (913, 'Tema', 'GH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (914, 'Sekondi-Takoradi', 'GH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (915, 'Gibraltar', 'GI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (916, 'Saint George´s', 'GD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (917, 'Nuuk', 'GL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (918, 'Les Abymes', 'GP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (919, 'Basse-Terre', 'GP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (920, 'Tamuning', 'GU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (921, 'Agaña', 'GU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (922, 'Ciudad de Guatemala', 'GT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (923, 'Mixco', 'GT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (924, 'Villa Nueva', 'GT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (925, 'Quetzaltenango', 'GT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (926, 'Conakry', 'GN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (927, 'Bissau', 'GW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (928, 'Georgetown', 'GY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (929, 'Port-au-Prince', 'HT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (930, 'Carrefour', 'HT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (931, 'Delmas', 'HT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (932, 'Le-Cap-Haïtien', 'HT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (933, 'Tegucigalpa', 'HN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (934, 'San Pedro Sula', 'HN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (935, 'La Ceiba', 'HN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (936, 'Kowloon and New Kowloon', 'HK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (937, 'Victoria', 'HK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (938, 'Longyearbyen', 'SJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (939, 'Jakarta', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (940, 'Surabaya', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (941, 'Bandung', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (942, 'Medan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (943, 'Palembang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (944, 'Tangerang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (945, 'Semarang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (946, 'Ujung Pandang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (947, 'Malang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (948, 'Bandar Lampung', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (949, 'Bekasi', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (950, 'Padang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (951, 'Surakarta', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (952, 'Banjarmasin', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (953, 'Pekan Baru', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (954, 'Denpasar', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (955, 'Yogyakarta', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (956, 'Pontianak', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (957, 'Samarinda', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (958, 'Jambi', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (959, 'Depok', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (960, 'Cimahi', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (961, 'Balikpapan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (962, 'Manado', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (963, 'Mataram', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (964, 'Pekalongan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (965, 'Tegal', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (966, 'Bogor', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (967, 'Ciputat', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (968, 'Pondokgede', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (969, 'Cirebon', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (970, 'Kediri', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (971, 'Ambon', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (972, 'Jember', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (973, 'Cilacap', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (974, 'Cimanggis', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (975, 'Pematang Siantar', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (976, 'Purwokerto', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (977, 'Ciomas', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (978, 'Tasikmalaya', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (979, 'Madiun', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (980, 'Bengkulu', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (981, 'Karawang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (982, 'Banda Aceh', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (983, 'Palu', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (984, 'Pasuruan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (985, 'Kupang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (986, 'Tebing Tinggi', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (987, 'Percut Sei Tuan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (988, 'Binjai', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (989, 'Sukabumi', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (990, 'Waru', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (991, 'Pangkal Pinang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (992, 'Magelang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (993, 'Blitar', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (994, 'Serang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (995, 'Probolinggo', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (996, 'Cilegon', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (997, 'Cianjur', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (998, 'Ciparay', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (999, 'Lhokseumawe', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1000, 'Taman', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1002, 'Citeureup', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1003, 'Pemalang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1004, 'Klaten', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1005, 'Salatiga', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1006, 'Cibinong', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1007, 'Palangka Raya', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1008, 'Mojokerto', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1009, 'Purwakarta', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1010, 'Garut', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1011, 'Kudus', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1012, 'Kendari', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1013, 'Jaya Pura', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1014, 'Gorontalo', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1015, 'Majalaya', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1016, 'Pondok Aren', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1017, 'Jombang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1018, 'Sunggal', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1019, 'Batam', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1020, 'Padang Sidempuan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1021, 'Sawangan', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1022, 'Banyuwangi', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1023, 'Tanjung Pinang', 'ID', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1024, 'Mumbai (Bombay)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1025, 'Delhi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1026, 'Calcutta [Kolkata]', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1027, 'Chennai (Madras)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1028, 'Hyderabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1029, 'Ahmedabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1030, 'Bangalore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1031, 'Kanpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1032, 'Nagpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1033, 'Lucknow', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1034, 'Pune', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1035, 'Surat', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1036, 'Jaipur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1037, 'Indore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1038, 'Bhopal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1039, 'Ludhiana', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1040, 'Vadodara (Baroda)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1041, 'Kalyan', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1042, 'Madurai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1043, 'Haora (Howrah)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1044, 'Varanasi (Benares)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1045, 'Patna', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1046, 'Srinagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1047, 'Agra', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1048, 'Coimbatore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1049, 'Thane (Thana)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1050, 'Allahabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1051, 'Meerut', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1052, 'Vishakhapatnam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1053, 'Jabalpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1054, 'Amritsar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1055, 'Faridabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1056, 'Vijayawada', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1057, 'Gwalior', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1058, 'Jodhpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1059, 'Nashik (Nasik)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1060, 'Hubli-Dharwad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1061, 'Solapur (Sholapur)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1062, 'Ranchi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1063, 'Bareilly', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1064, 'Guwahati (Gauhati)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1065, 'Shambajinagar (Aurangabad)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1066, 'Cochin (Kochi)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1067, 'Rajkot', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1068, 'Kota', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1069, 'Thiruvananthapuram (Trivandrum', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1070, 'Pimpri-Chinchwad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1071, 'Jalandhar (Jullundur)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1072, 'Gorakhpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1073, 'Chandigarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1074, 'Mysore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1075, 'Aligarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1076, 'Guntur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1077, 'Jamshedpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1078, 'Ghaziabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1079, 'Warangal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1080, 'Raipur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1081, 'Moradabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1082, 'Durgapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1083, 'Amravati', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1084, 'Calicut (Kozhikode)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1085, 'Bikaner', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1086, 'Bhubaneswar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1087, 'Kolhapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1088, 'Kataka (Cuttack)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1089, 'Ajmer', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1090, 'Bhavnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1091, 'Tiruchirapalli', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1092, 'Bhilai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1093, 'Bhiwandi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1094, 'Saharanpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1095, 'Ulhasnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1096, 'Salem', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1097, 'Ujjain', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1098, 'Malegaon', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1099, 'Jamnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1100, 'Bokaro Steel City', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1101, 'Akola', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1102, 'Belgaum', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1103, 'Rajahmundry', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1104, 'Nellore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1105, 'Udaipur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1106, 'New Bombay', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1107, 'Bhatpara', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1108, 'Gulbarga', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1109, 'New Delhi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1110, 'Jhansi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1111, 'Gaya', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1112, 'Kakinada', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1113, 'Dhule (Dhulia)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1114, 'Panihati', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1115, 'Nanded (Nander)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1116, 'Mangalore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1117, 'Dehra Dun', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1118, 'Kamarhati', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1119, 'Davangere', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1120, 'Asansol', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1121, 'Bhagalpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1122, 'Bellary', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1123, 'Barddhaman (Burdwan)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1124, 'Rampur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1125, 'Jalgaon', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1126, 'Muzaffarpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1127, 'Nizamabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1128, 'Muzaffarnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1129, 'Patiala', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1130, 'Shahjahanpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1131, 'Kurnool', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1132, 'Tiruppur (Tirupper)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1133, 'Rohtak', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1134, 'South Dum Dum', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1135, 'Mathura', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1136, 'Chandrapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1137, 'Barahanagar (Baranagar)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1138, 'Darbhanga', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1139, 'Siliguri (Shiliguri)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1140, 'Raurkela', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1141, 'Ambattur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1142, 'Panipat', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1143, 'Firozabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1144, 'Ichalkaranji', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1145, 'Jammu', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1146, 'Ramagundam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1147, 'Eluru', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1148, 'Brahmapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1149, 'Alwar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1150, 'Pondicherry', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1151, 'Thanjavur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1152, 'Bihar Sharif', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1153, 'Tuticorin', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1154, 'Imphal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1155, 'Latur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1156, 'Sagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1157, 'Farrukhabad-cum-Fatehgarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1158, 'Sangli', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1159, 'Parbhani', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1160, 'Nagar Coil', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1161, 'Bijapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1162, 'Kukatpalle', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1163, 'Bally', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1164, 'Bhilwara', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1165, 'Ratlam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1166, 'Avadi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1167, 'Dindigul', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1168, 'Ahmadnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1169, 'Bilaspur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1170, 'Shimoga', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1171, 'Kharagpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1172, 'Mira Bhayandar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1173, 'Vellore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1174, 'Jalna', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1175, 'Burnpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1176, 'Anantapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1177, 'Allappuzha (Alleppey)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1178, 'Tirupati', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1179, 'Karnal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1180, 'Burhanpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1181, 'Hisar (Hissar)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1182, 'Tiruvottiyur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1183, 'Mirzapur-cum-Vindhyachal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1184, 'Secunderabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1185, 'Nadiad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1186, 'Dewas', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1187, 'Murwara (Katni)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1188, 'Ganganagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1189, 'Vizianagaram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1190, 'Erode', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1191, 'Machilipatnam (Masulipatam)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1192, 'Bhatinda (Bathinda)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1193, 'Raichur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1194, 'Agartala', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1195, 'Arrah (Ara)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1196, 'Satna', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1197, 'Lalbahadur Nagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1198, 'Aizawl', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1199, 'Uluberia', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1200, 'Katihar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1201, 'Cuddalore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1202, 'Hugli-Chinsurah', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1203, 'Dhanbad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1204, 'Raiganj', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1205, 'Sambhal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1206, 'Durg', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1207, 'Munger (Monghyr)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1208, 'Kanchipuram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1209, 'North Dum Dum', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1210, 'Karimnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1211, 'Bharatpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1212, 'Sikar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1213, 'Hardwar (Haridwar)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1214, 'Dabgram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1215, 'Morena', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1216, 'Noida', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1217, 'Hapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1218, 'Bhusawal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1219, 'Khandwa', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1220, 'Yamuna Nagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1221, 'Sonipat (Sonepat)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1222, 'Tenali', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1223, 'Raurkela Civil Township', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1224, 'Kollam (Quilon)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1225, 'Kumbakonam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1226, 'Ingraj Bazar (English Bazar)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1227, 'Timkur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1228, 'Amroha', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1229, 'Serampore', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1230, 'Chapra', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1231, 'Pali', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1232, 'Maunath Bhanjan', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1233, 'Adoni', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1234, 'Jaunpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1235, 'Tirunelveli', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1236, 'Bahraich', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1237, 'Gadag Betigeri', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1238, 'Proddatur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1239, 'Chittoor', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1240, 'Barrackpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1241, 'Bharuch (Broach)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1242, 'Naihati', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1243, 'Shillong', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1244, 'Sambalpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1245, 'Junagadh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1246, 'Rae Bareli', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1247, 'Rewa', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1248, 'Gurgaon', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1249, 'Khammam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1250, 'Bulandshahr', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1251, 'Navsari', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1252, 'Malkajgiri', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1253, 'Midnapore (Medinipur)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1254, 'Miraj', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1255, 'Raj Nandgaon', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1256, 'Alandur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1257, 'Puri', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1258, 'Navadwip', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1259, 'Sirsa', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1260, 'Korba', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1261, 'Faizabad', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1262, 'Etawah', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1263, 'Pathankot', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1264, 'Gandhinagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1265, 'Palghat (Palakkad)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1266, 'Veraval', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1267, 'Hoshiarpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1268, 'Ambala', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1269, 'Sitapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1270, 'Bhiwani', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1271, 'Cuddapah', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1272, 'Bhimavaram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1273, 'Krishnanagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1274, 'Chandannagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1275, 'Mandya', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1276, 'Dibrugarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1277, 'Nandyal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1278, 'Balurghat', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1279, 'Neyveli', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1280, 'Fatehpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1281, 'Mahbubnagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1282, 'Budaun', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1283, 'Porbandar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1284, 'Silchar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1285, 'Berhampore (Baharampur)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1286, 'Purnea (Purnia)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1287, 'Bankura', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1288, 'Rajapalaiyam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1289, 'Titagarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1290, 'Halisahar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1291, 'Hathras', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1292, 'Bhir (Bid)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1293, 'Pallavaram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1294, 'Anand', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1295, 'Mango', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1296, 'Santipur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1297, 'Bhind', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1298, 'Gondiya', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1299, 'Tiruvannamalai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1300, 'Yeotmal (Yavatmal)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1301, 'Kulti-Barakar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1302, 'Moga', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1303, 'Shivapuri', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1304, 'Bidar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1305, 'Guntakal', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1306, 'Unnao', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1307, 'Barasat', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1308, 'Tambaram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1309, 'Abohar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1310, 'Pilibhit', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1311, 'Valparai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1312, 'Gonda', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1313, 'Surendranagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1314, 'Qutubullapur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1315, 'Beawar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1316, 'Hindupur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1317, 'Gandhidham', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1318, 'Haldwani-cum-Kathgodam', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1319, 'Tellicherry (Thalassery)', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1320, 'Wardha', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1321, 'Rishra', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1322, 'Bhuj', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1323, 'Modinagar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1324, 'Gudivada', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1325, 'Basirhat', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1326, 'Uttarpara-Kotrung', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1327, 'Ongole', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1328, 'North Barrackpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1329, 'Guna', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1330, 'Haldia', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1331, 'Habra', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1332, 'Kanchrapara', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1333, 'Tonk', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1334, 'Champdani', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1335, 'Orai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1336, 'Pudukkottai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1337, 'Sasaram', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1338, 'Hazaribag', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1339, 'Palayankottai', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1340, 'Banda', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1341, 'Godhra', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1342, 'Hospet', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1343, 'Ashoknagar-Kalyangarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1344, 'Achalpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1345, 'Patan', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1346, 'Mandasor', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1347, 'Damoh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1348, 'Satara', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1349, 'Meerut Cantonment', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1350, 'Dehri', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1351, 'Delhi Cantonment', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1352, 'Chhindwara', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1353, 'Bansberia', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1354, 'Nagaon', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1355, 'Kanpur Cantonment', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1356, 'Vidisha', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1357, 'Bettiah', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1358, 'Purulia', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1359, 'Hassan', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1360, 'Ambala Sadar', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1361, 'Baidyabati', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1362, 'Morvi', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1363, 'Raigarh', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1364, 'Vejalpur', 'IN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1365, 'Baghdad', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1366, 'Mosul', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1367, 'Irbil', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1368, 'Kirkuk', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1369, 'Basra', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1370, 'al-Sulaymaniya', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1371, 'al-Najaf', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1372, 'Karbala', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1373, 'al-Hilla', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1374, 'al-Nasiriya', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1375, 'al-Amara', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1376, 'al-Diwaniya', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1377, 'al-Ramadi', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1378, 'al-Kut', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1379, 'Baquba', 'IQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1380, 'Teheran', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1381, 'Mashhad', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1382, 'Esfahan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1383, 'Tabriz', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1384, 'Shiraz', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1385, 'Karaj', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1386, 'Ahvaz', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1387, 'Qom', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1388, 'Kermanshah', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1389, 'Urmia', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1390, 'Zahedan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1391, 'Rasht', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1392, 'Hamadan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1393, 'Kerman', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1394, 'Arak', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1395, 'Ardebil', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1396, 'Yazd', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1397, 'Qazvin', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1398, 'Zanjan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1399, 'Sanandaj', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1400, 'Bandar-e-Abbas', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1401, 'Khorramabad', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1402, 'Eslamshahr', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1403, 'Borujerd', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1404, 'Abadan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1405, 'Dezful', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1406, 'Kashan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1407, 'Sari', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1408, 'Gorgan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1409, 'Najafabad', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1410, 'Sabzevar', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1411, 'Khomeynishahr', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1412, 'Amol', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1413, 'Neyshabur', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1414, 'Babol', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1415, 'Khoy', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1416, 'Malayer', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1417, 'Bushehr', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1418, 'Qaemshahr', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1419, 'Qarchak', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1420, 'Qods', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1421, 'Sirjan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1422, 'Bojnurd', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1423, 'Maragheh', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1424, 'Birjand', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1425, 'Ilam', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1426, 'Bukan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1427, 'Masjed-e-Soleyman', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1428, 'Saqqez', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1429, 'Gonbad-e Qabus', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1430, 'Saveh', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1431, 'Mahabad', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1432, 'Varamin', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1433, 'Andimeshk', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1434, 'Khorramshahr', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1435, 'Shahrud', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1436, 'Marv Dasht', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1437, 'Zabol', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1438, 'Shahr-e Kord', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1439, 'Bandar-e Anzali', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1440, 'Rafsanjan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1441, 'Marand', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1442, 'Torbat-e Heydariyeh', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1443, 'Jahrom', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1444, 'Semnan', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1445, 'Miandoab', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1446, 'Qomsheh', 'IR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1447, 'Dublin', 'IE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1448, 'Cork', 'IE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1449, 'Reykjavík', 'IS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1450, 'Jerusalem', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1451, 'Tel Aviv-Jaffa', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1452, 'Haifa', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1453, 'Rishon Le Ziyyon', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1454, 'Beerseba', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1455, 'Holon', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1456, 'Petah Tiqwa', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1457, 'Ashdod', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1458, 'Netanya', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1459, 'Bat Yam', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1460, 'Bene Beraq', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1461, 'Ramat Gan', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1462, 'Ashqelon', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1463, 'Rehovot', 'IL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1464, 'Roma', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1465, 'Milano', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1466, 'Napoli', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1467, 'Torino', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1468, 'Palermo', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1469, 'Genova', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1470, 'Bologna', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1471, 'Firenze', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1472, 'Catania', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1473, 'Bari', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1474, 'Venezia', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1475, 'Messina', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1476, 'Verona', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1477, 'Trieste', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1478, 'Padova', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1479, 'Taranto', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1480, 'Brescia', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1481, 'Reggio di Calabria', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1482, 'Modena', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1483, 'Prato', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1484, 'Parma', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1485, 'Cagliari', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1486, 'Livorno', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1487, 'Perugia', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1488, 'Foggia', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1489, 'Reggio nell´ Emilia', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1490, 'Salerno', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1491, 'Ravenna', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1492, 'Ferrara', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1493, 'Rimini', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1494, 'Syrakusa', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1495, 'Sassari', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1496, 'Monza', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1497, 'Bergamo', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1498, 'Pescara', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1499, 'Latina', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1500, 'Vicenza', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1501, 'Terni', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1502, 'Forlì', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1503, 'Trento', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1504, 'Novara', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1505, 'Piacenza', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1506, 'Ancona', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1507, 'Lecce', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1508, 'Bolzano', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1509, 'Catanzaro', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1510, 'La Spezia', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1511, 'Udine', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1512, 'Torre del Greco', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1513, 'Andria', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1514, 'Brindisi', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1515, 'Giugliano in Campania', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1516, 'Pisa', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1517, 'Barletta', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1518, 'Arezzo', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1519, 'Alessandria', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1520, 'Cesena', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1521, 'Pesaro', 'IT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1523, 'Wien', 'AT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1524, 'Graz', 'AT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1525, 'Linz', 'AT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1526, 'Salzburg', 'AT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1527, 'Innsbruck', 'AT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1528, 'Klagenfurt', 'AT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1529, 'Spanish Town', 'JM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1530, 'Kingston', 'JM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1531, 'Portmore', 'JM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1532, 'Tokyo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1533, 'Jokohama [Yokohama]', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1534, 'Osaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1535, 'Nagoya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1536, 'Sapporo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1537, 'Kioto', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1538, 'Kobe', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1539, 'Fukuoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1540, 'Kawasaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1541, 'Hiroshima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1542, 'Kitakyushu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1543, 'Sendai', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1544, 'Chiba', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1545, 'Sakai', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1546, 'Kumamoto', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1547, 'Okayama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1548, 'Sagamihara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1549, 'Hamamatsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1550, 'Kagoshima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1551, 'Funabashi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1552, 'Higashiosaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1553, 'Hachioji', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1554, 'Niigata', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1555, 'Amagasaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1556, 'Himeji', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1557, 'Shizuoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1558, 'Urawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1559, 'Matsuyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1560, 'Matsudo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1561, 'Kanazawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1562, 'Kawaguchi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1563, 'Ichikawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1564, 'Omiya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1565, 'Utsunomiya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1566, 'Oita', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1567, 'Nagasaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1568, 'Yokosuka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1569, 'Kurashiki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1570, 'Gifu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1571, 'Hirakata', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1572, 'Nishinomiya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1573, 'Toyonaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1574, 'Wakayama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1575, 'Fukuyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1576, 'Fujisawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1577, 'Asahikawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1578, 'Machida', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1579, 'Nara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1580, 'Takatsuki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1581, 'Iwaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1582, 'Nagano', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1583, 'Toyohashi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1584, 'Toyota', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1585, 'Suita', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1586, 'Takamatsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1587, 'Koriyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1588, 'Okazaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1589, 'Kawagoe', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1590, 'Tokorozawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1591, 'Toyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1592, 'Kochi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1593, 'Kashiwa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1594, 'Akita', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1595, 'Miyazaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1596, 'Koshigaya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1597, 'Naha', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1598, 'Aomori', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1599, 'Hakodate', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1600, 'Akashi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1601, 'Yokkaichi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1602, 'Fukushima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1603, 'Morioka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1604, 'Maebashi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1605, 'Kasugai', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1606, 'Otsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1607, 'Ichihara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1608, 'Yao', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1609, 'Ichinomiya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1610, 'Tokushima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1611, 'Kakogawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1612, 'Ibaraki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1613, 'Neyagawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1614, 'Shimonoseki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1615, 'Yamagata', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1616, 'Fukui', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1617, 'Hiratsuka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1618, 'Mito', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1619, 'Sasebo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1620, 'Hachinohe', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1621, 'Takasaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1622, 'Shimizu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1623, 'Kurume', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1624, 'Fuji', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1625, 'Soka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1626, 'Fuchu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1627, 'Chigasaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1628, 'Atsugi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1629, 'Numazu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1630, 'Ageo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1631, 'Yamato', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1632, 'Matsumoto', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1633, 'Kure', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1634, 'Takarazuka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1635, 'Kasukabe', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1636, 'Chofu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1637, 'Odawara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1638, 'Kofu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1639, 'Kushiro', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1640, 'Kishiwada', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1641, 'Hitachi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1642, 'Nagaoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1643, 'Itami', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1644, 'Uji', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1645, 'Suzuka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1646, 'Hirosaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1647, 'Ube', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1648, 'Kodaira', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1649, 'Takaoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1650, 'Obihiro', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1651, 'Tomakomai', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1652, 'Saga', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1653, 'Sakura', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1654, 'Kamakura', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1655, 'Mitaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1656, 'Izumi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1657, 'Hino', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1658, 'Hadano', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1659, 'Ashikaga', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1660, 'Tsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1661, 'Sayama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1662, 'Yachiyo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1663, 'Tsukuba', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1664, 'Tachikawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1665, 'Kumagaya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1666, 'Moriguchi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1667, 'Otaru', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1668, 'Anjo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1669, 'Narashino', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1670, 'Oyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1671, 'Ogaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1672, 'Matsue', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1673, 'Kawanishi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1674, 'Hitachinaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1675, 'Niiza', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1676, 'Nagareyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1677, 'Tottori', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1678, 'Tama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1679, 'Iruma', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1680, 'Ota', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1681, 'Omuta', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1682, 'Komaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1683, 'Ome', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1684, 'Kadoma', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1685, 'Yamaguchi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1686, 'Higashimurayama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1687, 'Yonago', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1688, 'Matsubara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1689, 'Musashino', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1690, 'Tsuchiura', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1691, 'Joetsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1692, 'Miyakonojo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1693, 'Misato', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1694, 'Kakamigahara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1695, 'Daito', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1696, 'Seto', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1697, 'Kariya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1698, 'Urayasu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1699, 'Beppu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1700, 'Niihama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1701, 'Minoo', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1702, 'Fujieda', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1703, 'Abiko', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1704, 'Nobeoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1705, 'Tondabayashi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1706, 'Ueda', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1707, 'Kashihara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1708, 'Matsusaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1709, 'Isesaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1710, 'Zama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1711, 'Kisarazu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1712, 'Noda', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1713, 'Ishinomaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1714, 'Fujinomiya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1715, 'Kawachinagano', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1716, 'Imabari', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1717, 'Aizuwakamatsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1718, 'Higashihiroshima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1719, 'Habikino', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1720, 'Ebetsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1721, 'Hofu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1722, 'Kiryu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1723, 'Okinawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1724, 'Yaizu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1725, 'Toyokawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1726, 'Ebina', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1727, 'Asaka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1728, 'Higashikurume', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1729, 'Ikoma', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1730, 'Kitami', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1731, 'Koganei', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1732, 'Iwatsuki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1733, 'Mishima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1734, 'Handa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1735, 'Muroran', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1736, 'Komatsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1737, 'Yatsushiro', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1738, 'Iida', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1739, 'Tokuyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1740, 'Kokubunji', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1741, 'Akishima', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1742, 'Iwakuni', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1743, 'Kusatsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1744, 'Kuwana', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1745, 'Sanda', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1746, 'Hikone', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1747, 'Toda', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1748, 'Tajimi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1749, 'Ikeda', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1750, 'Fukaya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1751, 'Ise', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1752, 'Sakata', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1753, 'Kasuga', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1754, 'Kamagaya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1755, 'Tsuruoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1756, 'Hoya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1757, 'Nishio', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1758, 'Tokai', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1759, 'Inazawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1760, 'Sakado', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1761, 'Isehara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1762, 'Takasago', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1763, 'Fujimi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1764, 'Urasoe', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1765, 'Yonezawa', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1766, 'Konan', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1767, 'Yamatokoriyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1768, 'Maizuru', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1769, 'Onomichi', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1770, 'Higashimatsuyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1771, 'Kimitsu', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1772, 'Isahaya', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1773, 'Kanuma', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1774, 'Izumisano', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1775, 'Kameoka', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1776, 'Mobara', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1777, 'Narita', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1778, 'Kashiwazaki', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1779, 'Tsuyama', 'JP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1780, 'Sanaa', 'YE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1781, 'Aden', 'YE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1782, 'Taizz', 'YE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1783, 'Hodeida', 'YE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1784, 'al-Mukalla', 'YE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1785, 'Ibb', 'YE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1786, 'Amman', 'JO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1787, 'al-Zarqa', 'JO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1788, 'Irbid', 'JO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1789, 'al-Rusayfa', 'JO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1790, 'Wadi al-Sir', 'JO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1791, 'Flying Fish Cove', 'CX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1800, 'Phnom Penh', 'KH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1801, 'Battambang', 'KH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1802, 'Siem Reap', 'KH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1803, 'Douala', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1804, 'Yaoundé', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1805, 'Garoua', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1806, 'Maroua', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1807, 'Bamenda', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1808, 'Bafoussam', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1809, 'Nkongsamba', 'CM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1810, 'Montréal', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1811, 'Calgary', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1812, 'Toronto', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1813, 'North York', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1814, 'Winnipeg', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1815, 'Edmonton', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1816, 'Mississauga', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1817, 'Scarborough', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1818, 'Vancouver', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1819, 'Etobicoke', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1820, 'London', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1821, 'Hamilton', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1822, 'Ottawa', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1823, 'Laval', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1824, 'Surrey', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1825, 'Brampton', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1826, 'Windsor', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1827, 'Saskatoon', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1828, 'Kitchener', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1829, 'Markham', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1830, 'Regina', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1831, 'Burnaby', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1832, 'Québec', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1833, 'York', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1834, 'Richmond', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1835, 'Vaughan', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1836, 'Burlington', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1837, 'Oshawa', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1838, 'Oakville', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1839, 'Saint Catharines', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1840, 'Longueuil', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1841, 'Richmond Hill', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1842, 'Thunder Bay', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1843, 'Nepean', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1844, 'Cape Breton', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1845, 'East York', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1846, 'Halifax', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1847, 'Cambridge', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1848, 'Gloucester', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1849, 'Abbotsford', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1850, 'Guelph', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1851, 'Saint John´s', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1852, 'Coquitlam', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1853, 'Saanich', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1854, 'Gatineau', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1855, 'Delta', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1856, 'Sudbury', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1857, 'Kelowna', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1858, 'Barrie', 'CA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1859, 'Praia', 'CV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1860, 'Almaty', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1861, 'Qaraghandy', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1862, 'Shymkent', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1863, 'Taraz', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1864, 'Astana', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1865, 'Öskemen', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1866, 'Pavlodar', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1867, 'Semey', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1868, 'Aqtöbe', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1869, 'Qostanay', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1870, 'Petropavl', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1871, 'Oral', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1872, 'Temirtau', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1873, 'Qyzylorda', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1874, 'Aqtau', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1875, 'Atyrau', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1876, 'Ekibastuz', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1877, 'Kökshetau', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1878, 'Rudnyy', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1879, 'Taldyqorghan', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1880, 'Zhezqazghan', 'KZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1881, 'Nairobi', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1882, 'Mombasa', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1883, 'Kisumu', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1884, 'Nakuru', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1885, 'Machakos', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1886, 'Eldoret', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1887, 'Meru', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1888, 'Nyeri', 'KE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1889, 'Bangui', 'CF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1890, 'Shanghai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1891, 'Peking', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1892, 'Chongqing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1893, 'Tianjin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1894, 'Wuhan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1895, 'Harbin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1896, 'Shenyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1897, 'Kanton [Guangzhou]', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1898, 'Chengdu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1899, 'Nanking [Nanjing]', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1900, 'Changchun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1901, 'Xi´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1902, 'Dalian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1903, 'Qingdao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1904, 'Jinan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1905, 'Hangzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1906, 'Zhengzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1907, 'Shijiazhuang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1908, 'Taiyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1909, 'Kunming', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1910, 'Changsha', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1911, 'Nanchang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1912, 'Fuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1913, 'Lanzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1914, 'Guiyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1915, 'Ningbo', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1916, 'Hefei', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1917, 'Urumtši [Ürümqi]', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1918, 'Anshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1919, 'Fushun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1920, 'Nanning', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1921, 'Zibo', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1922, 'Qiqihar', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1923, 'Jilin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1924, 'Tangshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1925, 'Baotou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1926, 'Shenzhen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1927, 'Hohhot', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1928, 'Handan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1929, 'Wuxi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1930, 'Xuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1931, 'Datong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1932, 'Yichun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1933, 'Benxi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1934, 'Luoyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1935, 'Suzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1936, 'Xining', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1937, 'Huainan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1938, 'Jixi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1939, 'Daqing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1940, 'Fuxin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1941, 'Amoy [Xiamen]', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1942, 'Liuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1943, 'Shantou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1944, 'Jinzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1945, 'Mudanjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1946, 'Yinchuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1947, 'Changzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1948, 'Zhangjiakou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1949, 'Dandong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1950, 'Hegang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1951, 'Kaifeng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1952, 'Jiamusi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1953, 'Liaoyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1954, 'Hengyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1955, 'Baoding', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1956, 'Hunjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1957, 'Xinxiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1958, 'Huangshi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1959, 'Haikou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1960, 'Yantai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1961, 'Bengbu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1962, 'Xiangtan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1963, 'Weifang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1964, 'Wuhu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1965, 'Pingxiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1966, 'Yingkou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1967, 'Anyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1968, 'Panzhihua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1969, 'Pingdingshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1970, 'Xiangfan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1971, 'Zhuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1972, 'Jiaozuo', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1973, 'Wenzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1974, 'Zhangjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1975, 'Zigong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1976, 'Shuangyashan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1977, 'Zaozhuang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1978, 'Yakeshi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1979, 'Yichang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1980, 'Zhenjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1981, 'Huaibei', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1982, 'Qinhuangdao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1983, 'Guilin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1984, 'Liupanshui', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1985, 'Panjin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1986, 'Yangquan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1987, 'Jinxi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1988, 'Liaoyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1989, 'Lianyungang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1990, 'Xianyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1991, 'Tai´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1992, 'Chifeng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1993, 'Shaoguan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1994, 'Nantong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1995, 'Leshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1996, 'Baoji', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1997, 'Linyi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1998, 'Tonghua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (1999, 'Siping', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2000, 'Changzhi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2001, 'Tengzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2002, 'Chaozhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2003, 'Yangzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2004, 'Dongwan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2005, 'Ma´anshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2006, 'Foshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2007, 'Yueyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2008, 'Xingtai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2009, 'Changde', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2010, 'Shihezi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2011, 'Yancheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2012, 'Jiujiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2013, 'Dongying', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2014, 'Shashi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2015, 'Xintai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2016, 'Jingdezhen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2017, 'Tongchuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2018, 'Zhongshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2019, 'Shiyan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2020, 'Tieli', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2021, 'Jining', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2022, 'Wuhai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2023, 'Mianyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2024, 'Luzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2025, 'Zunyi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2026, 'Shizuishan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2027, 'Neijiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2028, 'Tongliao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2029, 'Tieling', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2030, 'Wafangdian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2031, 'Anqing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2032, 'Shaoyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2033, 'Laiwu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2034, 'Chengde', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2035, 'Tianshui', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2036, 'Nanyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2037, 'Cangzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2038, 'Yibin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2039, 'Huaiyin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2040, 'Dunhua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2041, 'Yanji', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2042, 'Jiangmen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2043, 'Tongling', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2044, 'Suihua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2045, 'Gongziling', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2046, 'Xiantao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2047, 'Chaoyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2048, 'Ganzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2049, 'Huzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2050, 'Baicheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2051, 'Shangzi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2052, 'Yangjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2053, 'Qitaihe', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2054, 'Gejiu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2055, 'Jiangyin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2056, 'Hebi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2057, 'Jiaxing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2058, 'Wuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2059, 'Meihekou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2060, 'Xuchang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2061, 'Liaocheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2062, 'Haicheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2063, 'Qianjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2064, 'Baiyin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2065, 'Bei´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2066, 'Yixing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2067, 'Laizhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2068, 'Qaramay', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2069, 'Acheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2070, 'Dezhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2071, 'Nanping', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2072, 'Zhaoqing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2073, 'Beipiao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2074, 'Fengcheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2075, 'Fuyu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2076, 'Xinyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2077, 'Dongtai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2078, 'Yuci', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2079, 'Honghu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2080, 'Ezhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2081, 'Heze', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2082, 'Daxian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2083, 'Linfen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2084, 'Tianmen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2085, 'Yiyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2086, 'Quanzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2087, 'Rizhao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2088, 'Deyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2089, 'Guangyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2090, 'Changshu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2091, 'Zhangzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2092, 'Hailar', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2093, 'Nanchong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2094, 'Jiutai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2095, 'Zhaodong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2096, 'Shaoxing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2097, 'Fuyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2098, 'Maoming', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2099, 'Qujing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2100, 'Ghulja', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2101, 'Jiaohe', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2102, 'Puyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2103, 'Huadian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2104, 'Jiangyou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2105, 'Qashqar', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2106, 'Anshun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2107, 'Fuling', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2108, 'Xinyu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2109, 'Hanzhong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2110, 'Danyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2111, 'Chenzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2112, 'Xiaogan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2113, 'Shangqiu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2114, 'Zhuhai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2115, 'Qingyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2116, 'Aqsu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2118, 'Xiaoshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2119, 'Zaoyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2120, 'Xinghua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2121, 'Hami', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2122, 'Huizhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2123, 'Jinmen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2124, 'Sanming', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2125, 'Ulanhot', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2126, 'Korla', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2127, 'Wanxian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2128, 'Rui´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2129, 'Zhoushan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2130, 'Liangcheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2131, 'Jiaozhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2132, 'Taizhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2135, 'Taonan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2136, 'Pingdu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2137, 'Ji´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2138, 'Longkou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2139, 'Langfang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2140, 'Zhoukou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2141, 'Suining', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2142, 'Yulin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2143, 'Jinhua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2144, 'Liu´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2145, 'Shuangcheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2146, 'Suizhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2147, 'Ankang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2148, 'Weinan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2149, 'Longjing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2150, 'Da´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2151, 'Lengshuijiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2152, 'Laiyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2153, 'Xianning', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2154, 'Dali', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2155, 'Anda', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2156, 'Jincheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2157, 'Longyan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2158, 'Xichang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2159, 'Wendeng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2160, 'Hailun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2161, 'Binzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2162, 'Linhe', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2163, 'Wuwei', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2164, 'Duyun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2165, 'Mishan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2166, 'Shangrao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2167, 'Changji', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2168, 'Meixian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2169, 'Yushu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2170, 'Tiefa', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2171, 'Huai´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2172, 'Leiyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2173, 'Zalantun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2174, 'Weihai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2175, 'Loudi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2176, 'Qingzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2177, 'Qidong', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2178, 'Huaihua', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2179, 'Luohe', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2180, 'Chuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2182, 'Linqing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2183, 'Chaohu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2184, 'Laohekou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2185, 'Dujiangyan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2186, 'Zhumadian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2187, 'Linchuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2188, 'Jiaonan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2189, 'Sanmenxia', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2190, 'Heyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2191, 'Manzhouli', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2192, 'Lhasa', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2193, 'Lianyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2194, 'Kuytun', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2195, 'Puqi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2196, 'Hongjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2197, 'Qinzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2198, 'Renqiu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2199, 'Yuyao', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2200, 'Guigang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2201, 'Kaili', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2202, 'Yan´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2203, 'Beihai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2204, 'Xuangzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2205, 'Quzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2206, 'Yong´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2207, 'Zixing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2208, 'Liyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2209, 'Yizheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2210, 'Yumen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2211, 'Liling', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2212, 'Yuncheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2213, 'Shanwei', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2214, 'Cixi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2215, 'Yuanjiang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2216, 'Bozhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2217, 'Jinchang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2218, 'Fu´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2219, 'Suqian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2220, 'Shishou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2221, 'Hengshui', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2222, 'Danjiangkou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2223, 'Fujin', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2224, 'Sanya', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2225, 'Guangshui', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2226, 'Huangshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2227, 'Xingcheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2228, 'Zhucheng', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2229, 'Kunshan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2230, 'Haining', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2231, 'Pingliang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2232, 'Fuqing', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2233, 'Xinzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2234, 'Jieyang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2235, 'Zhangjiagang', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2236, 'Tong Xian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2237, 'Ya´an', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2239, 'Emeishan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2240, 'Enshi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2241, 'Bose', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2242, 'Yuzhou', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2243, 'Kaiyuan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2244, 'Tumen', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2245, 'Putian', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2246, 'Linhai', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2247, 'Xilin Hot', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2248, 'Shaowu', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2249, 'Junan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2250, 'Huaying', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2251, 'Pingyi', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2252, 'Huangyan', 'CN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2253, 'Bishkek', 'KG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2254, 'Osh', 'KG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2255, 'Bikenibeu', 'KI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2256, 'Bairiki', 'KI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2257, 'Santafé de Bogotá', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2258, 'Cali', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2259, 'Medellín', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2260, 'Barranquilla', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2261, 'Cartagena', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2262, 'Cúcuta', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2263, 'Bucaramanga', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2264, 'Ibagué', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2265, 'Pereira', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2266, 'Santa Marta', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2267, 'Manizales', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2268, 'Bello', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2269, 'Pasto', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2270, 'Neiva', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2271, 'Soledad', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2272, 'Armenia', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2273, 'Villavicencio', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2274, 'Soacha', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2275, 'Valledupar', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2276, 'Montería', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2277, 'Itagüí', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2278, 'Palmira', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2279, 'Buenaventura', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2280, 'Floridablanca', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2281, 'Sincelejo', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2282, 'Popayán', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2283, 'Barrancabermeja', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2284, 'Dos Quebradas', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2285, 'Tuluá', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2286, 'Envigado', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2287, 'Cartago', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2288, 'Girardot', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2289, 'Buga', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2290, 'Tunja', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2291, 'Florencia', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2292, 'Maicao', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2293, 'Sogamoso', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2294, 'Giron', 'CO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2295, 'Moroni', 'KM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2296, 'Brazzaville', 'CG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2297, 'Pointe-Noire', 'CG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2298, 'Kinshasa', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2299, 'Lubumbashi', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2300, 'Mbuji-Mayi', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2301, 'Kolwezi', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2302, 'Kisangani', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2303, 'Kananga', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2304, 'Likasi', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2305, 'Bukavu', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2306, 'Kikwit', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2307, 'Tshikapa', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2308, 'Matadi', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2309, 'Mbandaka', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2310, 'Mwene-Ditu', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2311, 'Boma', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2312, 'Uvira', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2313, 'Butembo', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2314, 'Goma', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2315, 'Kalemie', 'CD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2316, 'Bantam', 'CC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2317, 'West Island', 'CC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2318, 'Pyongyang', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2319, 'Hamhung', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2320, 'Chongjin', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2321, 'Nampo', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2322, 'Sinuiju', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2323, 'Wonsan', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2324, 'Phyongsong', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2325, 'Sariwon', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2326, 'Haeju', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2327, 'Kanggye', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2328, 'Kimchaek', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2329, 'Hyesan', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2330, 'Kaesong', 'KP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2331, 'Seoul', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2332, 'Pusan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2333, 'Inchon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2334, 'Taegu', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2335, 'Taejon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2336, 'Kwangju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2337, 'Ulsan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2338, 'Songnam', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2339, 'Puchon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2340, 'Suwon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2341, 'Anyang', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2342, 'Chonju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2343, 'Chongju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2344, 'Koyang', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2345, 'Ansan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2346, 'Pohang', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2347, 'Chang-won', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2348, 'Masan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2349, 'Kwangmyong', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2350, 'Chonan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2351, 'Chinju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2352, 'Iksan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2353, 'Pyongtaek', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2354, 'Kumi', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2355, 'Uijongbu', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2356, 'Kyongju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2357, 'Kunsan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2358, 'Cheju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2359, 'Kimhae', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2360, 'Sunchon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2361, 'Mokpo', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2362, 'Yong-in', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2363, 'Wonju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2364, 'Kunpo', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2365, 'Chunchon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2366, 'Namyangju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2367, 'Kangnung', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2368, 'Chungju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2369, 'Andong', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2370, 'Yosu', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2371, 'Kyongsan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2372, 'Paju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2373, 'Yangsan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2374, 'Ichon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2375, 'Asan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2376, 'Koje', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2377, 'Kimchon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2378, 'Nonsan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2379, 'Kuri', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2380, 'Chong-up', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2381, 'Chechon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2382, 'Sosan', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2383, 'Shihung', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2384, 'Tong-yong', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2385, 'Kongju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2386, 'Yongju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2387, 'Chinhae', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2388, 'Sangju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2389, 'Poryong', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2390, 'Kwang-yang', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2391, 'Miryang', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2392, 'Hanam', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2393, 'Kimje', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2394, 'Yongchon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2395, 'Sachon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2396, 'Uiwang', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2397, 'Naju', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2398, 'Namwon', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2399, 'Tonghae', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2400, 'Mun-gyong', 'KR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2401, 'Athenai', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2402, 'Thessaloniki', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2403, 'Pireus', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2404, 'Patras', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2405, 'Peristerion', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2406, 'Herakleion', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2407, 'Kallithea', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2408, 'Larisa', 'GR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2409, 'Zagreb', 'HR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2410, 'Split', 'HR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2411, 'Rijeka', 'HR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2412, 'Osijek', 'HR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2413, 'La Habana', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2414, 'Santiago de Cuba', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2415, 'Camagüey', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2416, 'Holguín', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2417, 'Santa Clara', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2418, 'Guantánamo', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2419, 'Pinar del Río', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2420, 'Bayamo', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2421, 'Cienfuegos', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2422, 'Victoria de las Tunas', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2423, 'Matanzas', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2424, 'Manzanillo', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2425, 'Sancti-Spíritus', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2426, 'Ciego de Ávila', 'CU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2427, 'al-Salimiya', 'KW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2428, 'Jalib al-Shuyukh', 'KW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2429, 'Kuwait', 'KW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2430, 'Nicosia', 'CY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2431, 'Limassol', 'CY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2432, 'Vientiane', 'LA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2433, 'Savannakhet', 'LA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2434, 'Riga', 'LV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2435, 'Daugavpils', 'LV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2436, 'Liepaja', 'LV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2437, 'Maseru', 'LS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2438, 'Beirut', 'LB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2439, 'Tripoli', 'LB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2440, 'Monrovia', 'LR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2441, 'Tripoli', 'LY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2442, 'Bengasi', 'LY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2443, 'Misrata', 'LY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2444, 'al-Zawiya', 'LY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2445, 'Schaan', 'LI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2446, 'Vaduz', 'LI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2447, 'Vilnius', 'LT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2448, 'Kaunas', 'LT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2449, 'Klaipeda', 'LT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2450, 'Šiauliai', 'LT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2451, 'Panevezys', 'LT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2452, 'Luxembourg [Luxemburg/Lëtzebuerg]', 'LU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2453, 'El-Aaiún', 'EH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2454, 'Macao', 'MO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2455, 'Antananarivo', 'MG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2456, 'Toamasina', 'MG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2457, 'Antsirabé', 'MG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2458, 'Mahajanga', 'MG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2459, 'Fianarantsoa', 'MG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2460, 'Skopje', 'MK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2461, 'Blantyre', 'MW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2462, 'Lilongwe', 'MW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2463, 'Male', 'MV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2464, 'Kuala Lumpur', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2465, 'Ipoh', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2466, 'Johor Baharu', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2467, 'Petaling Jaya', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2468, 'Kelang', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2469, 'Kuala Terengganu', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2470, 'Pinang', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2471, 'Kota Bharu', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2472, 'Kuantan', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2473, 'Taiping', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2474, 'Seremban', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2475, 'Kuching', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2476, 'Sibu', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2477, 'Sandakan', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2478, 'Alor Setar', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2479, 'Selayang Baru', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2480, 'Sungai Petani', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2481, 'Shah Alam', 'MY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2482, 'Bamako', 'ML', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2483, 'Birkirkara', 'MT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2484, 'Valletta', 'MT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2485, 'Casablanca', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2486, 'Rabat', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2487, 'Marrakech', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2488, 'Fès', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2489, 'Tanger', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2490, 'Salé', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2491, 'Meknès', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2492, 'Oujda', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2493, 'Kénitra', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2494, 'Tétouan', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2495, 'Safi', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2496, 'Agadir', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2497, 'Mohammedia', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2498, 'Khouribga', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2499, 'Beni-Mellal', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2500, 'Témara', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2501, 'El Jadida', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2502, 'Nador', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2503, 'Ksar el Kebir', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2504, 'Settat', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2505, 'Taza', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2506, 'El Araich', 'MA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2507, 'Dalap-Uliga-Darrit', 'MH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2508, 'Fort-de-France', 'MQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2509, 'Nouakchott', 'MR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2510, 'Nouâdhibou', 'MR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2511, 'Port-Louis', 'MU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2512, 'Beau Bassin-Rose Hill', 'MU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2513, 'Vacoas-Phoenix', 'MU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2514, 'Mamoutzou', 'YT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2515, 'Ciudad de México', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2516, 'Guadalajara', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2517, 'Ecatepec de Morelos', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2518, 'Puebla', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2519, 'Nezahualcóyotl', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2520, 'Juárez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2521, 'Tijuana', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2522, 'León', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2523, 'Monterrey', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2524, 'Zapopan', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2525, 'Naucalpan de Juárez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2526, 'Mexicali', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2527, 'Culiacán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2528, 'Acapulco de Juárez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2529, 'Tlalnepantla de Baz', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2530, 'Mérida', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2531, 'Chihuahua', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2532, 'San Luis Potosí', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2533, 'Guadalupe', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2534, 'Toluca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2535, 'Aguascalientes', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2536, 'Querétaro', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2537, 'Morelia', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2538, 'Hermosillo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2539, 'Saltillo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2540, 'Torreón', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2541, 'Centro (Villahermosa)', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2542, 'San Nicolás de los Garza', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2543, 'Durango', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2544, 'Chimalhuacán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2545, 'Tlaquepaque', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2546, 'Atizapán de Zaragoza', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2547, 'Veracruz', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2548, 'Cuautitlán Izcalli', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2549, 'Irapuato', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2550, 'Tuxtla Gutiérrez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2551, 'Tultitlán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2552, 'Reynosa', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2553, 'Benito Juárez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2554, 'Matamoros', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2555, 'Xalapa', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2556, 'Celaya', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2557, 'Mazatlán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2558, 'Ensenada', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2559, 'Ahome', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2560, 'Cajeme', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2561, 'Cuernavaca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2562, 'Tonalá', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2563, 'Valle de Chalco Solidaridad', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2564, 'Nuevo Laredo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2565, 'Tepic', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2566, 'Tampico', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2567, 'Ixtapaluca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2568, 'Apodaca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2569, 'Guasave', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2570, 'Gómez Palacio', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2571, 'Tapachula', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2572, 'Nicolás Romero', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2573, 'Coatzacoalcos', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2574, 'Uruapan', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2575, 'Victoria', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2576, 'Oaxaca de Juárez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2577, 'Coacalco de Berriozábal', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2578, 'Pachuca de Soto', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2579, 'General Escobedo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2580, 'Salamanca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2581, 'Santa Catarina', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2582, 'Tehuacán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2583, 'Chalco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2584, 'Cárdenas', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2585, 'Campeche', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2586, 'La Paz', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2587, 'Othón P. Blanco (Chetumal)', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2588, 'Texcoco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2590, 'Metepec', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2591, 'Monclova', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2592, 'Huixquilucan', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2593, 'Chilpancingo de los Bravo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2594, 'Puerto Vallarta', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2595, 'Fresnillo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2596, 'Ciudad Madero', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2597, 'Soledad de Graciano Sánchez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2598, 'San Juan del Río', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2599, 'San Felipe del Progreso', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2600, 'Córdoba', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2601, 'Tecámac', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2602, 'Ocosingo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2603, 'Carmen', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2604, 'Lázaro Cárdenas', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2605, 'Jiutepec', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2606, 'Papantla', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2607, 'Comalcalco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2608, 'Zamora', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2609, 'Nogales', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2610, 'Huimanguillo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2611, 'Cuautla', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2612, 'Minatitlán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2613, 'Poza Rica de Hidalgo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2614, 'Ciudad Valles', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2615, 'Navolato', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2616, 'San Luis Río Colorado', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2617, 'Pénjamo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2618, 'San Andrés Tuxtla', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2619, 'Guanajuato', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2620, 'Navojoa', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2621, 'Zitácuaro', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2622, 'Boca del Río', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2623, 'Allende', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2624, 'Silao', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2625, 'Macuspana', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2626, 'San Juan Bautista Tuxtepec', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2627, 'San Cristóbal de las Casas', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2628, 'Valle de Santiago', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2629, 'Guaymas', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2630, 'Colima', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2631, 'Dolores Hidalgo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2632, 'Lagos de Moreno', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2633, 'Piedras Negras', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2634, 'Altamira', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2635, 'Túxpam', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2636, 'San Pedro Garza García', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2637, 'Cuauhtémoc', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2638, 'Manzanillo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2639, 'Iguala de la Independencia', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2640, 'Zacatecas', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2641, 'Tlajomulco de Zúñiga', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2642, 'Tulancingo de Bravo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2643, 'Zinacantepec', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2644, 'San Martín Texmelucan', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2645, 'Tepatitlán de Morelos', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2646, 'Martínez de la Torre', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2647, 'Orizaba', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2648, 'Apatzingán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2649, 'Atlixco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2650, 'Delicias', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2651, 'Ixtlahuaca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2652, 'El Mante', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2653, 'Lerdo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2654, 'Almoloya de Juárez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2655, 'Acámbaro', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2656, 'Acuña', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2658, 'Huejutla de Reyes', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2659, 'Hidalgo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2660, 'Los Cabos', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2661, 'Comitán de Domínguez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2662, 'Cunduacán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2663, 'Río Bravo', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2664, 'Temapache', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2665, 'Chilapa de Alvarez', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2666, 'Hidalgo del Parral', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2667, 'San Francisco del Rincón', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2668, 'Taxco de Alarcón', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2669, 'Zumpango', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2670, 'San Pedro Cholula', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2671, 'Lerma', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2672, 'Tecomán', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2673, 'Las Margaritas', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2674, 'Cosoleacaque', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2675, 'San Luis de la Paz', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2676, 'José Azueta', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2677, 'Santiago Ixcuintla', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2678, 'San Felipe', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2679, 'Tejupilco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2680, 'Tantoyuca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2681, 'Salvatierra', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2682, 'Tultepec', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2683, 'Temixco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2685, 'Pánuco', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2686, 'El Fuerte', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2687, 'Tierra Blanca', 'MX', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2688, 'Weno', 'FM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2689, 'Palikir', 'FM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2690, 'Chisinau', 'MD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2691, 'Tiraspol', 'MD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2692, 'Balti', 'MD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2693, 'Bender (Tîghina)', 'MD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2694, 'Monte-Carlo', 'MC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2695, 'Monaco-Ville', 'MC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2696, 'Ulan Bator', 'MN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2697, 'Plymouth', 'MS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2698, 'Maputo', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2699, 'Matola', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2700, 'Beira', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2701, 'Nampula', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2702, 'Chimoio', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2703, 'Naçala-Porto', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2704, 'Quelimane', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2705, 'Mocuba', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2706, 'Tete', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2707, 'Xai-Xai', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2708, 'Gurue', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2709, 'Maxixe', 'MZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2710, 'Rangoon (Yangon)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2711, 'Mandalay', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2712, 'Moulmein (Mawlamyine)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2713, 'Pegu (Bago)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2714, 'Bassein (Pathein)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2715, 'Monywa', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2716, 'Sittwe (Akyab)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2717, 'Taunggyi (Taunggye)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2718, 'Meikhtila', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2719, 'Mergui (Myeik)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2720, 'Lashio (Lasho)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2721, 'Prome (Pyay)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2722, 'Henzada (Hinthada)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2723, 'Myingyan', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2724, 'Tavoy (Dawei)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2725, 'Pagakku (Pakokku)', 'MM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2726, 'Windhoek', 'NA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2727, 'Yangor', 'NR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2728, 'Yaren', 'NR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2729, 'Kathmandu', 'NP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2730, 'Biratnagar', 'NP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2731, 'Pokhara', 'NP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2732, 'Lalitapur', 'NP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2733, 'Birgunj', 'NP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2734, 'Managua', 'NI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2735, 'León', 'NI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2736, 'Chinandega', 'NI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2737, 'Masaya', 'NI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2738, 'Niamey', 'NE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2739, 'Zinder', 'NE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2740, 'Maradi', 'NE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2741, 'Lagos', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2742, 'Ibadan', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2743, 'Ogbomosho', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2744, 'Kano', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2745, 'Oshogbo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2746, 'Ilorin', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2747, 'Abeokuta', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2748, 'Port Harcourt', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2749, 'Zaria', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2750, 'Ilesha', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2751, 'Onitsha', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2752, 'Iwo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2753, 'Ado-Ekiti', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2754, 'Abuja', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2755, 'Kaduna', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2756, 'Mushin', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2757, 'Maiduguri', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2758, 'Enugu', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2759, 'Ede', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2760, 'Aba', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2761, 'Ife', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2762, 'Ila', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2763, 'Oyo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2764, 'Ikerre', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2765, 'Benin City', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2766, 'Iseyin', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2767, 'Katsina', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2768, 'Jos', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2769, 'Sokoto', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2770, 'Ilobu', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2771, 'Offa', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2772, 'Ikorodu', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2773, 'Ilawe-Ekiti', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2774, 'Owo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2775, 'Ikirun', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2776, 'Shaki', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2777, 'Calabar', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2778, 'Ondo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2779, 'Akure', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2780, 'Gusau', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2781, 'Ijebu-Ode', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2782, 'Effon-Alaiye', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2783, 'Kumo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2784, 'Shomolu', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2785, 'Oka-Akoko', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2786, 'Ikare', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2787, 'Sapele', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2788, 'Deba Habe', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2789, 'Minna', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2790, 'Warri', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2791, 'Bida', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2792, 'Ikire', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2793, 'Makurdi', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2794, 'Lafia', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2795, 'Inisa', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2796, 'Shagamu', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2797, 'Awka', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2798, 'Gombe', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2799, 'Igboho', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2800, 'Ejigbo', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2801, 'Agege', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2802, 'Ise-Ekiti', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2803, 'Ugep', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2804, 'Epe', 'NG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2805, 'Alofi', 'NU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2806, 'Kingston', 'NF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2807, 'Oslo', 'NO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2808, 'Bergen', 'NO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2809, 'Trondheim', 'NO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2810, 'Stavanger', 'NO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2811, 'Bærum', 'NO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2812, 'Abidjan', 'CI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2813, 'Bouaké', 'CI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2814, 'Yamoussoukro', 'CI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2815, 'Daloa', 'CI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2816, 'Korhogo', 'CI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2817, 'al-Sib', 'OM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2818, 'Salala', 'OM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2819, 'Bawshar', 'OM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2820, 'Suhar', 'OM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2821, 'Masqat', 'OM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2822, 'Karachi', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2823, 'Lahore', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2824, 'Faisalabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2825, 'Rawalpindi', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2826, 'Multan', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2827, 'Hyderabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2828, 'Gujranwala', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2829, 'Peshawar', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2830, 'Quetta', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2831, 'Islamabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2832, 'Sargodha', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2833, 'Sialkot', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2834, 'Bahawalpur', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2835, 'Sukkur', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2836, 'Jhang', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2837, 'Sheikhupura', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2838, 'Larkana', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2839, 'Gujrat', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2840, 'Mardan', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2841, 'Kasur', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2842, 'Rahim Yar Khan', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2843, 'Sahiwal', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2844, 'Okara', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2845, 'Wah', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2846, 'Dera Ghazi Khan', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2847, 'Mirpur Khas', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2848, 'Nawabshah', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2849, 'Mingora', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2850, 'Chiniot', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2851, 'Kamoke', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2852, 'Mandi Burewala', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2853, 'Jhelum', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2854, 'Sadiqabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2855, 'Jacobabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2856, 'Shikarpur', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2857, 'Khanewal', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2858, 'Hafizabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2859, 'Kohat', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2860, 'Muzaffargarh', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2861, 'Khanpur', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2862, 'Gojra', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2863, 'Bahawalnagar', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2864, 'Muridke', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2865, 'Pak Pattan', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2866, 'Abottabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2867, 'Tando Adam', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2868, 'Jaranwala', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2869, 'Khairpur', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2870, 'Chishtian Mandi', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2871, 'Daska', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2872, 'Dadu', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2873, 'Mandi Bahauddin', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2874, 'Ahmadpur East', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2875, 'Kamalia', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2876, 'Khuzdar', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2877, 'Vihari', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2878, 'Dera Ismail Khan', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2879, 'Wazirabad', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2880, 'Nowshera', 'PK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2881, 'Koror', 'PW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2882, 'Ciudad de Panamá', 'PA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2883, 'San Miguelito', 'PA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2884, 'Port Moresby', 'PG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2885, 'Asunción', 'PY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2886, 'Ciudad del Este', 'PY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2887, 'San Lorenzo', 'PY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2888, 'Lambaré', 'PY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2889, 'Fernando de la Mora', 'PY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2890, 'Lima', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2891, 'Arequipa', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2892, 'Trujillo', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2893, 'Chiclayo', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2894, 'Callao', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2895, 'Iquitos', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2896, 'Chimbote', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2897, 'Huancayo', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2898, 'Piura', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2899, 'Cusco', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2900, 'Pucallpa', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2901, 'Tacna', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2902, 'Ica', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2903, 'Sullana', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2904, 'Juliaca', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2905, 'Huánuco', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2906, 'Ayacucho', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2907, 'Chincha Alta', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2908, 'Cajamarca', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2909, 'Puno', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2910, 'Ventanilla', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2911, 'Castilla', 'PE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2912, 'Adamstown', 'PN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2913, 'Garapan', 'MP', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2914, 'Lisboa', 'PT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2915, 'Porto', 'PT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2916, 'Amadora', 'PT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2917, 'Coímbra', 'PT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2918, 'Braga', 'PT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2919, 'San Juan', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2920, 'Bayamón', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2921, 'Ponce', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2922, 'Carolina', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2923, 'Caguas', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2924, 'Arecibo', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2925, 'Guaynabo', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2926, 'Mayagüez', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2927, 'Toa Baja', 'PR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2928, 'Warszawa', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2929, 'Lódz', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2930, 'Kraków', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2931, 'Wroclaw', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2932, 'Poznan', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2933, 'Gdansk', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2934, 'Szczecin', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2935, 'Bydgoszcz', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2936, 'Lublin', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2937, 'Katowice', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2938, 'Bialystok', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2939, 'Czestochowa', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2940, 'Gdynia', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2941, 'Sosnowiec', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2942, 'Radom', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2943, 'Kielce', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2944, 'Gliwice', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2945, 'Torun', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2946, 'Bytom', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2947, 'Zabrze', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2948, 'Bielsko-Biala', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2949, 'Olsztyn', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2950, 'Rzeszów', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2951, 'Ruda Slaska', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2952, 'Rybnik', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2953, 'Walbrzych', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2954, 'Tychy', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2955, 'Dabrowa Górnicza', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2956, 'Plock', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2957, 'Elblag', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2958, 'Opole', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2959, 'Gorzów Wielkopolski', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2960, 'Wloclawek', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2961, 'Chorzów', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2962, 'Tarnów', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2963, 'Zielona Góra', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2964, 'Koszalin', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2965, 'Legnica', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2966, 'Kalisz', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2967, 'Grudziadz', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2968, 'Slupsk', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2969, 'Jastrzebie-Zdrój', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2970, 'Jaworzno', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2971, 'Jelenia Góra', 'PL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2972, 'Malabo', 'GQ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2973, 'Doha', 'QA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2974, 'Paris', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2975, 'Marseille', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2976, 'Lyon', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2977, 'Toulouse', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2978, 'Nice', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2979, 'Nantes', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2980, 'Strasbourg', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2981, 'Montpellier', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2982, 'Bordeaux', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2983, 'Rennes', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2984, 'Le Havre', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2985, 'Reims', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2986, 'Lille', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2987, 'St-Étienne', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2988, 'Toulon', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2989, 'Grenoble', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2990, 'Angers', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2991, 'Dijon', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2992, 'Brest', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2993, 'Le Mans', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2994, 'Clermont-Ferrand', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2995, 'Amiens', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2996, 'Aix-en-Provence', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2997, 'Limoges', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2998, 'Nîmes', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (2999, 'Tours', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3000, 'Villeurbanne', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3001, 'Metz', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3002, 'Besançon', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3003, 'Caen', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3004, 'Orléans', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3005, 'Mulhouse', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3006, 'Rouen', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3007, 'Boulogne-Billancourt', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3008, 'Perpignan', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3009, 'Nancy', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3010, 'Roubaix', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3011, 'Argenteuil', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3012, 'Tourcoing', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3013, 'Montreuil', 'FR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3014, 'Cayenne', 'GF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3015, 'Faaa', 'PF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3016, 'Papeete', 'PF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3017, 'Saint-Denis', 'RE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3018, 'Bucuresti', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3019, 'Iasi', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3020, 'Constanta', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3021, 'Cluj-Napoca', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3022, 'Galati', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3023, 'Timisoara', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3024, 'Brasov', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3025, 'Craiova', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3026, 'Ploiesti', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3027, 'Braila', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3028, 'Oradea', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3029, 'Bacau', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3030, 'Pitesti', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3031, 'Arad', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3032, 'Sibiu', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3033, 'Târgu Mures', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3034, 'Baia Mare', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3035, 'Buzau', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3036, 'Satu Mare', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3037, 'Botosani', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3038, 'Piatra Neamt', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3039, 'Râmnicu Vâlcea', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3040, 'Suceava', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3041, 'Drobeta-Turnu Severin', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3042, 'Târgoviste', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3043, 'Focsani', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3044, 'Târgu Jiu', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3045, 'Tulcea', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3046, 'Resita', 'RO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3047, 'Kigali', 'RW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3048, 'Stockholm', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3049, 'Gothenburg [Göteborg]', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3050, 'Malmö', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3051, 'Uppsala', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3052, 'Linköping', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3053, 'Västerås', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3054, 'Örebro', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3055, 'Norrköping', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3056, 'Helsingborg', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3057, 'Jönköping', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3058, 'Umeå', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3059, 'Lund', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3060, 'Borås', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3061, 'Sundsvall', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3062, 'Gävle', 'SE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3063, 'Jamestown', 'SH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3064, 'Basseterre', 'KN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3065, 'Castries', 'LC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3066, 'Kingstown', 'VC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3067, 'Saint-Pierre', 'PM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3068, 'Berlin', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3069, 'Hamburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3070, 'Munich [München]', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3071, 'Köln', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3072, 'Frankfurt am Main', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3073, 'Essen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3074, 'Dortmund', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3075, 'Stuttgart', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3076, 'Düsseldorf', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3077, 'Bremen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3078, 'Duisburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3079, 'Hannover', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3080, 'Leipzig', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3081, 'Nürnberg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3082, 'Dresden', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3083, 'Bochum', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3084, 'Wuppertal', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3085, 'Bielefeld', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3086, 'Mannheim', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3087, 'Bonn', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3088, 'Gelsenkirchen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3089, 'Karlsruhe', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3090, 'Wiesbaden', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3091, 'Münster', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3092, 'Mönchengladbach', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3093, 'Chemnitz', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3094, 'Augsburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3095, 'Halle/Saale', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3096, 'Braunschweig', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3097, 'Aachen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3098, 'Krefeld', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3099, 'Magdeburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3100, 'Kiel', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3101, 'Oberhausen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3102, 'Lübeck', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3103, 'Hagen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3104, 'Rostock', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3105, 'Freiburg im Breisgau', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3106, 'Erfurt', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3107, 'Kassel', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3108, 'Saarbrücken', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3109, 'Mainz', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3110, 'Hamm', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3111, 'Herne', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3112, 'Mülheim an der Ruhr', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3113, 'Solingen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3114, 'Osnabrück', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3115, 'Ludwigshafen am Rhein', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3116, 'Leverkusen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3117, 'Oldenburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3118, 'Neuss', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3119, 'Heidelberg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3120, 'Darmstadt', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3121, 'Paderborn', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3122, 'Potsdam', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3123, 'Würzburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3124, 'Regensburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3125, 'Recklinghausen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3126, 'Göttingen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3127, 'Bremerhaven', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3128, 'Wolfsburg', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3129, 'Bottrop', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3130, 'Remscheid', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3131, 'Heilbronn', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3132, 'Pforzheim', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3133, 'Offenbach am Main', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3134, 'Ulm', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3135, 'Ingolstadt', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3136, 'Gera', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3137, 'Salzgitter', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3138, 'Cottbus', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3139, 'Reutlingen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3140, 'Fürth', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3141, 'Siegen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3142, 'Koblenz', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3143, 'Moers', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3144, 'Bergisch Gladbach', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3145, 'Zwickau', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3146, 'Hildesheim', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3147, 'Witten', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3148, 'Schwerin', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3149, 'Erlangen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3150, 'Kaiserslautern', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3151, 'Trier', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3152, 'Jena', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3153, 'Iserlohn', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3154, 'Gütersloh', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3155, 'Marl', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3156, 'Lünen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3157, 'Düren', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3158, 'Ratingen', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3159, 'Velbert', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3160, 'Esslingen am Neckar', 'DE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3161, 'Honiara', 'SB', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3162, 'Lusaka', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3163, 'Ndola', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3164, 'Kitwe', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3165, 'Kabwe', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3166, 'Chingola', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3167, 'Mufulira', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3168, 'Luanshya', 'ZM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3169, 'Apia', 'WS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3170, 'Serravalle', 'SM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3171, 'San Marino', 'SM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3172, 'São Tomé', 'ST', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3173, 'Riyadh', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3174, 'Jedda', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3175, 'Mekka', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3176, 'Medina', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3177, 'al-Dammam', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3178, 'al-Taif', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3179, 'Tabuk', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3180, 'Burayda', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3181, 'al-Hufuf', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3182, 'al-Mubarraz', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3183, 'Khamis Mushayt', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3184, 'Hail', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3185, 'al-Kharj', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3186, 'al-Khubar', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3187, 'Jubayl', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3188, 'Hafar al-Batin', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3189, 'al-Tuqba', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3190, 'Yanbu', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3191, 'Abha', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3192, 'Ara´ar', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3193, 'al-Qatif', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3194, 'al-Hawiya', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3195, 'Unayza', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3196, 'Najran', 'SA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3197, 'Pikine', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3198, 'Dakar', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3199, 'Thiès', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3200, 'Kaolack', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3201, 'Ziguinchor', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3202, 'Rufisque', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3203, 'Saint-Louis', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3204, 'Mbour', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3205, 'Diourbel', 'SN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3206, 'Victoria', 'SC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3207, 'Freetown', 'SL', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3208, 'Singapore', 'SG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3209, 'Bratislava', 'SK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3210, 'Košice', 'SK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3211, 'Prešov', 'SK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3212, 'Ljubljana', 'SI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3213, 'Maribor', 'SI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3214, 'Mogadishu', 'SO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3215, 'Hargeysa', 'SO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3216, 'Kismaayo', 'SO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3217, 'Colombo', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3218, 'Dehiwala', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3219, 'Moratuwa', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3220, 'Jaffna', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3221, 'Kandy', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3222, 'Sri Jayawardenepura Kotte', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3223, 'Negombo', 'LK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3224, 'Omdurman', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3225, 'Khartum', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3226, 'Sharq al-Nil', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3227, 'Port Sudan', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3228, 'Kassala', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3229, 'Obeid', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3230, 'Nyala', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3231, 'Wad Madani', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3232, 'al-Qadarif', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3233, 'Kusti', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3234, 'al-Fashir', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3235, 'Juba', 'SD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3236, 'Helsinki [Helsingfors]', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3237, 'Espoo', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3238, 'Tampere', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3239, 'Vantaa', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3240, 'Turku [Åbo]', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3241, 'Oulu', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3242, 'Lahti', 'FI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3243, 'Paramaribo', 'SR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3244, 'Mbabane', 'SZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3245, 'Zürich', 'CH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3246, 'Geneve', 'CH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3247, 'Basel', 'CH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3248, 'Bern', 'CH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3249, 'Lausanne', 'CH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3250, 'Damascus', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3251, 'Aleppo', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3252, 'Hims', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3253, 'Hama', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3254, 'Latakia', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3255, 'al-Qamishliya', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3256, 'Dayr al-Zawr', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3257, 'Jaramana', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3258, 'Duma', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3259, 'al-Raqqa', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3260, 'Idlib', 'SY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3261, 'Dushanbe', 'TJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3262, 'Khujand', 'TJ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3263, 'Taipei', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3264, 'Kaohsiung', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3265, 'Taichung', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3266, 'Tainan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3267, 'Panchiao', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3268, 'Chungho', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3269, 'Keelung (Chilung)', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3270, 'Sanchung', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3271, 'Hsinchuang', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3272, 'Hsinchu', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3273, 'Chungli', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3274, 'Fengshan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3275, 'Taoyuan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3276, 'Chiayi', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3277, 'Hsintien', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3278, 'Changhwa', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3279, 'Yungho', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3280, 'Tucheng', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3281, 'Pingtung', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3282, 'Yungkang', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3283, 'Pingchen', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3284, 'Tali', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3285, 'Taiping', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3286, 'Pate', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3287, 'Fengyuan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3288, 'Luchou', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3289, 'Hsichuh', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3290, 'Shulin', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3291, 'Yuanlin', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3292, 'Yangmei', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3293, 'Taliao', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3294, 'Kueishan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3295, 'Tanshui', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3296, 'Taitung', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3297, 'Hualien', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3298, 'Nantou', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3299, 'Lungtan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3300, 'Touliu', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3301, 'Tsaotun', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3302, 'Kangshan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3303, 'Ilan', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3304, 'Miaoli', 'TW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3305, 'Dar es Salaam', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3306, 'Dodoma', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3307, 'Mwanza', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3308, 'Zanzibar', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3309, 'Tanga', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3310, 'Mbeya', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3311, 'Morogoro', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3312, 'Arusha', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3313, 'Moshi', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3314, 'Tabora', 'TZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3315, 'København', 'DK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3316, 'Århus', 'DK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3317, 'Odense', 'DK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3318, 'Aalborg', 'DK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3319, 'Frederiksberg', 'DK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3320, 'Bangkok', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3321, 'Nonthaburi', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3322, 'Nakhon Ratchasima', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3323, 'Chiang Mai', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3324, 'Udon Thani', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3325, 'Hat Yai', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3326, 'Khon Kaen', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3327, 'Pak Kret', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3328, 'Nakhon Sawan', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3329, 'Ubon Ratchathani', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3330, 'Songkhla', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3331, 'Nakhon Pathom', 'TH', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3332, 'Lomé', 'TG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3333, 'Fakaofo', 'TK', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3334, 'Nuku´alofa', 'TO', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3335, 'Chaguanas', 'TT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3336, 'Port-of-Spain', 'TT', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3337, 'N´Djaména', 'TD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3338, 'Moundou', 'TD', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3339, 'Praha', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3340, 'Brno', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3341, 'Ostrava', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3342, 'Plzen', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3343, 'Olomouc', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3344, 'Liberec', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3345, 'Ceské Budejovice', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3346, 'Hradec Králové', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3347, 'Ústí nad Labem', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3348, 'Pardubice', 'CZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3349, 'Tunis', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3350, 'Sfax', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3351, 'Ariana', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3352, 'Ettadhamen', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3353, 'Sousse', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3354, 'Kairouan', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3355, 'Biserta', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3356, 'Gabès', 'TN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3357, 'Istanbul', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3358, 'Ankara', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3359, 'Izmir', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3360, 'Adana', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3361, 'Bursa', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3362, 'Gaziantep', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3363, 'Konya', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3364, 'Mersin (Içel)', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3365, 'Antalya', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3366, 'Diyarbakir', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3367, 'Kayseri', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3368, 'Eskisehir', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3369, 'Sanliurfa', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3370, 'Samsun', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3371, 'Malatya', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3372, 'Gebze', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3373, 'Denizli', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3374, 'Sivas', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3375, 'Erzurum', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3376, 'Tarsus', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3377, 'Kahramanmaras', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3378, 'Elâzig', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3379, 'Van', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3380, 'Sultanbeyli', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3381, 'Izmit (Kocaeli)', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3382, 'Manisa', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3383, 'Batman', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3384, 'Balikesir', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3385, 'Sakarya (Adapazari)', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3386, 'Iskenderun', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3387, 'Osmaniye', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3388, 'Çorum', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3389, 'Kütahya', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3390, 'Hatay (Antakya)', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3391, 'Kirikkale', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3392, 'Adiyaman', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3393, 'Trabzon', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3394, 'Ordu', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3395, 'Aydin', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3396, 'Usak', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3397, 'Edirne', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3398, 'Çorlu', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3399, 'Isparta', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3400, 'Karabük', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3401, 'Kilis', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3402, 'Alanya', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3403, 'Kiziltepe', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3404, 'Zonguldak', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3405, 'Siirt', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3406, 'Viransehir', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3407, 'Tekirdag', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3408, 'Karaman', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3409, 'Afyon', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3410, 'Aksaray', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3411, 'Ceyhan', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3412, 'Erzincan', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3413, 'Bismil', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3414, 'Nazilli', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3415, 'Tokat', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3416, 'Kars', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3417, 'Inegöl', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3418, 'Bandirma', 'TR', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3419, 'Ashgabat', 'TM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3420, 'Chärjew', 'TM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3421, 'Dashhowuz', 'TM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3422, 'Mary', 'TM', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3423, 'Cockburn Town', 'TC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3424, 'Funafuti', 'TV', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3425, 'Kampala', 'UG', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3426, 'Kyiv', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3427, 'Harkova [Harkiv]', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3428, 'Dnipropetrovsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3429, 'Donetsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3430, 'Odesa', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3431, 'Zaporizzja', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3432, 'Lviv', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3433, 'Kryvyi Rig', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3434, 'Mykolajiv', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3435, 'Mariupol', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3436, 'Lugansk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3437, 'Vinnytsja', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3438, 'Makijivka', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3439, 'Herson', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3440, 'Sevastopol', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3441, 'Simferopol', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3442, 'Pultava [Poltava]', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3443, 'Tšernigiv', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3444, 'Tšerkasy', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3445, 'Gorlivka', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3446, 'Zytomyr', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3447, 'Sumy', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3448, 'Dniprodzerzynsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3449, 'Kirovograd', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3450, 'Hmelnytskyi', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3451, 'Tšernivtsi', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3452, 'Rivne', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3453, 'Krementšuk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3454, 'Ivano-Frankivsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3455, 'Ternopil', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3456, 'Lutsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3457, 'Bila Tserkva', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3458, 'Kramatorsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3459, 'Melitopol', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3460, 'Kertš', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3461, 'Nikopol', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3462, 'Berdjansk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3463, 'Pavlograd', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3464, 'Sjeverodonetsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3465, 'Slovjansk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3466, 'Uzgorod', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3467, 'Altševsk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3468, 'Lysytšansk', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3469, 'Jevpatorija', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3470, 'Kamjanets-Podilskyi', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3471, 'Jenakijeve', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3472, 'Krasnyi Lutš', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3473, 'Stahanov', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3474, 'Oleksandrija', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3475, 'Konotop', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3476, 'Kostjantynivka', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3477, 'Berdytšiv', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3478, 'Izmajil', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3479, 'Šostka', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3480, 'Uman', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3481, 'Brovary', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3482, 'Mukatševe', 'UA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3483, 'Budapest', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3484, 'Debrecen', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3485, 'Miskolc', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3486, 'Szeged', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3487, 'Pécs', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3488, 'Györ', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3489, 'Nyiregyháza', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3490, 'Kecskemét', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3491, 'Székesfehérvár', 'HU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3492, 'Montevideo', 'UY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3493, 'Nouméa', 'NC', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3494, 'Auckland', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3495, 'Christchurch', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3496, 'Manukau', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3497, 'North Shore', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3498, 'Waitakere', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3499, 'Wellington', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3500, 'Dunedin', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3501, 'Hamilton', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3502, 'Lower Hutt', 'NZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3503, 'Toskent', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3504, 'Namangan', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3505, 'Samarkand', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3506, 'Andijon', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3507, 'Buhoro', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3508, 'Karsi', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3509, 'Nukus', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3510, 'Kükon', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3511, 'Fargona', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3512, 'Circik', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3513, 'Margilon', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3514, 'Ürgenc', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3515, 'Angren', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3516, 'Cizah', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3517, 'Navoi', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3518, 'Olmalik', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3519, 'Termiz', 'UZ', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3520, 'Minsk', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3521, 'Gomel', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3522, 'Mogiljov', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3523, 'Vitebsk', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3524, 'Grodno', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3525, 'Brest', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3526, 'Bobruisk', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3527, 'Baranovitši', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3528, 'Borisov', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3529, 'Pinsk', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3530, 'Orša', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3531, 'Mozyr', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3532, 'Novopolotsk', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3533, 'Lida', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3534, 'Soligorsk', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3535, 'Molodetšno', 'BY', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3536, 'Mata-Utu', 'WF', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3537, 'Port-Vila', 'VU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3538, 'Città del Vaticano', 'VA', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3539, 'Caracas', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3540, 'Maracaíbo', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3541, 'Barquisimeto', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3542, 'Valencia', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3543, 'Ciudad Guayana', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3544, 'Petare', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3545, 'Maracay', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3546, 'Barcelona', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3547, 'Maturín', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3548, 'San Cristóbal', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3549, 'Ciudad Bolívar', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3550, 'Cumaná', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3551, 'Mérida', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3552, 'Cabimas', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3553, 'Barinas', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3554, 'Turmero', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3555, 'Baruta', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3556, 'Puerto Cabello', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3557, 'Santa Ana de Coro', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3558, 'Los Teques', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3559, 'Punto Fijo', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3560, 'Guarenas', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3561, 'Acarigua', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3562, 'Puerto La Cruz', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3563, 'Ciudad Losada', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3564, 'Guacara', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3565, 'Valera', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3566, 'Guanare', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3567, 'Carúpano', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3568, 'Catia La Mar', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3569, 'El Tigre', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3570, 'Guatire', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3571, 'Calabozo', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3572, 'Pozuelos', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3573, 'Ciudad Ojeda', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3574, 'Ocumare del Tuy', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3575, 'Valle de la Pascua', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3576, 'Araure', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3577, 'San Fernando de Apure', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3578, 'San Felipe', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3579, 'El Limón', 'VE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3580, 'Moscow', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3581, 'St Petersburg', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3582, 'Novosibirsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3583, 'Nizni Novgorod', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3584, 'Jekaterinburg', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3585, 'Samara', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3586, 'Omsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3587, 'Kazan', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3588, 'Ufa', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3589, 'Tšeljabinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3590, 'Rostov-na-Donu', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3591, 'Perm', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3592, 'Volgograd', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3593, 'Voronez', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3594, 'Krasnojarsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3595, 'Saratov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3596, 'Toljatti', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3597, 'Uljanovsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3598, 'Izevsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3599, 'Krasnodar', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3600, 'Jaroslavl', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3601, 'Habarovsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3602, 'Vladivostok', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3603, 'Irkutsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3604, 'Barnaul', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3605, 'Novokuznetsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3606, 'Penza', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3607, 'Rjazan', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3608, 'Orenburg', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3609, 'Lipetsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3610, 'Nabereznyje Tšelny', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3611, 'Tula', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3612, 'Tjumen', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3613, 'Kemerovo', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3614, 'Astrahan', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3615, 'Tomsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3616, 'Kirov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3617, 'Ivanovo', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3618, 'Tšeboksary', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3619, 'Brjansk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3620, 'Tver', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3621, 'Kursk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3622, 'Magnitogorsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3623, 'Kaliningrad', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3624, 'Nizni Tagil', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3625, 'Murmansk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3626, 'Ulan-Ude', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3627, 'Kurgan', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3628, 'Arkangeli', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3629, 'Sotši', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3630, 'Smolensk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3631, 'Orjol', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3632, 'Stavropol', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3633, 'Belgorod', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3634, 'Kaluga', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3635, 'Vladimir', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3636, 'Mahatškala', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3637, 'Tšerepovets', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3638, 'Saransk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3639, 'Tambov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3640, 'Vladikavkaz', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3641, 'Tšita', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3642, 'Vologda', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3643, 'Veliki Novgorod', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3644, 'Komsomolsk-na-Amure', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3645, 'Kostroma', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3646, 'Volzski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3647, 'Taganrog', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3648, 'Petroskoi', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3649, 'Bratsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3650, 'Dzerzinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3651, 'Surgut', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3652, 'Orsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3653, 'Sterlitamak', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3654, 'Angarsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3655, 'Joškar-Ola', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3656, 'Rybinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3657, 'Prokopjevsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3658, 'Niznevartovsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3659, 'Naltšik', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3660, 'Syktyvkar', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3661, 'Severodvinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3662, 'Bijsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3663, 'Niznekamsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3664, 'Blagoveštšensk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3665, 'Šahty', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3666, 'Staryi Oskol', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3667, 'Zelenograd', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3668, 'Balakovo', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3669, 'Novorossijsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3670, 'Pihkova', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3671, 'Zlatoust', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3672, 'Jakutsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3673, 'Podolsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3674, 'Petropavlovsk-Kamtšatski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3675, 'Kamensk-Uralski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3676, 'Engels', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3677, 'Syzran', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3678, 'Grozny', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3679, 'Novotšerkassk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3680, 'Berezniki', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3681, 'Juzno-Sahalinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3682, 'Volgodonsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3683, 'Abakan', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3684, 'Maikop', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3685, 'Miass', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3686, 'Armavir', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3687, 'Ljubertsy', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3688, 'Rubtsovsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3689, 'Kovrov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3690, 'Nahodka', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3691, 'Ussurijsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3692, 'Salavat', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3693, 'Mytištši', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3694, 'Kolomna', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3695, 'Elektrostal', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3696, 'Murom', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3697, 'Kolpino', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3698, 'Norilsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3699, 'Almetjevsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3700, 'Novomoskovsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3701, 'Dimitrovgrad', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3702, 'Pervouralsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3703, 'Himki', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3704, 'Balašiha', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3705, 'Nevinnomyssk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3706, 'Pjatigorsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3707, 'Korolev', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3708, 'Serpuhov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3709, 'Odintsovo', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3710, 'Orehovo-Zujevo', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3711, 'Kamyšin', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3712, 'Novotšeboksarsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3713, 'Tšerkessk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3714, 'Atšinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3715, 'Magadan', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3716, 'Mitšurinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3717, 'Kislovodsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3718, 'Jelets', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3719, 'Seversk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3720, 'Noginsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3721, 'Velikije Luki', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3722, 'Novokuibyševsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3723, 'Neftekamsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3724, 'Leninsk-Kuznetski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3725, 'Oktjabrski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3726, 'Sergijev Posad', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3727, 'Arzamas', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3728, 'Kiseljovsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3729, 'Novotroitsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3730, 'Obninsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3731, 'Kansk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3732, 'Glazov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3733, 'Solikamsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3734, 'Sarapul', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3735, 'Ust-Ilimsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3736, 'Štšolkovo', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3737, 'Mezduretšensk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3738, 'Usolje-Sibirskoje', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3739, 'Elista', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3740, 'Novošahtinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3741, 'Votkinsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3742, 'Kyzyl', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3743, 'Serov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3744, 'Zelenodolsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3745, 'Zeleznodoroznyi', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3746, 'Kinešma', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3747, 'Kuznetsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3748, 'Uhta', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3749, 'Jessentuki', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3750, 'Tobolsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3751, 'Neftejugansk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3752, 'Bataisk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3753, 'Nojabrsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3754, 'Balašov', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3755, 'Zeleznogorsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3756, 'Zukovski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3757, 'Anzero-Sudzensk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3758, 'Bugulma', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3760, 'Novouralsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3761, 'Puškin', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3762, 'Vorkuta', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3763, 'Derbent', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3764, 'Kirovo-Tšepetsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3765, 'Krasnogorsk', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3766, 'Klin', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3767, 'Tšaikovski', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3768, 'Novyi Urengoi', 'RU', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3769, 'Ho Chi Minh City', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3770, 'Hanoi', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3771, 'Haiphong', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3772, 'Da Nang', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3773, 'Biên Hoa', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3774, 'Nha Trang', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3775, 'Hue', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3776, 'Can Tho', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3777, 'Cam Pha', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3778, 'Nam Dinh', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3779, 'Quy Nhon', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3780, 'Vung Tau', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3781, 'Rach Gia', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3782, 'Long Xuyen', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3783, 'Thai Nguyen', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3784, 'Hong Gai', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3785, 'Phan Thiêt', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3786, 'Cam Ranh', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3787, 'Vinh', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3788, 'My Tho', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3789, 'Da Lat', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3790, 'Buon Ma Thuot', 'VN', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3791, 'Tallinn', 'EE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3792, 'Tartu', 'EE', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3793, 'New York', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3794, 'Los Angeles', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3795, 'Chicago', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3796, 'Houston', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3797, 'Philadelphia', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3798, 'Phoenix', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3799, 'San Diego', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3800, 'Dallas', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3801, 'San Antonio', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3802, 'Detroit', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3803, 'San Jose', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3804, 'Indianapolis', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3805, 'San Francisco', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3806, 'Jacksonville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3807, 'Columbus', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3808, 'Austin', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3809, 'Baltimore', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3810, 'Memphis', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3811, 'Milwaukee', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3812, 'Boston', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3813, 'Washington', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3814, 'Nashville-Davidson', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3815, 'El Paso', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3816, 'Seattle', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3817, 'Denver', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3818, 'Charlotte', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3819, 'Fort Worth', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3820, 'Portland', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3821, 'Oklahoma City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3822, 'Tucson', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3823, 'New Orleans', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3824, 'Las Vegas', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3825, 'Cleveland', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3826, 'Long Beach', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3827, 'Albuquerque', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3828, 'Kansas City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3829, 'Fresno', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3830, 'Virginia Beach', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3831, 'Atlanta', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3832, 'Sacramento', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3833, 'Oakland', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3834, 'Mesa', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3835, 'Tulsa', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3836, 'Omaha', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3837, 'Minneapolis', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3838, 'Honolulu', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3839, 'Miami', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3840, 'Colorado Springs', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3841, 'Saint Louis', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3842, 'Wichita', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3843, 'Santa Ana', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3844, 'Pittsburgh', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3845, 'Arlington', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3846, 'Cincinnati', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3847, 'Anaheim', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3848, 'Toledo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3849, 'Tampa', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3850, 'Buffalo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3851, 'Saint Paul', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3852, 'Corpus Christi', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3853, 'Aurora', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3854, 'Raleigh', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3855, 'Newark', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3856, 'Lexington-Fayette', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3857, 'Anchorage', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3858, 'Louisville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3859, 'Riverside', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3860, 'Saint Petersburg', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3861, 'Bakersfield', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3862, 'Stockton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3863, 'Birmingham', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3864, 'Jersey City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3865, 'Norfolk', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3866, 'Baton Rouge', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3867, 'Hialeah', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3868, 'Lincoln', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3869, 'Greensboro', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3870, 'Plano', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3871, 'Rochester', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3872, 'Glendale', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3873, 'Akron', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3874, 'Garland', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3875, 'Madison', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3876, 'Fort Wayne', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3877, 'Fremont', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3878, 'Scottsdale', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3879, 'Montgomery', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3880, 'Shreveport', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3881, 'Augusta-Richmond County', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3882, 'Lubbock', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3883, 'Chesapeake', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3884, 'Mobile', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3885, 'Des Moines', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3886, 'Grand Rapids', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3887, 'Richmond', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3888, 'Yonkers', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3889, 'Spokane', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3891, 'Tacoma', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3892, 'Irving', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3893, 'Huntington Beach', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3894, 'Modesto', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3895, 'Durham', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3897, 'Orlando', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3898, 'Boise City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3899, 'Winston-Salem', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3900, 'San Bernardino', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3901, 'Jackson', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3902, 'Little Rock', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3903, 'Salt Lake City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3904, 'Reno', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3905, 'Newport News', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3906, 'Chandler', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3907, 'Laredo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3908, 'Henderson', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3910, 'Knoxville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3911, 'Amarillo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3912, 'Providence', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3913, 'Chula Vista', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3914, 'Worcester', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3915, 'Oxnard', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3916, 'Dayton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3917, 'Garden Grove', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3918, 'Oceanside', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3919, 'Tempe', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3920, 'Huntsville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3921, 'Ontario', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3922, 'Chattanooga', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3923, 'Fort Lauderdale', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3924, 'Springfield', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3926, 'Santa Clarita', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3927, 'Salinas', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3928, 'Tallahassee', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3929, 'Rockford', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3930, 'Pomona', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3931, 'Metairie', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3932, 'Paterson', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3933, 'Overland Park', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3934, 'Santa Rosa', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3935, 'Syracuse', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3937, 'Hampton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3938, 'Lakewood', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3939, 'Vancouver', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3940, 'Irvine', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3942, 'Moreno Valley', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3943, 'Pasadena', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3944, 'Hayward', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3945, 'Brownsville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3946, 'Bridgeport', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3947, 'Hollywood', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3948, 'Warren', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3949, 'Torrance', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3950, 'Eugene', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3951, 'Pembroke Pines', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3952, 'Salem', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3954, 'Escondido', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3955, 'Sunnyvale', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3956, 'Savannah', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3957, 'Fontana', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3958, 'Orange', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3959, 'Naperville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3960, 'Alexandria', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3961, 'Rancho Cucamonga', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3962, 'Grand Prairie', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3963, 'East Los Angeles', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3964, 'Fullerton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3965, 'Corona', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3966, 'Flint', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3967, 'Paradise', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3968, 'Mesquite', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3969, 'Sterling Heights', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3970, 'Sioux Falls', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3971, 'New Haven', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3972, 'Topeka', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3973, 'Concord', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3974, 'Evansville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3975, 'Hartford', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3976, 'Fayetteville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3977, 'Cedar Rapids', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3978, 'Elizabeth', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3979, 'Lansing', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3980, 'Lancaster', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3981, 'Fort Collins', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3982, 'Coral Springs', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3983, 'Stamford', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3984, 'Thousand Oaks', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3985, 'Vallejo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3986, 'Palmdale', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3987, 'Columbia', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3988, 'El Monte', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3989, 'Abilene', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3990, 'North Las Vegas', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3991, 'Ann Arbor', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3992, 'Beaumont', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3993, 'Waco', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3994, 'Macon', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3995, 'Independence', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3996, 'Peoria', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3997, 'Inglewood', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (3999, 'Simi Valley', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4000, 'Lafayette', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4001, 'Gilbert', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4002, 'Carrollton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4003, 'Bellevue', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4004, 'West Valley City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4005, 'Clarksville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4006, 'Costa Mesa', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4008, 'South Bend', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4009, 'Downey', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4010, 'Waterbury', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4011, 'Manchester', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4012, 'Allentown', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4013, 'McAllen', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4014, 'Joliet', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4015, 'Lowell', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4016, 'Provo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4017, 'West Covina', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4018, 'Wichita Falls', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4019, 'Erie', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4020, 'Daly City', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4021, 'Citrus Heights', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4022, 'Norwalk', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4023, 'Gary', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4024, 'Berkeley', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4025, 'Santa Clara', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4026, 'Green Bay', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4027, 'Cape Coral', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4028, 'Arvada', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4029, 'Pueblo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4030, 'Sandy', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4031, 'Athens-Clarke County', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4032, 'Cambridge', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4033, 'Westminster', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4034, 'San Buenaventura', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4035, 'Portsmouth', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4036, 'Livonia', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4037, 'Burbank', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4038, 'Clearwater', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4039, 'Midland', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4040, 'Davenport', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4041, 'Mission Viejo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4042, 'Miami Beach', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4043, 'Sunrise Manor', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4044, 'New Bedford', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4045, 'El Cajon', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4046, 'Norman', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4048, 'Albany', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4049, 'Brockton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4050, 'Roanoke', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4051, 'Billings', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4052, 'Compton', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4053, 'Gainesville', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4054, 'Fairfield', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4055, 'Arden-Arcade', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4056, 'San Mateo', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4057, 'Visalia', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4058, 'Boulder', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4059, 'Cary', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4060, 'Santa Monica', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4061, 'Fall River', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4062, 'Kenosha', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4063, 'Elgin', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4064, 'Odessa', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4065, 'Carson', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4066, 'Charleston', 'US', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4067, 'Charlotte Amalie', 'VI', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4068, 'Harare', 'ZW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4069, 'Bulawayo', 'ZW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4070, 'Chitungwiza', 'ZW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4071, 'Mount Darwin', 'ZW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4072, 'Mutare', 'ZW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4073, 'Gweru', 'ZW', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4074, 'Gaza', 'PS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4075, 'Khan Yunis', 'PS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4076, 'Hebron', 'PS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4077, 'Jabaliya', 'PS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4078, 'Nablus', 'PS', 1, '2021-03-08 16:38:23', NULL);
-INSERT INTO `tbl_cities` VALUES (4079, 'Rafah', 'PS', 1, '2021-03-08 16:38:23', NULL);
-COMMIT;
+-- --------------------------------------------------------
 
--- ----------------------------
--- Table structure for tbl_countries
--- ----------------------------
-DROP TABLE IF EXISTS `tbl_countries`;
+--
+-- Table structure for table `tbl_cities`
+--
+
+CREATE TABLE `tbl_cities` (
+  `id` int(11) NOT NULL,
+  `city_name` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
+  `country_code` char(2) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Dumping data for table `tbl_cities`
+--
+
+INSERT INTO `tbl_cities` (`id`, `city_name`, `country_code`, `enabled`, `updated_at`, `deleted_at`) VALUES
+(1, 'Kabul', 'AF', 1, '2021-03-08 11:08:23', NULL),
+(2, 'Qandahar', 'AF', 1, '2021-03-08 11:08:23', NULL),
+(3, 'Herat', 'AF', 1, '2021-03-08 11:08:23', NULL),
+(4, 'Mazar-e-Sharif', 'AF', 1, '2021-03-08 11:08:23', NULL),
+(5, 'Amsterdam', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(6, 'Rotterdam', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(7, 'Haag', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(8, 'Utrecht', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(9, 'Eindhoven', 'NL', 1, '2021-03-08 10:59:15', NULL),
+(10, 'Tilburg', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(11, 'Groningen', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(12, 'Breda', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(13, 'Apeldoorn', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(14, 'Nijmegen', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(15, 'Enschede', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(16, 'Haarlem', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(17, 'Almere', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(18, 'Arnhem', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(19, 'Zaanstad', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(20, '\'s-Hertogenbosch', 'NL', 1, '2021-03-08 11:10:40', NULL),
+(21, 'Amersfoort', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(22, 'Maastricht', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(23, 'Dordrecht', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(24, 'Leiden', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(25, 'Haarlemmermeer', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(26, 'Zoetermeer', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(27, 'Emmen', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(28, 'Zwolle', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(29, 'Ede', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(30, 'Delft', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(31, 'Heerlen', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(32, 'Alkmaar', 'NL', 1, '2021-03-08 11:08:23', NULL),
+(33, 'Willemstad', 'AN', 1, '2021-03-08 11:08:23', NULL),
+(34, 'Tirana', 'AL', 1, '2021-03-08 11:08:23', NULL),
+(35, 'Alger', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(36, 'Oran', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(37, 'Constantine', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(38, 'Annaba', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(39, 'Batna', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(40, 'Sétif', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(41, 'Sidi Bel Abbès', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(42, 'Skikda', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(43, 'Biskra', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(44, 'Blida (el-Boulaida)', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(45, 'Béjaïa', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(46, 'Mostaganem', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(47, 'Tébessa', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(48, 'Tlemcen (Tilimsen)', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(49, 'Béchar', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(50, 'Tiaret', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(51, 'Ech-Chleff (el-Asnam)', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(52, 'Ghardaïa', 'DZ', 1, '2021-03-08 11:08:23', NULL),
+(53, 'Tafuna', 'AS', 1, '2021-03-08 11:08:23', NULL),
+(54, 'Fagatogo', 'AS', 1, '2021-03-08 11:08:23', NULL),
+(55, 'Andorra la Vella', 'AD', 1, '2021-03-08 11:08:23', NULL),
+(56, 'Luanda', 'AO', 1, '2021-03-08 11:08:23', NULL),
+(57, 'Huambo', 'AO', 1, '2021-03-08 11:08:23', NULL),
+(58, 'Lobito', 'AO', 1, '2021-03-08 11:08:23', NULL),
+(59, 'Benguela', 'AO', 1, '2021-03-08 11:08:23', NULL),
+(60, 'Namibe', 'AO', 1, '2021-03-08 11:08:23', NULL),
+(61, 'South Hill', 'AI', 1, '2021-03-08 11:08:23', NULL),
+(62, 'The Valley', 'AI', 1, '2021-03-08 11:08:23', NULL),
+(63, 'Saint John´s', 'AG', 1, '2021-03-08 11:08:23', NULL),
+(64, 'Dubai', 'AE', 1, '2021-03-08 11:08:23', NULL),
+(65, 'Abu Dhabi', 'AE', 1, '2021-03-08 11:08:23', NULL),
+(66, 'Sharja', 'AE', 1, '2021-03-08 11:08:23', NULL),
+(67, 'al-Ayn', 'AE', 1, '2021-03-08 11:08:23', NULL),
+(68, 'Ajman', 'AE', 1, '2021-03-08 11:08:23', NULL),
+(69, 'Buenos Aires', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(70, 'La Matanza', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(71, 'Córdoba', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(72, 'Rosario', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(73, 'Lomas de Zamora', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(74, 'Quilmes', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(75, 'Almirante Brown', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(76, 'La Plata', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(77, 'Mar del Plata', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(78, 'San Miguel de Tucumán', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(79, 'Lanús', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(80, 'Merlo', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(81, 'General San Martín', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(82, 'Salta', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(83, 'Moreno', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(84, 'Santa Fé', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(85, 'Avellaneda', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(86, 'Tres de Febrero', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(87, 'Morón', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(88, 'Florencio Varela', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(89, 'San Isidro', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(90, 'Tigre', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(91, 'Malvinas Argentinas', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(92, 'Vicente López', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(93, 'Berazategui', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(94, 'Corrientes', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(95, 'San Miguel', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(96, 'Bahía Blanca', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(97, 'Esteban Echeverría', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(98, 'Resistencia', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(99, 'José C. Paz', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(100, 'Paraná', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(101, 'Godoy Cruz', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(102, 'Posadas', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(103, 'Guaymallén', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(104, 'Santiago del Estero', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(105, 'San Salvador de Jujuy', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(106, 'Hurlingham', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(107, 'Neuquén', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(108, 'Ituzaingó', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(109, 'San Fernando', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(110, 'Formosa', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(111, 'Las Heras', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(112, 'La Rioja', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(113, 'San Fernando del Valle de Cata', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(114, 'Río Cuarto', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(115, 'Comodoro Rivadavia', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(116, 'Mendoza', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(117, 'San Nicolás de los Arroyos', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(118, 'San Juan', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(119, 'Escobar', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(120, 'Concordia', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(121, 'Pilar', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(122, 'San Luis', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(123, 'Ezeiza', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(124, 'San Rafael', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(125, 'Tandil', 'AR', 1, '2021-03-08 11:08:23', NULL),
+(126, 'Yerevan', 'AM', 1, '2021-03-08 11:08:23', NULL),
+(127, 'Gjumri', 'AM', 1, '2021-03-08 11:08:23', NULL),
+(128, 'Vanadzor', 'AM', 1, '2021-03-08 11:08:23', NULL),
+(129, 'Oranjestad', 'AW', 1, '2021-03-08 11:08:23', NULL),
+(130, 'Sydney', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(131, 'Melbourne', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(132, 'Brisbane', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(133, 'Perth', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(134, 'Adelaide', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(135, 'Canberra', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(136, 'Gold Coast', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(137, 'Newcastle', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(138, 'Central Coast', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(139, 'Wollongong', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(140, 'Hobart', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(141, 'Geelong', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(142, 'Townsville', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(143, 'Cairns', 'AU', 1, '2021-03-08 11:08:23', NULL),
+(144, 'Baku', 'AZ', 1, '2021-03-08 11:08:23', NULL),
+(145, 'Gäncä', 'AZ', 1, '2021-03-08 11:08:23', NULL),
+(146, 'Sumqayit', 'AZ', 1, '2021-03-08 11:08:23', NULL),
+(147, 'Mingäçevir', 'AZ', 1, '2021-03-08 11:08:23', NULL),
+(148, 'Nassau', 'BS', 1, '2021-03-08 11:08:23', NULL),
+(149, 'al-Manama', 'BH', 1, '2021-03-08 11:08:23', NULL),
+(150, 'Dhaka', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(151, 'Chittagong', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(152, 'Khulna', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(153, 'Rajshahi', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(154, 'Narayanganj', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(155, 'Rangpur', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(156, 'Mymensingh', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(157, 'Barisal', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(158, 'Tungi', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(159, 'Jessore', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(160, 'Comilla', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(161, 'Nawabganj', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(162, 'Dinajpur', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(163, 'Bogra', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(164, 'Sylhet', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(165, 'Brahmanbaria', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(166, 'Tangail', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(167, 'Jamalpur', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(168, 'Pabna', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(169, 'Naogaon', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(170, 'Sirajganj', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(171, 'Narsinghdi', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(172, 'Saidpur', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(173, 'Gazipur', 'BD', 1, '2021-03-08 11:08:23', NULL),
+(174, 'Bridgetown', 'BB', 1, '2021-03-08 11:08:23', NULL),
+(175, 'Antwerpen', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(176, 'Gent', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(177, 'Charleroi', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(178, 'Liège', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(179, 'Bruxelles [Brussel]', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(180, 'Brugge', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(181, 'Schaerbeek', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(182, 'Namur', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(183, 'Mons', 'BE', 1, '2021-03-08 11:08:23', NULL),
+(184, 'Belize City', 'BZ', 1, '2021-03-08 11:08:23', NULL),
+(185, 'Belmopan', 'BZ', 1, '2021-03-08 11:08:23', NULL),
+(186, 'Cotonou', 'BJ', 1, '2021-03-08 11:08:23', NULL),
+(187, 'Porto-Novo', 'BJ', 1, '2021-03-08 11:08:23', NULL),
+(188, 'Djougou', 'BJ', 1, '2021-03-08 11:08:23', NULL),
+(189, 'Parakou', 'BJ', 1, '2021-03-08 11:08:23', NULL),
+(190, 'Saint George', 'BM', 1, '2021-03-08 11:08:23', NULL),
+(191, 'Hamilton', 'BM', 1, '2021-03-08 11:08:23', NULL),
+(192, 'Thimphu', 'BT', 1, '2021-03-08 11:08:23', NULL),
+(193, 'Santa Cruz de la Sierra', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(194, 'La Paz', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(195, 'El Alto', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(196, 'Cochabamba', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(197, 'Oruro', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(198, 'Sucre', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(199, 'Potosí', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(200, 'Tarija', 'BO', 1, '2021-03-08 11:08:23', NULL),
+(201, 'Sarajevo', 'BA', 1, '2021-03-08 11:08:23', NULL),
+(202, 'Banja Luka', 'BA', 1, '2021-03-08 11:08:23', NULL),
+(203, 'Zenica', 'BA', 1, '2021-03-08 11:08:23', NULL),
+(204, 'Gaborone', 'BW', 1, '2021-03-08 11:08:23', NULL),
+(205, 'Francistown', 'BW', 1, '2021-03-08 11:08:23', NULL),
+(206, 'São Paulo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(207, 'Rio de Janeiro', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(208, 'Salvador', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(209, 'Belo Horizonte', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(210, 'Fortaleza', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(211, 'Brasília', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(212, 'Curitiba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(213, 'Recife', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(214, 'Porto Alegre', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(215, 'Manaus', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(216, 'Belém', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(217, 'Guarulhos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(218, 'Goiânia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(219, 'Campinas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(220, 'São Gonçalo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(221, 'Nova Iguaçu', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(222, 'São Luís', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(223, 'Maceió', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(224, 'Duque de Caxias', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(225, 'São Bernardo do Campo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(226, 'Teresina', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(227, 'Natal', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(228, 'Osasco', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(229, 'Campo Grande', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(230, 'Santo André', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(231, 'João Pessoa', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(232, 'Jaboatão dos Guararapes', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(233, 'Contagem', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(234, 'São José dos Campos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(235, 'Uberlândia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(236, 'Feira de Santana', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(237, 'Ribeirão Preto', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(238, 'Sorocaba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(239, 'Niterói', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(240, 'Cuiabá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(241, 'Juiz de Fora', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(242, 'Aracaju', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(243, 'São João de Meriti', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(244, 'Londrina', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(245, 'Joinville', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(246, 'Belford Roxo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(247, 'Santos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(248, 'Ananindeua', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(249, 'Campos dos Goytacazes', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(250, 'Mauá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(251, 'Carapicuíba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(252, 'Olinda', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(253, 'Campina Grande', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(254, 'São José do Rio Preto', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(255, 'Caxias do Sul', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(256, 'Moji das Cruzes', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(257, 'Diadema', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(258, 'Aparecida de Goiânia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(259, 'Piracicaba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(260, 'Cariacica', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(261, 'Vila Velha', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(262, 'Pelotas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(263, 'Bauru', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(264, 'Porto Velho', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(265, 'Serra', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(266, 'Betim', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(267, 'Jundíaí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(268, 'Canoas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(269, 'Franca', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(270, 'São Vicente', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(271, 'Maringá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(272, 'Montes Claros', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(273, 'Anápolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(274, 'Florianópolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(275, 'Petrópolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(276, 'Itaquaquecetuba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(277, 'Vitória', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(278, 'Ponta Grossa', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(279, 'Rio Branco', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(280, 'Foz do Iguaçu', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(281, 'Macapá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(282, 'Ilhéus', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(283, 'Vitória da Conquista', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(284, 'Uberaba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(285, 'Paulista', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(286, 'Limeira', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(287, 'Blumenau', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(288, 'Caruaru', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(289, 'Santarém', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(290, 'Volta Redonda', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(291, 'Novo Hamburgo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(292, 'Caucaia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(293, 'Santa Maria', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(294, 'Cascavel', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(295, 'Guarujá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(296, 'Ribeirão das Neves', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(297, 'Governador Valadares', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(298, 'Taubaté', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(299, 'Imperatriz', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(300, 'Gravataí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(301, 'Embu', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(302, 'Mossoró', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(303, 'Várzea Grande', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(304, 'Petrolina', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(305, 'Barueri', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(306, 'Viamão', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(307, 'Ipatinga', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(308, 'Juazeiro', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(309, 'Juazeiro do Norte', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(310, 'Taboão da Serra', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(311, 'São José dos Pinhais', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(312, 'Magé', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(313, 'Suzano', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(314, 'São Leopoldo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(315, 'Marília', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(316, 'São Carlos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(317, 'Sumaré', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(318, 'Presidente Prudente', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(319, 'Divinópolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(320, 'Sete Lagoas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(321, 'Rio Grande', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(322, 'Itabuna', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(323, 'Jequié', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(324, 'Arapiraca', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(325, 'Colombo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(326, 'Americana', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(327, 'Alvorada', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(328, 'Araraquara', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(329, 'Itaboraí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(330, 'Santa Bárbara d´Oeste', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(331, 'Nova Friburgo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(332, 'Jacareí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(333, 'Araçatuba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(334, 'Barra Mansa', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(335, 'Praia Grande', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(336, 'Marabá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(337, 'Criciúma', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(338, 'Boa Vista', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(339, 'Passo Fundo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(340, 'Dourados', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(341, 'Santa Luzia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(342, 'Rio Claro', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(343, 'Maracanaú', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(344, 'Guarapuava', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(345, 'Rondonópolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(346, 'São José', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(347, 'Cachoeiro de Itapemirim', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(348, 'Nilópolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(349, 'Itapevi', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(350, 'Cabo de Santo Agostinho', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(351, 'Camaçari', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(352, 'Sobral', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(353, 'Itajaí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(354, 'Chapecó', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(355, 'Cotia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(356, 'Lages', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(357, 'Ferraz de Vasconcelos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(358, 'Indaiatuba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(359, 'Hortolândia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(360, 'Caxias', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(361, 'São Caetano do Sul', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(362, 'Itu', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(363, 'Nossa Senhora do Socorro', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(364, 'Parnaíba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(365, 'Poços de Caldas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(366, 'Teresópolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(367, 'Barreiras', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(368, 'Castanhal', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(369, 'Alagoinhas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(370, 'Itapecerica da Serra', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(371, 'Uruguaiana', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(372, 'Paranaguá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(373, 'Ibirité', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(374, 'Timon', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(375, 'Luziânia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(376, 'Macaé', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(377, 'Teófilo Otoni', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(378, 'Moji-Guaçu', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(379, 'Palmas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(380, 'Pindamonhangaba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(381, 'Francisco Morato', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(382, 'Bagé', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(383, 'Sapucaia do Sul', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(384, 'Cabo Frio', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(385, 'Itapetininga', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(386, 'Patos de Minas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(387, 'Camaragibe', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(388, 'Bragança Paulista', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(389, 'Queimados', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(390, 'Araguaína', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(391, 'Garanhuns', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(392, 'Vitória de Santo Antão', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(393, 'Santa Rita', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(394, 'Barbacena', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(395, 'Abaetetuba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(396, 'Jaú', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(397, 'Lauro de Freitas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(398, 'Franco da Rocha', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(399, 'Teixeira de Freitas', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(400, 'Varginha', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(401, 'Ribeirão Pires', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(402, 'Sabará', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(403, 'Catanduva', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(404, 'Rio Verde', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(405, 'Botucatu', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(406, 'Colatina', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(407, 'Santa Cruz do Sul', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(408, 'Linhares', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(409, 'Apucarana', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(410, 'Barretos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(411, 'Guaratinguetá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(412, 'Cachoeirinha', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(413, 'Codó', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(414, 'Jaraguá do Sul', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(415, 'Cubatão', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(416, 'Itabira', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(417, 'Itaituba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(418, 'Araras', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(419, 'Resende', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(420, 'Atibaia', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(421, 'Pouso Alegre', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(422, 'Toledo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(423, 'Crato', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(424, 'Passos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(425, 'Araguari', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(426, 'São José de Ribamar', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(427, 'Pinhais', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(428, 'Sertãozinho', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(429, 'Conselheiro Lafaiete', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(430, 'Paulo Afonso', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(431, 'Angra dos Reis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(432, 'Eunápolis', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(433, 'Salto', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(434, 'Ourinhos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(435, 'Parnamirim', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(436, 'Jacobina', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(437, 'Coronel Fabriciano', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(438, 'Birigui', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(439, 'Tatuí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(440, 'Ji-Paraná', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(441, 'Bacabal', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(442, 'Cametá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(443, 'Guaíba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(444, 'São Lourenço da Mata', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(445, 'Santana do Livramento', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(446, 'Votorantim', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(447, 'Campo Largo', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(448, 'Patos', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(449, 'Ituiutaba', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(450, 'Corumbá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(451, 'Palhoça', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(452, 'Barra do Piraí', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(453, 'Bento Gonçalves', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(454, 'Poá', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(455, 'Águas Lindas de Goiás', 'BR', 1, '2021-03-08 11:08:23', NULL),
+(456, 'London', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(457, 'Birmingham', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(458, 'Glasgow', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(459, 'Liverpool', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(460, 'Edinburgh', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(461, 'Sheffield', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(462, 'Manchester', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(463, 'Leeds', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(464, 'Bristol', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(465, 'Cardiff', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(466, 'Coventry', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(467, 'Leicester', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(468, 'Bradford', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(469, 'Belfast', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(470, 'Nottingham', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(471, 'Kingston upon Hull', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(472, 'Plymouth', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(473, 'Stoke-on-Trent', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(474, 'Wolverhampton', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(475, 'Derby', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(476, 'Swansea', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(477, 'Southampton', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(478, 'Aberdeen', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(479, 'Northampton', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(480, 'Dudley', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(481, 'Portsmouth', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(482, 'Newcastle upon Tyne', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(483, 'Sunderland', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(484, 'Luton', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(485, 'Swindon', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(486, 'Southend-on-Sea', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(487, 'Walsall', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(488, 'Bournemouth', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(489, 'Peterborough', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(490, 'Brighton', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(491, 'Blackpool', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(492, 'Dundee', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(493, 'West Bromwich', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(494, 'Reading', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(495, 'Oldbury/Smethwick (Warley)', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(496, 'Middlesbrough', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(497, 'Huddersfield', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(498, 'Oxford', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(499, 'Poole', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(500, 'Bolton', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(501, 'Blackburn', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(502, 'Newport', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(503, 'Preston', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(504, 'Stockport', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(505, 'Norwich', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(506, 'Rotherham', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(507, 'Cambridge', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(508, 'Watford', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(509, 'Ipswich', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(510, 'Slough', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(511, 'Exeter', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(512, 'Cheltenham', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(513, 'Gloucester', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(514, 'Saint Helens', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(515, 'Sutton Coldfield', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(516, 'York', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(517, 'Oldham', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(518, 'Basildon', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(519, 'Worthing', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(520, 'Chelmsford', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(521, 'Colchester', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(522, 'Crawley', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(523, 'Gillingham', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(524, 'Solihull', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(525, 'Rochdale', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(526, 'Birkenhead', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(527, 'Worcester', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(528, 'Hartlepool', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(529, 'Halifax', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(530, 'Woking/Byfleet', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(531, 'Southport', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(532, 'Maidstone', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(533, 'Eastbourne', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(534, 'Grimsby', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(535, 'Saint Helier', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(536, 'Douglas', 'GB', 1, '2021-03-08 11:08:23', NULL),
+(537, 'Road Town', 'VG', 1, '2021-03-08 11:08:23', NULL),
+(538, 'Bandar Seri Begawan', 'BN', 1, '2021-03-08 11:08:23', NULL),
+(539, 'Sofija', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(540, 'Plovdiv', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(541, 'Varna', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(542, 'Burgas', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(543, 'Ruse', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(544, 'Stara Zagora', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(545, 'Pleven', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(546, 'Sliven', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(547, 'Dobric', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(548, 'Šumen', 'BG', 1, '2021-03-08 11:08:23', NULL),
+(549, 'Ouagadougou', 'BF', 1, '2021-03-08 11:08:23', NULL),
+(550, 'Bobo-Dioulasso', 'BF', 1, '2021-03-08 11:08:23', NULL),
+(551, 'Koudougou', 'BF', 1, '2021-03-08 11:08:23', NULL),
+(552, 'Bujumbura', 'BI', 1, '2021-03-08 11:08:23', NULL),
+(553, 'George Town', 'KY', 1, '2021-03-08 11:08:23', NULL),
+(554, 'Santiago de Chile', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(555, 'Puente Alto', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(556, 'Viña del Mar', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(557, 'Valparaíso', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(558, 'Talcahuano', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(559, 'Antofagasta', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(560, 'San Bernardo', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(561, 'Temuco', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(562, 'Concepción', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(563, 'Rancagua', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(564, 'Arica', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(565, 'Talca', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(566, 'Chillán', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(567, 'Iquique', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(568, 'Los Angeles', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(569, 'Puerto Montt', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(570, 'Coquimbo', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(571, 'Osorno', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(572, 'La Serena', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(573, 'Calama', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(574, 'Valdivia', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(575, 'Punta Arenas', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(576, 'Copiapó', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(577, 'Quilpué', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(578, 'Curicó', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(579, 'Ovalle', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(580, 'Coronel', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(581, 'San Pedro de la Paz', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(582, 'Melipilla', 'CL', 1, '2021-03-08 11:08:23', NULL),
+(583, 'Avarua', 'CK', 1, '2021-03-08 11:08:23', NULL),
+(584, 'San José', 'CR', 1, '2021-03-08 11:08:23', NULL),
+(585, 'Djibouti', 'DJ', 1, '2021-03-08 11:08:23', NULL),
+(586, 'Roseau', 'DM', 1, '2021-03-08 11:08:23', NULL),
+(587, 'Santo Domingo de Guzmán', 'DO', 1, '2021-03-08 11:08:23', NULL),
+(588, 'Santiago de los Caballeros', 'DO', 1, '2021-03-08 11:08:23', NULL),
+(589, 'La Romana', 'DO', 1, '2021-03-08 11:08:23', NULL),
+(590, 'San Pedro de Macorís', 'DO', 1, '2021-03-08 11:08:23', NULL),
+(591, 'San Francisco de Macorís', 'DO', 1, '2021-03-08 11:08:23', NULL),
+(592, 'San Felipe de Puerto Plata', 'DO', 1, '2021-03-08 11:08:23', NULL),
+(593, 'Guayaquil', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(594, 'Quito', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(595, 'Cuenca', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(596, 'Machala', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(597, 'Santo Domingo de los Colorados', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(598, 'Portoviejo', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(599, 'Ambato', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(600, 'Manta', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(601, 'Duran [Eloy Alfaro]', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(602, 'Ibarra', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(603, 'Quevedo', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(604, 'Milagro', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(605, 'Loja', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(606, 'Ríobamba', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(607, 'Esmeraldas', 'EC', 1, '2021-03-08 11:08:23', NULL),
+(608, 'Cairo', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(609, 'Alexandria', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(610, 'Giza', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(611, 'Shubra al-Khayma', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(612, 'Port Said', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(613, 'Suez', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(614, 'al-Mahallat al-Kubra', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(615, 'Tanta', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(616, 'al-Mansura', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(617, 'Luxor', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(618, 'Asyut', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(619, 'Bahtim', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(620, 'Zagazig', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(621, 'al-Faiyum', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(622, 'Ismailia', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(623, 'Kafr al-Dawwar', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(624, 'Assuan', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(625, 'Damanhur', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(626, 'al-Minya', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(627, 'Bani Suwayf', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(628, 'Qina', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(629, 'Sawhaj', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(630, 'Shibin al-Kawm', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(631, 'Bulaq al-Dakrur', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(632, 'Banha', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(633, 'Warraq al-Arab', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(634, 'Kafr al-Shaykh', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(635, 'Mallawi', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(636, 'Bilbays', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(637, 'Mit Ghamr', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(638, 'al-Arish', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(639, 'Talkha', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(640, 'Qalyub', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(641, 'Jirja', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(642, 'Idfu', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(643, 'al-Hawamidiya', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(644, 'Disuq', 'EG', 1, '2021-03-08 11:08:23', NULL),
+(645, 'San Salvador', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(646, 'Santa Ana', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(647, 'Mejicanos', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(648, 'Soyapango', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(649, 'San Miguel', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(650, 'Nueva San Salvador', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(651, 'Apopa', 'SV', 1, '2021-03-08 11:08:23', NULL),
+(652, 'Asmara', 'ER', 1, '2021-03-08 11:08:23', NULL),
+(653, 'Madrid', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(654, 'Barcelona', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(655, 'Valencia', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(656, 'Sevilla', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(657, 'Zaragoza', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(658, 'Málaga', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(659, 'Bilbao', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(660, 'Las Palmas de Gran Canaria', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(661, 'Murcia', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(662, 'Palma de Mallorca', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(663, 'Valladolid', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(664, 'Córdoba', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(665, 'Vigo', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(666, 'Alicante [Alacant]', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(667, 'Gijón', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(668, 'L´Hospitalet de Llobregat', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(669, 'Granada', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(670, 'A Coruña (La Coruña)', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(671, 'Vitoria-Gasteiz', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(672, 'Santa Cruz de Tenerife', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(673, 'Badalona', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(674, 'Oviedo', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(675, 'Móstoles', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(676, 'Elche [Elx]', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(677, 'Sabadell', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(678, 'Santander', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(679, 'Jerez de la Frontera', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(680, 'Pamplona [Iruña]', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(681, 'Donostia-San Sebastián', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(682, 'Cartagena', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(683, 'Leganés', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(684, 'Fuenlabrada', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(685, 'Almería', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(686, 'Terrassa', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(687, 'Alcalá de Henares', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(688, 'Burgos', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(689, 'Salamanca', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(690, 'Albacete', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(691, 'Getafe', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(692, 'Cádiz', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(693, 'Alcorcón', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(694, 'Huelva', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(695, 'León', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(696, 'Castellón de la Plana [Castell', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(697, 'Badajoz', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(698, '[San Cristóbal de] la Laguna', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(699, 'Logroño', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(700, 'Santa Coloma de Gramenet', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(701, 'Tarragona', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(702, 'Lleida (Lérida)', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(703, 'Jaén', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(704, 'Ourense (Orense)', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(705, 'Mataró', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(706, 'Algeciras', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(707, 'Marbella', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(708, 'Barakaldo', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(709, 'Dos Hermanas', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(710, 'Santiago de Compostela', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(711, 'Torrejón de Ardoz', 'ES', 1, '2021-03-08 11:08:23', NULL),
+(712, 'Cape Town', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(713, 'Soweto', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(714, 'Johannesburg', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(715, 'Port Elizabeth', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(716, 'Pretoria', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(717, 'Inanda', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(718, 'Durban', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(719, 'Vanderbijlpark', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(720, 'Kempton Park', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(721, 'Alberton', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(722, 'Pinetown', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(723, 'Pietermaritzburg', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(724, 'Benoni', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(725, 'Randburg', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(726, 'Umlazi', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(727, 'Bloemfontein', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(728, 'Vereeniging', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(729, 'Wonderboom', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(730, 'Roodepoort', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(731, 'Boksburg', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(732, 'Klerksdorp', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(733, 'Soshanguve', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(734, 'Newcastle', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(735, 'East London', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(736, 'Welkom', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(737, 'Kimberley', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(738, 'Uitenhage', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(739, 'Chatsworth', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(740, 'Mdantsane', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(741, 'Krugersdorp', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(742, 'Botshabelo', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(743, 'Brakpan', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(744, 'Witbank', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(745, 'Oberholzer', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(746, 'Germiston', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(747, 'Springs', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(748, 'Westonaria', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(749, 'Randfontein', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(750, 'Paarl', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(751, 'Potchefstroom', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(752, 'Rustenburg', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(753, 'Nigel', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(754, 'George', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(755, 'Ladysmith', 'ZA', 1, '2021-03-08 11:08:23', NULL),
+(756, 'Addis Abeba', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(757, 'Dire Dawa', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(758, 'Nazret', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(759, 'Gonder', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(760, 'Dese', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(761, 'Mekele', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(762, 'Bahir Dar', 'ET', 1, '2021-03-08 11:08:23', NULL),
+(763, 'Stanley', 'FK', 1, '2021-03-08 11:08:23', NULL),
+(764, 'Suva', 'FJ', 1, '2021-03-08 11:08:23', NULL),
+(765, 'Quezon', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(766, 'Manila', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(767, 'Kalookan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(768, 'Davao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(769, 'Cebu', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(770, 'Zamboanga', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(771, 'Pasig', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(772, 'Valenzuela', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(773, 'Las Piñas', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(774, 'Antipolo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(775, 'Taguig', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(776, 'Cagayan de Oro', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(777, 'Parañaque', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(778, 'Makati', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(779, 'Bacolod', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(780, 'General Santos', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(781, 'Marikina', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(782, 'Dasmariñas', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(783, 'Muntinlupa', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(784, 'Iloilo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(785, 'Pasay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(786, 'Malabon', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(787, 'San José del Monte', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(788, 'Bacoor', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(789, 'Iligan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(790, 'Calamba', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(791, 'Mandaluyong', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(792, 'Butuan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(793, 'Angeles', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(794, 'Tarlac', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(795, 'Mandaue', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(796, 'Baguio', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(797, 'Batangas', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(798, 'Cainta', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(799, 'San Pedro', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(800, 'Navotas', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(801, 'Cabanatuan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(802, 'San Fernando', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(803, 'Lipa', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(804, 'Lapu-Lapu', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(805, 'San Pablo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(806, 'Biñan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(807, 'Taytay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(808, 'Lucena', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(809, 'Imus', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(810, 'Olongapo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(811, 'Binangonan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(812, 'Santa Rosa', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(813, 'Tagum', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(814, 'Tacloban', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(815, 'Malolos', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(816, 'Mabalacat', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(817, 'Cotabato', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(818, 'Meycauayan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(819, 'Puerto Princesa', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(820, 'Legazpi', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(821, 'Silang', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(822, 'Ormoc', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(823, 'San Carlos', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(824, 'Kabankalan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(825, 'Talisay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(826, 'Valencia', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(827, 'Calbayog', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(828, 'Santa Maria', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(829, 'Pagadian', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(830, 'Cadiz', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(831, 'Bago', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(832, 'Toledo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(833, 'Naga', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(834, 'San Mateo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(835, 'Panabo', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(836, 'Koronadal', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(837, 'Marawi', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(838, 'Dagupan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(839, 'Sagay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(840, 'Roxas', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(841, 'Lubao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(842, 'Digos', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(843, 'San Miguel', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(844, 'Malaybalay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(845, 'Tuguegarao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(846, 'Ilagan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(847, 'Baliuag', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(848, 'Surigao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(850, 'San Juan del Monte', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(851, 'Tanauan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(852, 'Concepcion', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(853, 'Rodriguez (Montalban)', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(854, 'Sariaya', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(855, 'Malasiqui', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(856, 'General Mariano Alvarez', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(857, 'Urdaneta', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(858, 'Hagonoy', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(859, 'San Jose', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(860, 'Polomolok', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(861, 'Santiago', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(862, 'Tanza', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(863, 'Ozamis', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(864, 'Mexico', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(866, 'Silay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(867, 'General Trias', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(868, 'Tabaco', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(869, 'Cabuyao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(870, 'Calapan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(871, 'Mati', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(872, 'Midsayap', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(873, 'Cauayan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(874, 'Gingoog', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(875, 'Dumaguete', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(877, 'Arayat', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(878, 'Bayawan (Tulong)', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(879, 'Kidapawan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(880, 'Daraga (Locsin)', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(881, 'Marilao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(882, 'Malita', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(883, 'Dipolog', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(884, 'Cavite', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(885, 'Danao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(886, 'Bislig', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(887, 'Talavera', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(888, 'Guagua', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(889, 'Bayambang', 'PH', 1, '2021-03-08 11:08:23', NULL);
+INSERT INTO `tbl_cities` (`id`, `city_name`, `country_code`, `enabled`, `updated_at`, `deleted_at`) VALUES
+(890, 'Nasugbu', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(891, 'Baybay', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(892, 'Capas', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(893, 'Sultan Kudarat', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(894, 'Laoag', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(895, 'Bayugan', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(896, 'Malungon', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(897, 'Santa Cruz', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(898, 'Sorsogon', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(899, 'Candelaria', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(900, 'Ligao', 'PH', 1, '2021-03-08 11:08:23', NULL),
+(901, 'Tórshavn', 'FO', 1, '2021-03-08 11:08:23', NULL),
+(902, 'Libreville', 'GA', 1, '2021-03-08 11:08:23', NULL),
+(903, 'Serekunda', 'GM', 1, '2021-03-08 11:08:23', NULL),
+(904, 'Banjul', 'GM', 1, '2021-03-08 11:08:23', NULL),
+(905, 'Tbilisi', 'GE', 1, '2021-03-08 11:08:23', NULL),
+(906, 'Kutaisi', 'GE', 1, '2021-03-08 11:08:23', NULL),
+(907, 'Rustavi', 'GE', 1, '2021-03-08 11:08:23', NULL),
+(908, 'Batumi', 'GE', 1, '2021-03-08 11:08:23', NULL),
+(909, 'Sohumi', 'GE', 1, '2021-03-08 11:08:23', NULL),
+(910, 'Accra', 'GH', 1, '2021-03-08 11:08:23', NULL),
+(911, 'Kumasi', 'GH', 1, '2021-03-08 11:08:23', NULL),
+(912, 'Tamale', 'GH', 1, '2021-03-08 11:08:23', NULL),
+(913, 'Tema', 'GH', 1, '2021-03-08 11:08:23', NULL),
+(914, 'Sekondi-Takoradi', 'GH', 1, '2021-03-08 11:08:23', NULL),
+(915, 'Gibraltar', 'GI', 1, '2021-03-08 11:08:23', NULL),
+(916, 'Saint George´s', 'GD', 1, '2021-03-08 11:08:23', NULL),
+(917, 'Nuuk', 'GL', 1, '2021-03-08 11:08:23', NULL),
+(918, 'Les Abymes', 'GP', 1, '2021-03-08 11:08:23', NULL),
+(919, 'Basse-Terre', 'GP', 1, '2021-03-08 11:08:23', NULL),
+(920, 'Tamuning', 'GU', 1, '2021-03-08 11:08:23', NULL),
+(921, 'Agaña', 'GU', 1, '2021-03-08 11:08:23', NULL),
+(922, 'Ciudad de Guatemala', 'GT', 1, '2021-03-08 11:08:23', NULL),
+(923, 'Mixco', 'GT', 1, '2021-03-08 11:08:23', NULL),
+(924, 'Villa Nueva', 'GT', 1, '2021-03-08 11:08:23', NULL),
+(925, 'Quetzaltenango', 'GT', 1, '2021-03-08 11:08:23', NULL),
+(926, 'Conakry', 'GN', 1, '2021-03-08 11:08:23', NULL),
+(927, 'Bissau', 'GW', 1, '2021-03-08 11:08:23', NULL),
+(928, 'Georgetown', 'GY', 1, '2021-03-08 11:08:23', NULL),
+(929, 'Port-au-Prince', 'HT', 1, '2021-03-08 11:08:23', NULL),
+(930, 'Carrefour', 'HT', 1, '2021-03-08 11:08:23', NULL),
+(931, 'Delmas', 'HT', 1, '2021-03-08 11:08:23', NULL),
+(932, 'Le-Cap-Haïtien', 'HT', 1, '2021-03-08 11:08:23', NULL),
+(933, 'Tegucigalpa', 'HN', 1, '2021-03-08 11:08:23', NULL),
+(934, 'San Pedro Sula', 'HN', 1, '2021-03-08 11:08:23', NULL),
+(935, 'La Ceiba', 'HN', 1, '2021-03-08 11:08:23', NULL),
+(936, 'Kowloon and New Kowloon', 'HK', 1, '2021-03-08 11:08:23', NULL),
+(937, 'Victoria', 'HK', 1, '2021-03-08 11:08:23', NULL),
+(938, 'Longyearbyen', 'SJ', 1, '2021-03-08 11:08:23', NULL),
+(939, 'Jakarta', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(940, 'Surabaya', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(941, 'Bandung', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(942, 'Medan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(943, 'Palembang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(944, 'Tangerang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(945, 'Semarang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(946, 'Ujung Pandang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(947, 'Malang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(948, 'Bandar Lampung', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(949, 'Bekasi', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(950, 'Padang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(951, 'Surakarta', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(952, 'Banjarmasin', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(953, 'Pekan Baru', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(954, 'Denpasar', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(955, 'Yogyakarta', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(956, 'Pontianak', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(957, 'Samarinda', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(958, 'Jambi', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(959, 'Depok', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(960, 'Cimahi', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(961, 'Balikpapan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(962, 'Manado', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(963, 'Mataram', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(964, 'Pekalongan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(965, 'Tegal', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(966, 'Bogor', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(967, 'Ciputat', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(968, 'Pondokgede', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(969, 'Cirebon', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(970, 'Kediri', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(971, 'Ambon', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(972, 'Jember', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(973, 'Cilacap', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(974, 'Cimanggis', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(975, 'Pematang Siantar', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(976, 'Purwokerto', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(977, 'Ciomas', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(978, 'Tasikmalaya', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(979, 'Madiun', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(980, 'Bengkulu', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(981, 'Karawang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(982, 'Banda Aceh', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(983, 'Palu', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(984, 'Pasuruan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(985, 'Kupang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(986, 'Tebing Tinggi', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(987, 'Percut Sei Tuan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(988, 'Binjai', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(989, 'Sukabumi', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(990, 'Waru', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(991, 'Pangkal Pinang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(992, 'Magelang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(993, 'Blitar', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(994, 'Serang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(995, 'Probolinggo', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(996, 'Cilegon', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(997, 'Cianjur', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(998, 'Ciparay', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(999, 'Lhokseumawe', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1000, 'Taman', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1002, 'Citeureup', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1003, 'Pemalang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1004, 'Klaten', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1005, 'Salatiga', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1006, 'Cibinong', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1007, 'Palangka Raya', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1008, 'Mojokerto', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1009, 'Purwakarta', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1010, 'Garut', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1011, 'Kudus', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1012, 'Kendari', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1013, 'Jaya Pura', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1014, 'Gorontalo', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1015, 'Majalaya', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1016, 'Pondok Aren', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1017, 'Jombang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1018, 'Sunggal', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1019, 'Batam', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1020, 'Padang Sidempuan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1021, 'Sawangan', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1022, 'Banyuwangi', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1023, 'Tanjung Pinang', 'ID', 1, '2021-03-08 11:08:23', NULL),
+(1024, 'Mumbai (Bombay)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1025, 'Delhi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1026, 'Calcutta [Kolkata]', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1027, 'Chennai (Madras)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1028, 'Hyderabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1029, 'Ahmedabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1030, 'Bangalore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1031, 'Kanpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1032, 'Nagpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1033, 'Lucknow', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1034, 'Pune', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1035, 'Surat', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1036, 'Jaipur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1037, 'Indore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1038, 'Bhopal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1039, 'Ludhiana', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1040, 'Vadodara (Baroda)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1041, 'Kalyan', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1042, 'Madurai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1043, 'Haora (Howrah)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1044, 'Varanasi (Benares)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1045, 'Patna', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1046, 'Srinagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1047, 'Agra', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1048, 'Coimbatore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1049, 'Thane (Thana)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1050, 'Allahabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1051, 'Meerut', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1052, 'Vishakhapatnam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1053, 'Jabalpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1054, 'Amritsar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1055, 'Faridabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1056, 'Vijayawada', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1057, 'Gwalior', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1058, 'Jodhpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1059, 'Nashik (Nasik)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1060, 'Hubli-Dharwad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1061, 'Solapur (Sholapur)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1062, 'Ranchi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1063, 'Bareilly', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1064, 'Guwahati (Gauhati)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1065, 'Shambajinagar (Aurangabad)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1066, 'Cochin (Kochi)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1067, 'Rajkot', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1068, 'Kota', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1069, 'Thiruvananthapuram (Trivandrum', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1070, 'Pimpri-Chinchwad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1071, 'Jalandhar (Jullundur)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1072, 'Gorakhpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1073, 'Chandigarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1074, 'Mysore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1075, 'Aligarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1076, 'Guntur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1077, 'Jamshedpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1078, 'Ghaziabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1079, 'Warangal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1080, 'Raipur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1081, 'Moradabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1082, 'Durgapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1083, 'Amravati', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1084, 'Calicut (Kozhikode)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1085, 'Bikaner', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1086, 'Bhubaneswar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1087, 'Kolhapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1088, 'Kataka (Cuttack)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1089, 'Ajmer', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1090, 'Bhavnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1091, 'Tiruchirapalli', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1092, 'Bhilai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1093, 'Bhiwandi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1094, 'Saharanpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1095, 'Ulhasnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1096, 'Salem', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1097, 'Ujjain', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1098, 'Malegaon', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1099, 'Jamnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1100, 'Bokaro Steel City', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1101, 'Akola', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1102, 'Belgaum', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1103, 'Rajahmundry', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1104, 'Nellore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1105, 'Udaipur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1106, 'New Bombay', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1107, 'Bhatpara', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1108, 'Gulbarga', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1109, 'New Delhi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1110, 'Jhansi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1111, 'Gaya', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1112, 'Kakinada', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1113, 'Dhule (Dhulia)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1114, 'Panihati', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1115, 'Nanded (Nander)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1116, 'Mangalore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1117, 'Dehra Dun', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1118, 'Kamarhati', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1119, 'Davangere', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1120, 'Asansol', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1121, 'Bhagalpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1122, 'Bellary', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1123, 'Barddhaman (Burdwan)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1124, 'Rampur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1125, 'Jalgaon', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1126, 'Muzaffarpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1127, 'Nizamabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1128, 'Muzaffarnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1129, 'Patiala', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1130, 'Shahjahanpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1131, 'Kurnool', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1132, 'Tiruppur (Tirupper)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1133, 'Rohtak', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1134, 'South Dum Dum', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1135, 'Mathura', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1136, 'Chandrapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1137, 'Barahanagar (Baranagar)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1138, 'Darbhanga', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1139, 'Siliguri (Shiliguri)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1140, 'Raurkela', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1141, 'Ambattur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1142, 'Panipat', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1143, 'Firozabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1144, 'Ichalkaranji', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1145, 'Jammu', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1146, 'Ramagundam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1147, 'Eluru', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1148, 'Brahmapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1149, 'Alwar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1150, 'Pondicherry', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1151, 'Thanjavur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1152, 'Bihar Sharif', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1153, 'Tuticorin', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1154, 'Imphal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1155, 'Latur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1156, 'Sagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1157, 'Farrukhabad-cum-Fatehgarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1158, 'Sangli', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1159, 'Parbhani', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1160, 'Nagar Coil', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1161, 'Bijapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1162, 'Kukatpalle', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1163, 'Bally', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1164, 'Bhilwara', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1165, 'Ratlam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1166, 'Avadi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1167, 'Dindigul', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1168, 'Ahmadnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1169, 'Bilaspur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1170, 'Shimoga', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1171, 'Kharagpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1172, 'Mira Bhayandar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1173, 'Vellore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1174, 'Jalna', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1175, 'Burnpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1176, 'Anantapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1177, 'Allappuzha (Alleppey)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1178, 'Tirupati', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1179, 'Karnal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1180, 'Burhanpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1181, 'Hisar (Hissar)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1182, 'Tiruvottiyur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1183, 'Mirzapur-cum-Vindhyachal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1184, 'Secunderabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1185, 'Nadiad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1186, 'Dewas', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1187, 'Murwara (Katni)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1188, 'Ganganagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1189, 'Vizianagaram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1190, 'Erode', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1191, 'Machilipatnam (Masulipatam)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1192, 'Bhatinda (Bathinda)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1193, 'Raichur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1194, 'Agartala', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1195, 'Arrah (Ara)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1196, 'Satna', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1197, 'Lalbahadur Nagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1198, 'Aizawl', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1199, 'Uluberia', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1200, 'Katihar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1201, 'Cuddalore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1202, 'Hugli-Chinsurah', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1203, 'Dhanbad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1204, 'Raiganj', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1205, 'Sambhal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1206, 'Durg', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1207, 'Munger (Monghyr)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1208, 'Kanchipuram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1209, 'North Dum Dum', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1210, 'Karimnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1211, 'Bharatpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1212, 'Sikar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1213, 'Hardwar (Haridwar)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1214, 'Dabgram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1215, 'Morena', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1216, 'Noida', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1217, 'Hapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1218, 'Bhusawal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1219, 'Khandwa', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1220, 'Yamuna Nagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1221, 'Sonipat (Sonepat)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1222, 'Tenali', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1223, 'Raurkela Civil Township', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1224, 'Kollam (Quilon)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1225, 'Kumbakonam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1226, 'Ingraj Bazar (English Bazar)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1227, 'Timkur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1228, 'Amroha', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1229, 'Serampore', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1230, 'Chapra', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1231, 'Pali', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1232, 'Maunath Bhanjan', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1233, 'Adoni', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1234, 'Jaunpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1235, 'Tirunelveli', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1236, 'Bahraich', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1237, 'Gadag Betigeri', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1238, 'Proddatur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1239, 'Chittoor', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1240, 'Barrackpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1241, 'Bharuch (Broach)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1242, 'Naihati', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1243, 'Shillong', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1244, 'Sambalpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1245, 'Junagadh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1246, 'Rae Bareli', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1247, 'Rewa', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1248, 'Gurgaon', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1249, 'Khammam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1250, 'Bulandshahr', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1251, 'Navsari', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1252, 'Malkajgiri', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1253, 'Midnapore (Medinipur)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1254, 'Miraj', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1255, 'Raj Nandgaon', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1256, 'Alandur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1257, 'Puri', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1258, 'Navadwip', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1259, 'Sirsa', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1260, 'Korba', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1261, 'Faizabad', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1262, 'Etawah', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1263, 'Pathankot', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1264, 'Gandhinagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1265, 'Palghat (Palakkad)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1266, 'Veraval', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1267, 'Hoshiarpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1268, 'Ambala', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1269, 'Sitapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1270, 'Bhiwani', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1271, 'Cuddapah', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1272, 'Bhimavaram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1273, 'Krishnanagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1274, 'Chandannagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1275, 'Mandya', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1276, 'Dibrugarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1277, 'Nandyal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1278, 'Balurghat', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1279, 'Neyveli', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1280, 'Fatehpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1281, 'Mahbubnagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1282, 'Budaun', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1283, 'Porbandar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1284, 'Silchar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1285, 'Berhampore (Baharampur)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1286, 'Purnea (Purnia)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1287, 'Bankura', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1288, 'Rajapalaiyam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1289, 'Titagarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1290, 'Halisahar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1291, 'Hathras', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1292, 'Bhir (Bid)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1293, 'Pallavaram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1294, 'Anand', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1295, 'Mango', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1296, 'Santipur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1297, 'Bhind', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1298, 'Gondiya', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1299, 'Tiruvannamalai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1300, 'Yeotmal (Yavatmal)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1301, 'Kulti-Barakar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1302, 'Moga', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1303, 'Shivapuri', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1304, 'Bidar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1305, 'Guntakal', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1306, 'Unnao', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1307, 'Barasat', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1308, 'Tambaram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1309, 'Abohar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1310, 'Pilibhit', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1311, 'Valparai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1312, 'Gonda', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1313, 'Surendranagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1314, 'Qutubullapur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1315, 'Beawar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1316, 'Hindupur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1317, 'Gandhidham', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1318, 'Haldwani-cum-Kathgodam', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1319, 'Tellicherry (Thalassery)', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1320, 'Wardha', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1321, 'Rishra', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1322, 'Bhuj', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1323, 'Modinagar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1324, 'Gudivada', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1325, 'Basirhat', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1326, 'Uttarpara-Kotrung', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1327, 'Ongole', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1328, 'North Barrackpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1329, 'Guna', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1330, 'Haldia', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1331, 'Habra', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1332, 'Kanchrapara', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1333, 'Tonk', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1334, 'Champdani', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1335, 'Orai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1336, 'Pudukkottai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1337, 'Sasaram', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1338, 'Hazaribag', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1339, 'Palayankottai', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1340, 'Banda', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1341, 'Godhra', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1342, 'Hospet', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1343, 'Ashoknagar-Kalyangarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1344, 'Achalpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1345, 'Patan', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1346, 'Mandasor', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1347, 'Damoh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1348, 'Satara', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1349, 'Meerut Cantonment', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1350, 'Dehri', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1351, 'Delhi Cantonment', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1352, 'Chhindwara', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1353, 'Bansberia', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1354, 'Nagaon', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1355, 'Kanpur Cantonment', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1356, 'Vidisha', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1357, 'Bettiah', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1358, 'Purulia', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1359, 'Hassan', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1360, 'Ambala Sadar', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1361, 'Baidyabati', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1362, 'Morvi', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1363, 'Raigarh', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1364, 'Vejalpur', 'IN', 1, '2021-03-08 11:08:23', NULL),
+(1365, 'Baghdad', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1366, 'Mosul', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1367, 'Irbil', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1368, 'Kirkuk', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1369, 'Basra', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1370, 'al-Sulaymaniya', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1371, 'al-Najaf', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1372, 'Karbala', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1373, 'al-Hilla', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1374, 'al-Nasiriya', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1375, 'al-Amara', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1376, 'al-Diwaniya', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1377, 'al-Ramadi', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1378, 'al-Kut', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1379, 'Baquba', 'IQ', 1, '2021-03-08 11:08:23', NULL),
+(1380, 'Teheran', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1381, 'Mashhad', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1382, 'Esfahan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1383, 'Tabriz', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1384, 'Shiraz', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1385, 'Karaj', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1386, 'Ahvaz', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1387, 'Qom', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1388, 'Kermanshah', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1389, 'Urmia', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1390, 'Zahedan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1391, 'Rasht', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1392, 'Hamadan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1393, 'Kerman', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1394, 'Arak', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1395, 'Ardebil', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1396, 'Yazd', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1397, 'Qazvin', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1398, 'Zanjan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1399, 'Sanandaj', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1400, 'Bandar-e-Abbas', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1401, 'Khorramabad', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1402, 'Eslamshahr', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1403, 'Borujerd', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1404, 'Abadan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1405, 'Dezful', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1406, 'Kashan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1407, 'Sari', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1408, 'Gorgan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1409, 'Najafabad', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1410, 'Sabzevar', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1411, 'Khomeynishahr', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1412, 'Amol', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1413, 'Neyshabur', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1414, 'Babol', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1415, 'Khoy', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1416, 'Malayer', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1417, 'Bushehr', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1418, 'Qaemshahr', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1419, 'Qarchak', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1420, 'Qods', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1421, 'Sirjan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1422, 'Bojnurd', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1423, 'Maragheh', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1424, 'Birjand', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1425, 'Ilam', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1426, 'Bukan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1427, 'Masjed-e-Soleyman', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1428, 'Saqqez', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1429, 'Gonbad-e Qabus', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1430, 'Saveh', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1431, 'Mahabad', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1432, 'Varamin', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1433, 'Andimeshk', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1434, 'Khorramshahr', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1435, 'Shahrud', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1436, 'Marv Dasht', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1437, 'Zabol', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1438, 'Shahr-e Kord', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1439, 'Bandar-e Anzali', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1440, 'Rafsanjan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1441, 'Marand', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1442, 'Torbat-e Heydariyeh', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1443, 'Jahrom', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1444, 'Semnan', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1445, 'Miandoab', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1446, 'Qomsheh', 'IR', 1, '2021-03-08 11:08:23', NULL),
+(1447, 'Dublin', 'IE', 1, '2021-03-08 11:08:23', NULL),
+(1448, 'Cork', 'IE', 1, '2021-03-08 11:08:23', NULL),
+(1449, 'Reykjavík', 'IS', 1, '2021-03-08 11:08:23', NULL),
+(1450, 'Jerusalem', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1451, 'Tel Aviv-Jaffa', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1452, 'Haifa', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1453, 'Rishon Le Ziyyon', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1454, 'Beerseba', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1455, 'Holon', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1456, 'Petah Tiqwa', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1457, 'Ashdod', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1458, 'Netanya', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1459, 'Bat Yam', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1460, 'Bene Beraq', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1461, 'Ramat Gan', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1462, 'Ashqelon', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1463, 'Rehovot', 'IL', 1, '2021-03-08 11:08:23', NULL),
+(1464, 'Roma', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1465, 'Milano', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1466, 'Napoli', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1467, 'Torino', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1468, 'Palermo', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1469, 'Genova', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1470, 'Bologna', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1471, 'Firenze', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1472, 'Catania', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1473, 'Bari', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1474, 'Venezia', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1475, 'Messina', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1476, 'Verona', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1477, 'Trieste', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1478, 'Padova', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1479, 'Taranto', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1480, 'Brescia', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1481, 'Reggio di Calabria', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1482, 'Modena', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1483, 'Prato', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1484, 'Parma', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1485, 'Cagliari', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1486, 'Livorno', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1487, 'Perugia', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1488, 'Foggia', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1489, 'Reggio nell´ Emilia', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1490, 'Salerno', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1491, 'Ravenna', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1492, 'Ferrara', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1493, 'Rimini', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1494, 'Syrakusa', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1495, 'Sassari', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1496, 'Monza', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1497, 'Bergamo', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1498, 'Pescara', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1499, 'Latina', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1500, 'Vicenza', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1501, 'Terni', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1502, 'Forlì', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1503, 'Trento', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1504, 'Novara', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1505, 'Piacenza', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1506, 'Ancona', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1507, 'Lecce', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1508, 'Bolzano', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1509, 'Catanzaro', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1510, 'La Spezia', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1511, 'Udine', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1512, 'Torre del Greco', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1513, 'Andria', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1514, 'Brindisi', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1515, 'Giugliano in Campania', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1516, 'Pisa', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1517, 'Barletta', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1518, 'Arezzo', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1519, 'Alessandria', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1520, 'Cesena', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1521, 'Pesaro', 'IT', 1, '2021-03-08 11:08:23', NULL),
+(1523, 'Wien', 'AT', 1, '2021-03-08 11:08:23', NULL),
+(1524, 'Graz', 'AT', 1, '2021-03-08 11:08:23', NULL),
+(1525, 'Linz', 'AT', 1, '2021-03-08 11:08:23', NULL),
+(1526, 'Salzburg', 'AT', 1, '2021-03-08 11:08:23', NULL),
+(1527, 'Innsbruck', 'AT', 1, '2021-03-08 11:08:23', NULL),
+(1528, 'Klagenfurt', 'AT', 1, '2021-03-08 11:08:23', NULL),
+(1529, 'Spanish Town', 'JM', 1, '2021-03-08 11:08:23', NULL),
+(1530, 'Kingston', 'JM', 1, '2021-03-08 11:08:23', NULL),
+(1531, 'Portmore', 'JM', 1, '2021-03-08 11:08:23', NULL),
+(1532, 'Tokyo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1533, 'Jokohama [Yokohama]', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1534, 'Osaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1535, 'Nagoya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1536, 'Sapporo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1537, 'Kioto', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1538, 'Kobe', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1539, 'Fukuoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1540, 'Kawasaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1541, 'Hiroshima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1542, 'Kitakyushu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1543, 'Sendai', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1544, 'Chiba', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1545, 'Sakai', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1546, 'Kumamoto', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1547, 'Okayama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1548, 'Sagamihara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1549, 'Hamamatsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1550, 'Kagoshima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1551, 'Funabashi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1552, 'Higashiosaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1553, 'Hachioji', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1554, 'Niigata', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1555, 'Amagasaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1556, 'Himeji', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1557, 'Shizuoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1558, 'Urawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1559, 'Matsuyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1560, 'Matsudo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1561, 'Kanazawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1562, 'Kawaguchi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1563, 'Ichikawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1564, 'Omiya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1565, 'Utsunomiya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1566, 'Oita', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1567, 'Nagasaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1568, 'Yokosuka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1569, 'Kurashiki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1570, 'Gifu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1571, 'Hirakata', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1572, 'Nishinomiya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1573, 'Toyonaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1574, 'Wakayama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1575, 'Fukuyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1576, 'Fujisawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1577, 'Asahikawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1578, 'Machida', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1579, 'Nara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1580, 'Takatsuki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1581, 'Iwaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1582, 'Nagano', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1583, 'Toyohashi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1584, 'Toyota', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1585, 'Suita', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1586, 'Takamatsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1587, 'Koriyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1588, 'Okazaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1589, 'Kawagoe', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1590, 'Tokorozawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1591, 'Toyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1592, 'Kochi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1593, 'Kashiwa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1594, 'Akita', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1595, 'Miyazaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1596, 'Koshigaya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1597, 'Naha', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1598, 'Aomori', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1599, 'Hakodate', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1600, 'Akashi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1601, 'Yokkaichi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1602, 'Fukushima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1603, 'Morioka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1604, 'Maebashi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1605, 'Kasugai', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1606, 'Otsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1607, 'Ichihara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1608, 'Yao', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1609, 'Ichinomiya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1610, 'Tokushima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1611, 'Kakogawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1612, 'Ibaraki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1613, 'Neyagawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1614, 'Shimonoseki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1615, 'Yamagata', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1616, 'Fukui', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1617, 'Hiratsuka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1618, 'Mito', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1619, 'Sasebo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1620, 'Hachinohe', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1621, 'Takasaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1622, 'Shimizu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1623, 'Kurume', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1624, 'Fuji', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1625, 'Soka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1626, 'Fuchu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1627, 'Chigasaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1628, 'Atsugi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1629, 'Numazu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1630, 'Ageo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1631, 'Yamato', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1632, 'Matsumoto', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1633, 'Kure', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1634, 'Takarazuka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1635, 'Kasukabe', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1636, 'Chofu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1637, 'Odawara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1638, 'Kofu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1639, 'Kushiro', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1640, 'Kishiwada', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1641, 'Hitachi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1642, 'Nagaoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1643, 'Itami', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1644, 'Uji', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1645, 'Suzuka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1646, 'Hirosaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1647, 'Ube', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1648, 'Kodaira', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1649, 'Takaoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1650, 'Obihiro', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1651, 'Tomakomai', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1652, 'Saga', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1653, 'Sakura', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1654, 'Kamakura', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1655, 'Mitaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1656, 'Izumi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1657, 'Hino', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1658, 'Hadano', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1659, 'Ashikaga', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1660, 'Tsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1661, 'Sayama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1662, 'Yachiyo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1663, 'Tsukuba', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1664, 'Tachikawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1665, 'Kumagaya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1666, 'Moriguchi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1667, 'Otaru', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1668, 'Anjo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1669, 'Narashino', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1670, 'Oyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1671, 'Ogaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1672, 'Matsue', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1673, 'Kawanishi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1674, 'Hitachinaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1675, 'Niiza', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1676, 'Nagareyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1677, 'Tottori', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1678, 'Tama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1679, 'Iruma', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1680, 'Ota', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1681, 'Omuta', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1682, 'Komaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1683, 'Ome', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1684, 'Kadoma', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1685, 'Yamaguchi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1686, 'Higashimurayama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1687, 'Yonago', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1688, 'Matsubara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1689, 'Musashino', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1690, 'Tsuchiura', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1691, 'Joetsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1692, 'Miyakonojo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1693, 'Misato', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1694, 'Kakamigahara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1695, 'Daito', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1696, 'Seto', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1697, 'Kariya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1698, 'Urayasu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1699, 'Beppu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1700, 'Niihama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1701, 'Minoo', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1702, 'Fujieda', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1703, 'Abiko', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1704, 'Nobeoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1705, 'Tondabayashi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1706, 'Ueda', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1707, 'Kashihara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1708, 'Matsusaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1709, 'Isesaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1710, 'Zama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1711, 'Kisarazu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1712, 'Noda', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1713, 'Ishinomaki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1714, 'Fujinomiya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1715, 'Kawachinagano', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1716, 'Imabari', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1717, 'Aizuwakamatsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1718, 'Higashihiroshima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1719, 'Habikino', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1720, 'Ebetsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1721, 'Hofu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1722, 'Kiryu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1723, 'Okinawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1724, 'Yaizu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1725, 'Toyokawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1726, 'Ebina', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1727, 'Asaka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1728, 'Higashikurume', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1729, 'Ikoma', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1730, 'Kitami', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1731, 'Koganei', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1732, 'Iwatsuki', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1733, 'Mishima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1734, 'Handa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1735, 'Muroran', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1736, 'Komatsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1737, 'Yatsushiro', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1738, 'Iida', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1739, 'Tokuyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1740, 'Kokubunji', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1741, 'Akishima', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1742, 'Iwakuni', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1743, 'Kusatsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1744, 'Kuwana', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1745, 'Sanda', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1746, 'Hikone', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1747, 'Toda', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1748, 'Tajimi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1749, 'Ikeda', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1750, 'Fukaya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1751, 'Ise', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1752, 'Sakata', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1753, 'Kasuga', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1754, 'Kamagaya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1755, 'Tsuruoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1756, 'Hoya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1757, 'Nishio', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1758, 'Tokai', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1759, 'Inazawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1760, 'Sakado', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1761, 'Isehara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1762, 'Takasago', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1763, 'Fujimi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1764, 'Urasoe', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1765, 'Yonezawa', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1766, 'Konan', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1767, 'Yamatokoriyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1768, 'Maizuru', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1769, 'Onomichi', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1770, 'Higashimatsuyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1771, 'Kimitsu', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1772, 'Isahaya', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1773, 'Kanuma', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1774, 'Izumisano', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1775, 'Kameoka', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1776, 'Mobara', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1777, 'Narita', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1778, 'Kashiwazaki', 'JP', 1, '2021-03-08 11:08:23', NULL);
+INSERT INTO `tbl_cities` (`id`, `city_name`, `country_code`, `enabled`, `updated_at`, `deleted_at`) VALUES
+(1779, 'Tsuyama', 'JP', 1, '2021-03-08 11:08:23', NULL),
+(1780, 'Sanaa', 'YE', 1, '2021-03-08 11:08:23', NULL),
+(1781, 'Aden', 'YE', 1, '2021-03-08 11:08:23', NULL),
+(1782, 'Taizz', 'YE', 1, '2021-03-08 11:08:23', NULL),
+(1783, 'Hodeida', 'YE', 1, '2021-03-08 11:08:23', NULL),
+(1784, 'al-Mukalla', 'YE', 1, '2021-03-08 11:08:23', NULL),
+(1785, 'Ibb', 'YE', 1, '2021-03-08 11:08:23', NULL),
+(1786, 'Amman', 'JO', 1, '2021-03-08 11:08:23', NULL),
+(1787, 'al-Zarqa', 'JO', 1, '2021-03-08 11:08:23', NULL),
+(1788, 'Irbid', 'JO', 1, '2021-03-08 11:08:23', NULL),
+(1789, 'al-Rusayfa', 'JO', 1, '2021-03-08 11:08:23', NULL),
+(1790, 'Wadi al-Sir', 'JO', 1, '2021-03-08 11:08:23', NULL),
+(1791, 'Flying Fish Cove', 'CX', 1, '2021-03-08 11:08:23', NULL),
+(1800, 'Phnom Penh', 'KH', 1, '2021-03-08 11:08:23', NULL),
+(1801, 'Battambang', 'KH', 1, '2021-03-08 11:08:23', NULL),
+(1802, 'Siem Reap', 'KH', 1, '2021-03-08 11:08:23', NULL),
+(1803, 'Douala', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1804, 'Yaoundé', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1805, 'Garoua', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1806, 'Maroua', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1807, 'Bamenda', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1808, 'Bafoussam', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1809, 'Nkongsamba', 'CM', 1, '2021-03-08 11:08:23', NULL),
+(1810, 'Montréal', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1811, 'Calgary', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1812, 'Toronto', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1813, 'North York', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1814, 'Winnipeg', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1815, 'Edmonton', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1816, 'Mississauga', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1817, 'Scarborough', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1818, 'Vancouver', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1819, 'Etobicoke', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1820, 'London', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1821, 'Hamilton', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1822, 'Ottawa', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1823, 'Laval', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1824, 'Surrey', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1825, 'Brampton', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1826, 'Windsor', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1827, 'Saskatoon', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1828, 'Kitchener', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1829, 'Markham', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1830, 'Regina', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1831, 'Burnaby', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1832, 'Québec', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1833, 'York', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1834, 'Richmond', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1835, 'Vaughan', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1836, 'Burlington', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1837, 'Oshawa', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1838, 'Oakville', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1839, 'Saint Catharines', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1840, 'Longueuil', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1841, 'Richmond Hill', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1842, 'Thunder Bay', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1843, 'Nepean', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1844, 'Cape Breton', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1845, 'East York', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1846, 'Halifax', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1847, 'Cambridge', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1848, 'Gloucester', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1849, 'Abbotsford', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1850, 'Guelph', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1851, 'Saint John´s', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1852, 'Coquitlam', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1853, 'Saanich', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1854, 'Gatineau', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1855, 'Delta', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1856, 'Sudbury', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1857, 'Kelowna', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1858, 'Barrie', 'CA', 1, '2021-03-08 11:08:23', NULL),
+(1859, 'Praia', 'CV', 1, '2021-03-08 11:08:23', NULL),
+(1860, 'Almaty', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1861, 'Qaraghandy', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1862, 'Shymkent', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1863, 'Taraz', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1864, 'Astana', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1865, 'Öskemen', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1866, 'Pavlodar', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1867, 'Semey', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1868, 'Aqtöbe', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1869, 'Qostanay', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1870, 'Petropavl', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1871, 'Oral', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1872, 'Temirtau', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1873, 'Qyzylorda', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1874, 'Aqtau', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1875, 'Atyrau', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1876, 'Ekibastuz', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1877, 'Kökshetau', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1878, 'Rudnyy', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1879, 'Taldyqorghan', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1880, 'Zhezqazghan', 'KZ', 1, '2021-03-08 11:08:23', NULL),
+(1881, 'Nairobi', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1882, 'Mombasa', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1883, 'Kisumu', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1884, 'Nakuru', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1885, 'Machakos', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1886, 'Eldoret', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1887, 'Meru', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1888, 'Nyeri', 'KE', 1, '2021-03-08 11:08:23', NULL),
+(1889, 'Bangui', 'CF', 1, '2021-03-08 11:08:23', NULL),
+(1890, 'Shanghai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1891, 'Peking', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1892, 'Chongqing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1893, 'Tianjin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1894, 'Wuhan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1895, 'Harbin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1896, 'Shenyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1897, 'Kanton [Guangzhou]', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1898, 'Chengdu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1899, 'Nanking [Nanjing]', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1900, 'Changchun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1901, 'Xi´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1902, 'Dalian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1903, 'Qingdao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1904, 'Jinan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1905, 'Hangzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1906, 'Zhengzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1907, 'Shijiazhuang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1908, 'Taiyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1909, 'Kunming', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1910, 'Changsha', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1911, 'Nanchang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1912, 'Fuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1913, 'Lanzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1914, 'Guiyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1915, 'Ningbo', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1916, 'Hefei', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1917, 'Urumtši [Ürümqi]', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1918, 'Anshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1919, 'Fushun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1920, 'Nanning', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1921, 'Zibo', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1922, 'Qiqihar', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1923, 'Jilin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1924, 'Tangshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1925, 'Baotou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1926, 'Shenzhen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1927, 'Hohhot', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1928, 'Handan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1929, 'Wuxi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1930, 'Xuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1931, 'Datong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1932, 'Yichun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1933, 'Benxi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1934, 'Luoyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1935, 'Suzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1936, 'Xining', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1937, 'Huainan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1938, 'Jixi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1939, 'Daqing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1940, 'Fuxin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1941, 'Amoy [Xiamen]', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1942, 'Liuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1943, 'Shantou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1944, 'Jinzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1945, 'Mudanjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1946, 'Yinchuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1947, 'Changzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1948, 'Zhangjiakou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1949, 'Dandong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1950, 'Hegang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1951, 'Kaifeng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1952, 'Jiamusi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1953, 'Liaoyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1954, 'Hengyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1955, 'Baoding', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1956, 'Hunjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1957, 'Xinxiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1958, 'Huangshi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1959, 'Haikou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1960, 'Yantai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1961, 'Bengbu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1962, 'Xiangtan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1963, 'Weifang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1964, 'Wuhu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1965, 'Pingxiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1966, 'Yingkou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1967, 'Anyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1968, 'Panzhihua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1969, 'Pingdingshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1970, 'Xiangfan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1971, 'Zhuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1972, 'Jiaozuo', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1973, 'Wenzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1974, 'Zhangjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1975, 'Zigong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1976, 'Shuangyashan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1977, 'Zaozhuang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1978, 'Yakeshi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1979, 'Yichang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1980, 'Zhenjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1981, 'Huaibei', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1982, 'Qinhuangdao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1983, 'Guilin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1984, 'Liupanshui', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1985, 'Panjin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1986, 'Yangquan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1987, 'Jinxi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1988, 'Liaoyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1989, 'Lianyungang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1990, 'Xianyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1991, 'Tai´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1992, 'Chifeng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1993, 'Shaoguan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1994, 'Nantong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1995, 'Leshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1996, 'Baoji', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1997, 'Linyi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1998, 'Tonghua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(1999, 'Siping', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2000, 'Changzhi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2001, 'Tengzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2002, 'Chaozhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2003, 'Yangzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2004, 'Dongwan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2005, 'Ma´anshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2006, 'Foshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2007, 'Yueyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2008, 'Xingtai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2009, 'Changde', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2010, 'Shihezi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2011, 'Yancheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2012, 'Jiujiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2013, 'Dongying', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2014, 'Shashi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2015, 'Xintai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2016, 'Jingdezhen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2017, 'Tongchuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2018, 'Zhongshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2019, 'Shiyan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2020, 'Tieli', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2021, 'Jining', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2022, 'Wuhai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2023, 'Mianyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2024, 'Luzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2025, 'Zunyi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2026, 'Shizuishan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2027, 'Neijiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2028, 'Tongliao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2029, 'Tieling', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2030, 'Wafangdian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2031, 'Anqing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2032, 'Shaoyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2033, 'Laiwu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2034, 'Chengde', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2035, 'Tianshui', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2036, 'Nanyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2037, 'Cangzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2038, 'Yibin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2039, 'Huaiyin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2040, 'Dunhua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2041, 'Yanji', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2042, 'Jiangmen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2043, 'Tongling', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2044, 'Suihua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2045, 'Gongziling', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2046, 'Xiantao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2047, 'Chaoyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2048, 'Ganzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2049, 'Huzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2050, 'Baicheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2051, 'Shangzi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2052, 'Yangjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2053, 'Qitaihe', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2054, 'Gejiu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2055, 'Jiangyin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2056, 'Hebi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2057, 'Jiaxing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2058, 'Wuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2059, 'Meihekou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2060, 'Xuchang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2061, 'Liaocheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2062, 'Haicheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2063, 'Qianjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2064, 'Baiyin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2065, 'Bei´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2066, 'Yixing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2067, 'Laizhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2068, 'Qaramay', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2069, 'Acheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2070, 'Dezhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2071, 'Nanping', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2072, 'Zhaoqing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2073, 'Beipiao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2074, 'Fengcheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2075, 'Fuyu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2076, 'Xinyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2077, 'Dongtai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2078, 'Yuci', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2079, 'Honghu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2080, 'Ezhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2081, 'Heze', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2082, 'Daxian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2083, 'Linfen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2084, 'Tianmen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2085, 'Yiyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2086, 'Quanzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2087, 'Rizhao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2088, 'Deyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2089, 'Guangyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2090, 'Changshu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2091, 'Zhangzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2092, 'Hailar', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2093, 'Nanchong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2094, 'Jiutai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2095, 'Zhaodong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2096, 'Shaoxing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2097, 'Fuyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2098, 'Maoming', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2099, 'Qujing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2100, 'Ghulja', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2101, 'Jiaohe', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2102, 'Puyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2103, 'Huadian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2104, 'Jiangyou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2105, 'Qashqar', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2106, 'Anshun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2107, 'Fuling', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2108, 'Xinyu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2109, 'Hanzhong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2110, 'Danyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2111, 'Chenzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2112, 'Xiaogan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2113, 'Shangqiu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2114, 'Zhuhai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2115, 'Qingyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2116, 'Aqsu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2118, 'Xiaoshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2119, 'Zaoyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2120, 'Xinghua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2121, 'Hami', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2122, 'Huizhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2123, 'Jinmen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2124, 'Sanming', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2125, 'Ulanhot', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2126, 'Korla', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2127, 'Wanxian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2128, 'Rui´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2129, 'Zhoushan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2130, 'Liangcheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2131, 'Jiaozhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2132, 'Taizhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2135, 'Taonan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2136, 'Pingdu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2137, 'Ji´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2138, 'Longkou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2139, 'Langfang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2140, 'Zhoukou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2141, 'Suining', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2142, 'Yulin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2143, 'Jinhua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2144, 'Liu´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2145, 'Shuangcheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2146, 'Suizhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2147, 'Ankang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2148, 'Weinan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2149, 'Longjing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2150, 'Da´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2151, 'Lengshuijiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2152, 'Laiyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2153, 'Xianning', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2154, 'Dali', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2155, 'Anda', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2156, 'Jincheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2157, 'Longyan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2158, 'Xichang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2159, 'Wendeng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2160, 'Hailun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2161, 'Binzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2162, 'Linhe', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2163, 'Wuwei', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2164, 'Duyun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2165, 'Mishan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2166, 'Shangrao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2167, 'Changji', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2168, 'Meixian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2169, 'Yushu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2170, 'Tiefa', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2171, 'Huai´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2172, 'Leiyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2173, 'Zalantun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2174, 'Weihai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2175, 'Loudi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2176, 'Qingzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2177, 'Qidong', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2178, 'Huaihua', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2179, 'Luohe', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2180, 'Chuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2182, 'Linqing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2183, 'Chaohu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2184, 'Laohekou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2185, 'Dujiangyan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2186, 'Zhumadian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2187, 'Linchuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2188, 'Jiaonan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2189, 'Sanmenxia', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2190, 'Heyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2191, 'Manzhouli', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2192, 'Lhasa', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2193, 'Lianyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2194, 'Kuytun', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2195, 'Puqi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2196, 'Hongjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2197, 'Qinzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2198, 'Renqiu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2199, 'Yuyao', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2200, 'Guigang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2201, 'Kaili', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2202, 'Yan´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2203, 'Beihai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2204, 'Xuangzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2205, 'Quzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2206, 'Yong´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2207, 'Zixing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2208, 'Liyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2209, 'Yizheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2210, 'Yumen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2211, 'Liling', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2212, 'Yuncheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2213, 'Shanwei', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2214, 'Cixi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2215, 'Yuanjiang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2216, 'Bozhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2217, 'Jinchang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2218, 'Fu´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2219, 'Suqian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2220, 'Shishou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2221, 'Hengshui', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2222, 'Danjiangkou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2223, 'Fujin', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2224, 'Sanya', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2225, 'Guangshui', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2226, 'Huangshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2227, 'Xingcheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2228, 'Zhucheng', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2229, 'Kunshan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2230, 'Haining', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2231, 'Pingliang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2232, 'Fuqing', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2233, 'Xinzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2234, 'Jieyang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2235, 'Zhangjiagang', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2236, 'Tong Xian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2237, 'Ya´an', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2239, 'Emeishan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2240, 'Enshi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2241, 'Bose', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2242, 'Yuzhou', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2243, 'Kaiyuan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2244, 'Tumen', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2245, 'Putian', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2246, 'Linhai', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2247, 'Xilin Hot', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2248, 'Shaowu', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2249, 'Junan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2250, 'Huaying', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2251, 'Pingyi', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2252, 'Huangyan', 'CN', 1, '2021-03-08 11:08:23', NULL),
+(2253, 'Bishkek', 'KG', 1, '2021-03-08 11:08:23', NULL),
+(2254, 'Osh', 'KG', 1, '2021-03-08 11:08:23', NULL),
+(2255, 'Bikenibeu', 'KI', 1, '2021-03-08 11:08:23', NULL),
+(2256, 'Bairiki', 'KI', 1, '2021-03-08 11:08:23', NULL),
+(2257, 'Santafé de Bogotá', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2258, 'Cali', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2259, 'Medellín', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2260, 'Barranquilla', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2261, 'Cartagena', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2262, 'Cúcuta', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2263, 'Bucaramanga', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2264, 'Ibagué', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2265, 'Pereira', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2266, 'Santa Marta', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2267, 'Manizales', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2268, 'Bello', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2269, 'Pasto', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2270, 'Neiva', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2271, 'Soledad', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2272, 'Armenia', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2273, 'Villavicencio', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2274, 'Soacha', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2275, 'Valledupar', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2276, 'Montería', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2277, 'Itagüí', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2278, 'Palmira', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2279, 'Buenaventura', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2280, 'Floridablanca', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2281, 'Sincelejo', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2282, 'Popayán', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2283, 'Barrancabermeja', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2284, 'Dos Quebradas', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2285, 'Tuluá', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2286, 'Envigado', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2287, 'Cartago', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2288, 'Girardot', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2289, 'Buga', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2290, 'Tunja', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2291, 'Florencia', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2292, 'Maicao', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2293, 'Sogamoso', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2294, 'Giron', 'CO', 1, '2021-03-08 11:08:23', NULL),
+(2295, 'Moroni', 'KM', 1, '2021-03-08 11:08:23', NULL),
+(2296, 'Brazzaville', 'CG', 1, '2021-03-08 11:08:23', NULL),
+(2297, 'Pointe-Noire', 'CG', 1, '2021-03-08 11:08:23', NULL),
+(2298, 'Kinshasa', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2299, 'Lubumbashi', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2300, 'Mbuji-Mayi', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2301, 'Kolwezi', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2302, 'Kisangani', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2303, 'Kananga', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2304, 'Likasi', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2305, 'Bukavu', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2306, 'Kikwit', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2307, 'Tshikapa', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2308, 'Matadi', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2309, 'Mbandaka', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2310, 'Mwene-Ditu', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2311, 'Boma', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2312, 'Uvira', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2313, 'Butembo', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2314, 'Goma', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2315, 'Kalemie', 'CD', 1, '2021-03-08 11:08:23', NULL),
+(2316, 'Bantam', 'CC', 1, '2021-03-08 11:08:23', NULL),
+(2317, 'West Island', 'CC', 1, '2021-03-08 11:08:23', NULL),
+(2318, 'Pyongyang', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2319, 'Hamhung', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2320, 'Chongjin', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2321, 'Nampo', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2322, 'Sinuiju', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2323, 'Wonsan', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2324, 'Phyongsong', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2325, 'Sariwon', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2326, 'Haeju', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2327, 'Kanggye', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2328, 'Kimchaek', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2329, 'Hyesan', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2330, 'Kaesong', 'KP', 1, '2021-03-08 11:08:23', NULL),
+(2331, 'Seoul', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2332, 'Pusan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2333, 'Inchon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2334, 'Taegu', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2335, 'Taejon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2336, 'Kwangju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2337, 'Ulsan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2338, 'Songnam', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2339, 'Puchon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2340, 'Suwon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2341, 'Anyang', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2342, 'Chonju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2343, 'Chongju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2344, 'Koyang', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2345, 'Ansan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2346, 'Pohang', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2347, 'Chang-won', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2348, 'Masan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2349, 'Kwangmyong', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2350, 'Chonan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2351, 'Chinju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2352, 'Iksan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2353, 'Pyongtaek', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2354, 'Kumi', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2355, 'Uijongbu', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2356, 'Kyongju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2357, 'Kunsan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2358, 'Cheju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2359, 'Kimhae', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2360, 'Sunchon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2361, 'Mokpo', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2362, 'Yong-in', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2363, 'Wonju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2364, 'Kunpo', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2365, 'Chunchon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2366, 'Namyangju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2367, 'Kangnung', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2368, 'Chungju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2369, 'Andong', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2370, 'Yosu', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2371, 'Kyongsan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2372, 'Paju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2373, 'Yangsan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2374, 'Ichon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2375, 'Asan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2376, 'Koje', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2377, 'Kimchon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2378, 'Nonsan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2379, 'Kuri', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2380, 'Chong-up', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2381, 'Chechon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2382, 'Sosan', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2383, 'Shihung', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2384, 'Tong-yong', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2385, 'Kongju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2386, 'Yongju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2387, 'Chinhae', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2388, 'Sangju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2389, 'Poryong', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2390, 'Kwang-yang', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2391, 'Miryang', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2392, 'Hanam', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2393, 'Kimje', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2394, 'Yongchon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2395, 'Sachon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2396, 'Uiwang', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2397, 'Naju', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2398, 'Namwon', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2399, 'Tonghae', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2400, 'Mun-gyong', 'KR', 1, '2021-03-08 11:08:23', NULL),
+(2401, 'Athenai', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2402, 'Thessaloniki', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2403, 'Pireus', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2404, 'Patras', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2405, 'Peristerion', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2406, 'Herakleion', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2407, 'Kallithea', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2408, 'Larisa', 'GR', 1, '2021-03-08 11:08:23', NULL),
+(2409, 'Zagreb', 'HR', 1, '2021-03-08 11:08:23', NULL),
+(2410, 'Split', 'HR', 1, '2021-03-08 11:08:23', NULL),
+(2411, 'Rijeka', 'HR', 1, '2021-03-08 11:08:23', NULL),
+(2412, 'Osijek', 'HR', 1, '2021-03-08 11:08:23', NULL),
+(2413, 'La Habana', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2414, 'Santiago de Cuba', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2415, 'Camagüey', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2416, 'Holguín', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2417, 'Santa Clara', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2418, 'Guantánamo', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2419, 'Pinar del Río', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2420, 'Bayamo', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2421, 'Cienfuegos', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2422, 'Victoria de las Tunas', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2423, 'Matanzas', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2424, 'Manzanillo', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2425, 'Sancti-Spíritus', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2426, 'Ciego de Ávila', 'CU', 1, '2021-03-08 11:08:23', NULL),
+(2427, 'al-Salimiya', 'KW', 1, '2021-03-08 11:08:23', NULL),
+(2428, 'Jalib al-Shuyukh', 'KW', 1, '2021-03-08 11:08:23', NULL),
+(2429, 'Kuwait', 'KW', 1, '2021-03-08 11:08:23', NULL),
+(2430, 'Nicosia', 'CY', 1, '2021-03-08 11:08:23', NULL),
+(2431, 'Limassol', 'CY', 1, '2021-03-08 11:08:23', NULL),
+(2432, 'Vientiane', 'LA', 1, '2021-03-08 11:08:23', NULL),
+(2433, 'Savannakhet', 'LA', 1, '2021-03-08 11:08:23', NULL),
+(2434, 'Riga', 'LV', 1, '2021-03-08 11:08:23', NULL),
+(2435, 'Daugavpils', 'LV', 1, '2021-03-08 11:08:23', NULL),
+(2436, 'Liepaja', 'LV', 1, '2021-03-08 11:08:23', NULL),
+(2437, 'Maseru', 'LS', 1, '2021-03-08 11:08:23', NULL),
+(2438, 'Beirut', 'LB', 1, '2021-03-08 11:08:23', NULL),
+(2439, 'Tripoli', 'LB', 1, '2021-03-08 11:08:23', NULL),
+(2440, 'Monrovia', 'LR', 1, '2021-03-08 11:08:23', NULL),
+(2441, 'Tripoli', 'LY', 1, '2021-03-08 11:08:23', NULL),
+(2442, 'Bengasi', 'LY', 1, '2021-03-08 11:08:23', NULL),
+(2443, 'Misrata', 'LY', 1, '2021-03-08 11:08:23', NULL),
+(2444, 'al-Zawiya', 'LY', 1, '2021-03-08 11:08:23', NULL),
+(2445, 'Schaan', 'LI', 1, '2021-03-08 11:08:23', NULL),
+(2446, 'Vaduz', 'LI', 1, '2021-03-08 11:08:23', NULL),
+(2447, 'Vilnius', 'LT', 1, '2021-03-08 11:08:23', NULL),
+(2448, 'Kaunas', 'LT', 1, '2021-03-08 11:08:23', NULL),
+(2449, 'Klaipeda', 'LT', 1, '2021-03-08 11:08:23', NULL),
+(2450, 'Šiauliai', 'LT', 1, '2021-03-08 11:08:23', NULL),
+(2451, 'Panevezys', 'LT', 1, '2021-03-08 11:08:23', NULL),
+(2452, 'Luxembourg [Luxemburg/Lëtzebuerg]', 'LU', 1, '2021-03-08 11:08:23', NULL),
+(2453, 'El-Aaiún', 'EH', 1, '2021-03-08 11:08:23', NULL),
+(2454, 'Macao', 'MO', 1, '2021-03-08 11:08:23', NULL),
+(2455, 'Antananarivo', 'MG', 1, '2021-03-08 11:08:23', NULL),
+(2456, 'Toamasina', 'MG', 1, '2021-03-08 11:08:23', NULL),
+(2457, 'Antsirabé', 'MG', 1, '2021-03-08 11:08:23', NULL),
+(2458, 'Mahajanga', 'MG', 1, '2021-03-08 11:08:23', NULL),
+(2459, 'Fianarantsoa', 'MG', 1, '2021-03-08 11:08:23', NULL),
+(2460, 'Skopje', 'MK', 1, '2021-03-08 11:08:23', NULL),
+(2461, 'Blantyre', 'MW', 1, '2021-03-08 11:08:23', NULL),
+(2462, 'Lilongwe', 'MW', 1, '2021-03-08 11:08:23', NULL),
+(2463, 'Male', 'MV', 1, '2021-03-08 11:08:23', NULL),
+(2464, 'Kuala Lumpur', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2465, 'Ipoh', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2466, 'Johor Baharu', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2467, 'Petaling Jaya', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2468, 'Kelang', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2469, 'Kuala Terengganu', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2470, 'Pinang', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2471, 'Kota Bharu', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2472, 'Kuantan', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2473, 'Taiping', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2474, 'Seremban', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2475, 'Kuching', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2476, 'Sibu', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2477, 'Sandakan', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2478, 'Alor Setar', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2479, 'Selayang Baru', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2480, 'Sungai Petani', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2481, 'Shah Alam', 'MY', 1, '2021-03-08 11:08:23', NULL),
+(2482, 'Bamako', 'ML', 1, '2021-03-08 11:08:23', NULL),
+(2483, 'Birkirkara', 'MT', 1, '2021-03-08 11:08:23', NULL),
+(2484, 'Valletta', 'MT', 1, '2021-03-08 11:08:23', NULL),
+(2485, 'Casablanca', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2486, 'Rabat', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2487, 'Marrakech', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2488, 'Fès', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2489, 'Tanger', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2490, 'Salé', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2491, 'Meknès', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2492, 'Oujda', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2493, 'Kénitra', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2494, 'Tétouan', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2495, 'Safi', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2496, 'Agadir', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2497, 'Mohammedia', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2498, 'Khouribga', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2499, 'Beni-Mellal', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2500, 'Témara', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2501, 'El Jadida', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2502, 'Nador', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2503, 'Ksar el Kebir', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2504, 'Settat', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2505, 'Taza', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2506, 'El Araich', 'MA', 1, '2021-03-08 11:08:23', NULL),
+(2507, 'Dalap-Uliga-Darrit', 'MH', 1, '2021-03-08 11:08:23', NULL),
+(2508, 'Fort-de-France', 'MQ', 1, '2021-03-08 11:08:23', NULL),
+(2509, 'Nouakchott', 'MR', 1, '2021-03-08 11:08:23', NULL),
+(2510, 'Nouâdhibou', 'MR', 1, '2021-03-08 11:08:23', NULL),
+(2511, 'Port-Louis', 'MU', 1, '2021-03-08 11:08:23', NULL),
+(2512, 'Beau Bassin-Rose Hill', 'MU', 1, '2021-03-08 11:08:23', NULL),
+(2513, 'Vacoas-Phoenix', 'MU', 1, '2021-03-08 11:08:23', NULL),
+(2514, 'Mamoutzou', 'YT', 1, '2021-03-08 11:08:23', NULL),
+(2515, 'Ciudad de México', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2516, 'Guadalajara', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2517, 'Ecatepec de Morelos', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2518, 'Puebla', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2519, 'Nezahualcóyotl', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2520, 'Juárez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2521, 'Tijuana', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2522, 'León', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2523, 'Monterrey', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2524, 'Zapopan', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2525, 'Naucalpan de Juárez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2526, 'Mexicali', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2527, 'Culiacán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2528, 'Acapulco de Juárez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2529, 'Tlalnepantla de Baz', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2530, 'Mérida', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2531, 'Chihuahua', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2532, 'San Luis Potosí', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2533, 'Guadalupe', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2534, 'Toluca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2535, 'Aguascalientes', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2536, 'Querétaro', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2537, 'Morelia', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2538, 'Hermosillo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2539, 'Saltillo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2540, 'Torreón', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2541, 'Centro (Villahermosa)', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2542, 'San Nicolás de los Garza', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2543, 'Durango', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2544, 'Chimalhuacán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2545, 'Tlaquepaque', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2546, 'Atizapán de Zaragoza', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2547, 'Veracruz', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2548, 'Cuautitlán Izcalli', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2549, 'Irapuato', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2550, 'Tuxtla Gutiérrez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2551, 'Tultitlán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2552, 'Reynosa', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2553, 'Benito Juárez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2554, 'Matamoros', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2555, 'Xalapa', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2556, 'Celaya', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2557, 'Mazatlán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2558, 'Ensenada', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2559, 'Ahome', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2560, 'Cajeme', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2561, 'Cuernavaca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2562, 'Tonalá', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2563, 'Valle de Chalco Solidaridad', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2564, 'Nuevo Laredo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2565, 'Tepic', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2566, 'Tampico', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2567, 'Ixtapaluca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2568, 'Apodaca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2569, 'Guasave', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2570, 'Gómez Palacio', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2571, 'Tapachula', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2572, 'Nicolás Romero', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2573, 'Coatzacoalcos', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2574, 'Uruapan', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2575, 'Victoria', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2576, 'Oaxaca de Juárez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2577, 'Coacalco de Berriozábal', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2578, 'Pachuca de Soto', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2579, 'General Escobedo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2580, 'Salamanca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2581, 'Santa Catarina', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2582, 'Tehuacán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2583, 'Chalco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2584, 'Cárdenas', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2585, 'Campeche', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2586, 'La Paz', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2587, 'Othón P. Blanco (Chetumal)', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2588, 'Texcoco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2590, 'Metepec', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2591, 'Monclova', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2592, 'Huixquilucan', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2593, 'Chilpancingo de los Bravo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2594, 'Puerto Vallarta', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2595, 'Fresnillo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2596, 'Ciudad Madero', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2597, 'Soledad de Graciano Sánchez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2598, 'San Juan del Río', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2599, 'San Felipe del Progreso', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2600, 'Córdoba', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2601, 'Tecámac', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2602, 'Ocosingo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2603, 'Carmen', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2604, 'Lázaro Cárdenas', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2605, 'Jiutepec', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2606, 'Papantla', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2607, 'Comalcalco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2608, 'Zamora', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2609, 'Nogales', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2610, 'Huimanguillo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2611, 'Cuautla', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2612, 'Minatitlán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2613, 'Poza Rica de Hidalgo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2614, 'Ciudad Valles', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2615, 'Navolato', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2616, 'San Luis Río Colorado', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2617, 'Pénjamo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2618, 'San Andrés Tuxtla', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2619, 'Guanajuato', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2620, 'Navojoa', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2621, 'Zitácuaro', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2622, 'Boca del Río', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2623, 'Allende', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2624, 'Silao', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2625, 'Macuspana', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2626, 'San Juan Bautista Tuxtepec', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2627, 'San Cristóbal de las Casas', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2628, 'Valle de Santiago', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2629, 'Guaymas', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2630, 'Colima', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2631, 'Dolores Hidalgo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2632, 'Lagos de Moreno', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2633, 'Piedras Negras', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2634, 'Altamira', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2635, 'Túxpam', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2636, 'San Pedro Garza García', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2637, 'Cuauhtémoc', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2638, 'Manzanillo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2639, 'Iguala de la Independencia', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2640, 'Zacatecas', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2641, 'Tlajomulco de Zúñiga', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2642, 'Tulancingo de Bravo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2643, 'Zinacantepec', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2644, 'San Martín Texmelucan', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2645, 'Tepatitlán de Morelos', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2646, 'Martínez de la Torre', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2647, 'Orizaba', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2648, 'Apatzingán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2649, 'Atlixco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2650, 'Delicias', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2651, 'Ixtlahuaca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2652, 'El Mante', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2653, 'Lerdo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2654, 'Almoloya de Juárez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2655, 'Acámbaro', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2656, 'Acuña', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2658, 'Huejutla de Reyes', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2659, 'Hidalgo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2660, 'Los Cabos', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2661, 'Comitán de Domínguez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2662, 'Cunduacán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2663, 'Río Bravo', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2664, 'Temapache', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2665, 'Chilapa de Alvarez', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2666, 'Hidalgo del Parral', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2667, 'San Francisco del Rincón', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2668, 'Taxco de Alarcón', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2669, 'Zumpango', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2670, 'San Pedro Cholula', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2671, 'Lerma', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2672, 'Tecomán', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2673, 'Las Margaritas', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2674, 'Cosoleacaque', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2675, 'San Luis de la Paz', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2676, 'José Azueta', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2677, 'Santiago Ixcuintla', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2678, 'San Felipe', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2679, 'Tejupilco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2680, 'Tantoyuca', 'MX', 1, '2021-03-08 11:08:23', NULL);
+INSERT INTO `tbl_cities` (`id`, `city_name`, `country_code`, `enabled`, `updated_at`, `deleted_at`) VALUES
+(2681, 'Salvatierra', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2682, 'Tultepec', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2683, 'Temixco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2685, 'Pánuco', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2686, 'El Fuerte', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2687, 'Tierra Blanca', 'MX', 1, '2021-03-08 11:08:23', NULL),
+(2688, 'Weno', 'FM', 1, '2021-03-08 11:08:23', NULL),
+(2689, 'Palikir', 'FM', 1, '2021-03-08 11:08:23', NULL),
+(2690, 'Chisinau', 'MD', 1, '2021-03-08 11:08:23', NULL),
+(2691, 'Tiraspol', 'MD', 1, '2021-03-08 11:08:23', NULL),
+(2692, 'Balti', 'MD', 1, '2021-03-08 11:08:23', NULL),
+(2693, 'Bender (Tîghina)', 'MD', 1, '2021-03-08 11:08:23', NULL),
+(2694, 'Monte-Carlo', 'MC', 1, '2021-03-08 11:08:23', NULL),
+(2695, 'Monaco-Ville', 'MC', 1, '2021-03-08 11:08:23', NULL),
+(2696, 'Ulan Bator', 'MN', 1, '2021-03-08 11:08:23', NULL),
+(2697, 'Plymouth', 'MS', 1, '2021-03-08 11:08:23', NULL),
+(2698, 'Maputo', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2699, 'Matola', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2700, 'Beira', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2701, 'Nampula', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2702, 'Chimoio', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2703, 'Naçala-Porto', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2704, 'Quelimane', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2705, 'Mocuba', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2706, 'Tete', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2707, 'Xai-Xai', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2708, 'Gurue', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2709, 'Maxixe', 'MZ', 1, '2021-03-08 11:08:23', NULL),
+(2710, 'Rangoon (Yangon)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2711, 'Mandalay', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2712, 'Moulmein (Mawlamyine)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2713, 'Pegu (Bago)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2714, 'Bassein (Pathein)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2715, 'Monywa', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2716, 'Sittwe (Akyab)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2717, 'Taunggyi (Taunggye)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2718, 'Meikhtila', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2719, 'Mergui (Myeik)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2720, 'Lashio (Lasho)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2721, 'Prome (Pyay)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2722, 'Henzada (Hinthada)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2723, 'Myingyan', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2724, 'Tavoy (Dawei)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2725, 'Pagakku (Pakokku)', 'MM', 1, '2021-03-08 11:08:23', NULL),
+(2726, 'Windhoek', 'NA', 1, '2021-03-08 11:08:23', NULL),
+(2727, 'Yangor', 'NR', 1, '2021-03-08 11:08:23', NULL),
+(2728, 'Yaren', 'NR', 1, '2021-03-08 11:08:23', NULL),
+(2729, 'Kathmandu', 'NP', 1, '2021-03-08 11:08:23', NULL),
+(2730, 'Biratnagar', 'NP', 1, '2021-03-08 11:08:23', NULL),
+(2731, 'Pokhara', 'NP', 1, '2021-03-08 11:08:23', NULL),
+(2732, 'Lalitapur', 'NP', 1, '2021-03-08 11:08:23', NULL),
+(2733, 'Birgunj', 'NP', 1, '2021-03-08 11:08:23', NULL),
+(2734, 'Managua', 'NI', 1, '2021-03-08 11:08:23', NULL),
+(2735, 'León', 'NI', 1, '2021-03-08 11:08:23', NULL),
+(2736, 'Chinandega', 'NI', 1, '2021-03-08 11:08:23', NULL),
+(2737, 'Masaya', 'NI', 1, '2021-03-08 11:08:23', NULL),
+(2738, 'Niamey', 'NE', 1, '2021-03-08 11:08:23', NULL),
+(2739, 'Zinder', 'NE', 1, '2021-03-08 11:08:23', NULL),
+(2740, 'Maradi', 'NE', 1, '2021-03-08 11:08:23', NULL),
+(2741, 'Lagos', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2742, 'Ibadan', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2743, 'Ogbomosho', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2744, 'Kano', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2745, 'Oshogbo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2746, 'Ilorin', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2747, 'Abeokuta', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2748, 'Port Harcourt', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2749, 'Zaria', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2750, 'Ilesha', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2751, 'Onitsha', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2752, 'Iwo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2753, 'Ado-Ekiti', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2754, 'Abuja', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2755, 'Kaduna', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2756, 'Mushin', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2757, 'Maiduguri', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2758, 'Enugu', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2759, 'Ede', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2760, 'Aba', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2761, 'Ife', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2762, 'Ila', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2763, 'Oyo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2764, 'Ikerre', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2765, 'Benin City', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2766, 'Iseyin', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2767, 'Katsina', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2768, 'Jos', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2769, 'Sokoto', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2770, 'Ilobu', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2771, 'Offa', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2772, 'Ikorodu', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2773, 'Ilawe-Ekiti', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2774, 'Owo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2775, 'Ikirun', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2776, 'Shaki', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2777, 'Calabar', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2778, 'Ondo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2779, 'Akure', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2780, 'Gusau', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2781, 'Ijebu-Ode', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2782, 'Effon-Alaiye', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2783, 'Kumo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2784, 'Shomolu', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2785, 'Oka-Akoko', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2786, 'Ikare', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2787, 'Sapele', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2788, 'Deba Habe', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2789, 'Minna', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2790, 'Warri', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2791, 'Bida', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2792, 'Ikire', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2793, 'Makurdi', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2794, 'Lafia', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2795, 'Inisa', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2796, 'Shagamu', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2797, 'Awka', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2798, 'Gombe', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2799, 'Igboho', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2800, 'Ejigbo', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2801, 'Agege', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2802, 'Ise-Ekiti', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2803, 'Ugep', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2804, 'Epe', 'NG', 1, '2021-03-08 11:08:23', NULL),
+(2805, 'Alofi', 'NU', 1, '2021-03-08 11:08:23', NULL),
+(2806, 'Kingston', 'NF', 1, '2021-03-08 11:08:23', NULL),
+(2807, 'Oslo', 'NO', 1, '2021-03-08 11:08:23', NULL),
+(2808, 'Bergen', 'NO', 1, '2021-03-08 11:08:23', NULL),
+(2809, 'Trondheim', 'NO', 1, '2021-03-08 11:08:23', NULL),
+(2810, 'Stavanger', 'NO', 1, '2021-03-08 11:08:23', NULL),
+(2811, 'Bærum', 'NO', 1, '2021-03-08 11:08:23', NULL),
+(2812, 'Abidjan', 'CI', 1, '2021-03-08 11:08:23', NULL),
+(2813, 'Bouaké', 'CI', 1, '2021-03-08 11:08:23', NULL),
+(2814, 'Yamoussoukro', 'CI', 1, '2021-03-08 11:08:23', NULL),
+(2815, 'Daloa', 'CI', 1, '2021-03-08 11:08:23', NULL),
+(2816, 'Korhogo', 'CI', 1, '2021-03-08 11:08:23', NULL),
+(2817, 'al-Sib', 'OM', 1, '2021-03-08 11:08:23', NULL),
+(2818, 'Salala', 'OM', 1, '2021-03-08 11:08:23', NULL),
+(2819, 'Bawshar', 'OM', 1, '2021-03-08 11:08:23', NULL),
+(2820, 'Suhar', 'OM', 1, '2021-03-08 11:08:23', NULL),
+(2821, 'Masqat', 'OM', 1, '2021-03-08 11:08:23', NULL),
+(2822, 'Karachi', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2823, 'Lahore', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2824, 'Faisalabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2825, 'Rawalpindi', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2826, 'Multan', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2827, 'Hyderabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2828, 'Gujranwala', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2829, 'Peshawar', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2830, 'Quetta', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2831, 'Islamabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2832, 'Sargodha', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2833, 'Sialkot', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2834, 'Bahawalpur', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2835, 'Sukkur', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2836, 'Jhang', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2837, 'Sheikhupura', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2838, 'Larkana', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2839, 'Gujrat', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2840, 'Mardan', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2841, 'Kasur', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2842, 'Rahim Yar Khan', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2843, 'Sahiwal', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2844, 'Okara', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2845, 'Wah', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2846, 'Dera Ghazi Khan', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2847, 'Mirpur Khas', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2848, 'Nawabshah', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2849, 'Mingora', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2850, 'Chiniot', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2851, 'Kamoke', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2852, 'Mandi Burewala', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2853, 'Jhelum', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2854, 'Sadiqabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2855, 'Jacobabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2856, 'Shikarpur', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2857, 'Khanewal', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2858, 'Hafizabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2859, 'Kohat', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2860, 'Muzaffargarh', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2861, 'Khanpur', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2862, 'Gojra', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2863, 'Bahawalnagar', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2864, 'Muridke', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2865, 'Pak Pattan', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2866, 'Abottabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2867, 'Tando Adam', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2868, 'Jaranwala', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2869, 'Khairpur', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2870, 'Chishtian Mandi', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2871, 'Daska', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2872, 'Dadu', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2873, 'Mandi Bahauddin', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2874, 'Ahmadpur East', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2875, 'Kamalia', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2876, 'Khuzdar', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2877, 'Vihari', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2878, 'Dera Ismail Khan', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2879, 'Wazirabad', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2880, 'Nowshera', 'PK', 1, '2021-03-08 11:08:23', NULL),
+(2881, 'Koror', 'PW', 1, '2021-03-08 11:08:23', NULL),
+(2882, 'Ciudad de Panamá', 'PA', 1, '2021-03-08 11:08:23', NULL),
+(2883, 'San Miguelito', 'PA', 1, '2021-03-08 11:08:23', NULL),
+(2884, 'Port Moresby', 'PG', 1, '2021-03-08 11:08:23', NULL),
+(2885, 'Asunción', 'PY', 1, '2021-03-08 11:08:23', NULL),
+(2886, 'Ciudad del Este', 'PY', 1, '2021-03-08 11:08:23', NULL),
+(2887, 'San Lorenzo', 'PY', 1, '2021-03-08 11:08:23', NULL),
+(2888, 'Lambaré', 'PY', 1, '2021-03-08 11:08:23', NULL),
+(2889, 'Fernando de la Mora', 'PY', 1, '2021-03-08 11:08:23', NULL),
+(2890, 'Lima', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2891, 'Arequipa', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2892, 'Trujillo', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2893, 'Chiclayo', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2894, 'Callao', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2895, 'Iquitos', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2896, 'Chimbote', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2897, 'Huancayo', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2898, 'Piura', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2899, 'Cusco', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2900, 'Pucallpa', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2901, 'Tacna', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2902, 'Ica', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2903, 'Sullana', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2904, 'Juliaca', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2905, 'Huánuco', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2906, 'Ayacucho', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2907, 'Chincha Alta', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2908, 'Cajamarca', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2909, 'Puno', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2910, 'Ventanilla', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2911, 'Castilla', 'PE', 1, '2021-03-08 11:08:23', NULL),
+(2912, 'Adamstown', 'PN', 1, '2021-03-08 11:08:23', NULL),
+(2913, 'Garapan', 'MP', 1, '2021-03-08 11:08:23', NULL),
+(2914, 'Lisboa', 'PT', 1, '2021-03-08 11:08:23', NULL),
+(2915, 'Porto', 'PT', 1, '2021-03-08 11:08:23', NULL),
+(2916, 'Amadora', 'PT', 1, '2021-03-08 11:08:23', NULL),
+(2917, 'Coímbra', 'PT', 1, '2021-03-08 11:08:23', NULL),
+(2918, 'Braga', 'PT', 1, '2021-03-08 11:08:23', NULL),
+(2919, 'San Juan', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2920, 'Bayamón', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2921, 'Ponce', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2922, 'Carolina', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2923, 'Caguas', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2924, 'Arecibo', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2925, 'Guaynabo', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2926, 'Mayagüez', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2927, 'Toa Baja', 'PR', 1, '2021-03-08 11:08:23', NULL),
+(2928, 'Warszawa', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2929, 'Lódz', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2930, 'Kraków', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2931, 'Wroclaw', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2932, 'Poznan', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2933, 'Gdansk', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2934, 'Szczecin', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2935, 'Bydgoszcz', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2936, 'Lublin', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2937, 'Katowice', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2938, 'Bialystok', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2939, 'Czestochowa', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2940, 'Gdynia', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2941, 'Sosnowiec', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2942, 'Radom', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2943, 'Kielce', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2944, 'Gliwice', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2945, 'Torun', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2946, 'Bytom', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2947, 'Zabrze', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2948, 'Bielsko-Biala', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2949, 'Olsztyn', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2950, 'Rzeszów', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2951, 'Ruda Slaska', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2952, 'Rybnik', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2953, 'Walbrzych', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2954, 'Tychy', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2955, 'Dabrowa Górnicza', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2956, 'Plock', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2957, 'Elblag', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2958, 'Opole', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2959, 'Gorzów Wielkopolski', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2960, 'Wloclawek', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2961, 'Chorzów', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2962, 'Tarnów', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2963, 'Zielona Góra', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2964, 'Koszalin', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2965, 'Legnica', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2966, 'Kalisz', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2967, 'Grudziadz', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2968, 'Slupsk', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2969, 'Jastrzebie-Zdrój', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2970, 'Jaworzno', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2971, 'Jelenia Góra', 'PL', 1, '2021-03-08 11:08:23', NULL),
+(2972, 'Malabo', 'GQ', 1, '2021-03-08 11:08:23', NULL),
+(2973, 'Doha', 'QA', 1, '2021-03-08 11:08:23', NULL),
+(2974, 'Paris', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2975, 'Marseille', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2976, 'Lyon', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2977, 'Toulouse', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2978, 'Nice', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2979, 'Nantes', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2980, 'Strasbourg', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2981, 'Montpellier', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2982, 'Bordeaux', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2983, 'Rennes', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2984, 'Le Havre', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2985, 'Reims', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2986, 'Lille', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2987, 'St-Étienne', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2988, 'Toulon', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2989, 'Grenoble', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2990, 'Angers', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2991, 'Dijon', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2992, 'Brest', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2993, 'Le Mans', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2994, 'Clermont-Ferrand', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2995, 'Amiens', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2996, 'Aix-en-Provence', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2997, 'Limoges', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2998, 'Nîmes', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(2999, 'Tours', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3000, 'Villeurbanne', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3001, 'Metz', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3002, 'Besançon', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3003, 'Caen', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3004, 'Orléans', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3005, 'Mulhouse', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3006, 'Rouen', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3007, 'Boulogne-Billancourt', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3008, 'Perpignan', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3009, 'Nancy', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3010, 'Roubaix', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3011, 'Argenteuil', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3012, 'Tourcoing', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3013, 'Montreuil', 'FR', 1, '2021-03-08 11:08:23', NULL),
+(3014, 'Cayenne', 'GF', 1, '2021-03-08 11:08:23', NULL),
+(3015, 'Faaa', 'PF', 1, '2021-03-08 11:08:23', NULL),
+(3016, 'Papeete', 'PF', 1, '2021-03-08 11:08:23', NULL),
+(3017, 'Saint-Denis', 'RE', 1, '2021-03-08 11:08:23', NULL),
+(3018, 'Bucuresti', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3019, 'Iasi', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3020, 'Constanta', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3021, 'Cluj-Napoca', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3022, 'Galati', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3023, 'Timisoara', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3024, 'Brasov', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3025, 'Craiova', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3026, 'Ploiesti', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3027, 'Braila', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3028, 'Oradea', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3029, 'Bacau', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3030, 'Pitesti', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3031, 'Arad', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3032, 'Sibiu', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3033, 'Târgu Mures', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3034, 'Baia Mare', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3035, 'Buzau', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3036, 'Satu Mare', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3037, 'Botosani', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3038, 'Piatra Neamt', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3039, 'Râmnicu Vâlcea', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3040, 'Suceava', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3041, 'Drobeta-Turnu Severin', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3042, 'Târgoviste', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3043, 'Focsani', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3044, 'Târgu Jiu', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3045, 'Tulcea', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3046, 'Resita', 'RO', 1, '2021-03-08 11:08:23', NULL),
+(3047, 'Kigali', 'RW', 1, '2021-03-08 11:08:23', NULL),
+(3048, 'Stockholm', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3049, 'Gothenburg [Göteborg]', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3050, 'Malmö', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3051, 'Uppsala', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3052, 'Linköping', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3053, 'Västerås', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3054, 'Örebro', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3055, 'Norrköping', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3056, 'Helsingborg', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3057, 'Jönköping', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3058, 'Umeå', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3059, 'Lund', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3060, 'Borås', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3061, 'Sundsvall', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3062, 'Gävle', 'SE', 1, '2021-03-08 11:08:23', NULL),
+(3063, 'Jamestown', 'SH', 1, '2021-03-08 11:08:23', NULL),
+(3064, 'Basseterre', 'KN', 1, '2021-03-08 11:08:23', NULL),
+(3065, 'Castries', 'LC', 1, '2021-03-08 11:08:23', NULL),
+(3066, 'Kingstown', 'VC', 1, '2021-03-08 11:08:23', NULL),
+(3067, 'Saint-Pierre', 'PM', 1, '2021-03-08 11:08:23', NULL),
+(3068, 'Berlin', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3069, 'Hamburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3070, 'Munich [München]', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3071, 'Köln', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3072, 'Frankfurt am Main', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3073, 'Essen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3074, 'Dortmund', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3075, 'Stuttgart', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3076, 'Düsseldorf', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3077, 'Bremen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3078, 'Duisburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3079, 'Hannover', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3080, 'Leipzig', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3081, 'Nürnberg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3082, 'Dresden', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3083, 'Bochum', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3084, 'Wuppertal', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3085, 'Bielefeld', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3086, 'Mannheim', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3087, 'Bonn', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3088, 'Gelsenkirchen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3089, 'Karlsruhe', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3090, 'Wiesbaden', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3091, 'Münster', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3092, 'Mönchengladbach', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3093, 'Chemnitz', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3094, 'Augsburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3095, 'Halle/Saale', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3096, 'Braunschweig', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3097, 'Aachen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3098, 'Krefeld', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3099, 'Magdeburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3100, 'Kiel', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3101, 'Oberhausen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3102, 'Lübeck', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3103, 'Hagen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3104, 'Rostock', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3105, 'Freiburg im Breisgau', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3106, 'Erfurt', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3107, 'Kassel', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3108, 'Saarbrücken', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3109, 'Mainz', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3110, 'Hamm', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3111, 'Herne', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3112, 'Mülheim an der Ruhr', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3113, 'Solingen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3114, 'Osnabrück', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3115, 'Ludwigshafen am Rhein', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3116, 'Leverkusen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3117, 'Oldenburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3118, 'Neuss', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3119, 'Heidelberg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3120, 'Darmstadt', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3121, 'Paderborn', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3122, 'Potsdam', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3123, 'Würzburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3124, 'Regensburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3125, 'Recklinghausen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3126, 'Göttingen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3127, 'Bremerhaven', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3128, 'Wolfsburg', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3129, 'Bottrop', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3130, 'Remscheid', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3131, 'Heilbronn', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3132, 'Pforzheim', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3133, 'Offenbach am Main', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3134, 'Ulm', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3135, 'Ingolstadt', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3136, 'Gera', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3137, 'Salzgitter', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3138, 'Cottbus', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3139, 'Reutlingen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3140, 'Fürth', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3141, 'Siegen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3142, 'Koblenz', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3143, 'Moers', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3144, 'Bergisch Gladbach', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3145, 'Zwickau', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3146, 'Hildesheim', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3147, 'Witten', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3148, 'Schwerin', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3149, 'Erlangen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3150, 'Kaiserslautern', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3151, 'Trier', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3152, 'Jena', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3153, 'Iserlohn', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3154, 'Gütersloh', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3155, 'Marl', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3156, 'Lünen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3157, 'Düren', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3158, 'Ratingen', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3159, 'Velbert', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3160, 'Esslingen am Neckar', 'DE', 1, '2021-03-08 11:08:23', NULL),
+(3161, 'Honiara', 'SB', 1, '2021-03-08 11:08:23', NULL),
+(3162, 'Lusaka', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3163, 'Ndola', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3164, 'Kitwe', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3165, 'Kabwe', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3166, 'Chingola', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3167, 'Mufulira', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3168, 'Luanshya', 'ZM', 1, '2021-03-08 11:08:23', NULL),
+(3169, 'Apia', 'WS', 1, '2021-03-08 11:08:23', NULL),
+(3170, 'Serravalle', 'SM', 1, '2021-03-08 11:08:23', NULL),
+(3171, 'San Marino', 'SM', 1, '2021-03-08 11:08:23', NULL),
+(3172, 'São Tomé', 'ST', 1, '2021-03-08 11:08:23', NULL),
+(3173, 'Riyadh', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3174, 'Jedda', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3175, 'Mekka', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3176, 'Medina', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3177, 'al-Dammam', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3178, 'al-Taif', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3179, 'Tabuk', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3180, 'Burayda', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3181, 'al-Hufuf', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3182, 'al-Mubarraz', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3183, 'Khamis Mushayt', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3184, 'Hail', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3185, 'al-Kharj', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3186, 'al-Khubar', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3187, 'Jubayl', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3188, 'Hafar al-Batin', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3189, 'al-Tuqba', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3190, 'Yanbu', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3191, 'Abha', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3192, 'Ara´ar', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3193, 'al-Qatif', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3194, 'al-Hawiya', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3195, 'Unayza', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3196, 'Najran', 'SA', 1, '2021-03-08 11:08:23', NULL),
+(3197, 'Pikine', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3198, 'Dakar', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3199, 'Thiès', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3200, 'Kaolack', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3201, 'Ziguinchor', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3202, 'Rufisque', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3203, 'Saint-Louis', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3204, 'Mbour', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3205, 'Diourbel', 'SN', 1, '2021-03-08 11:08:23', NULL),
+(3206, 'Victoria', 'SC', 1, '2021-03-08 11:08:23', NULL),
+(3207, 'Freetown', 'SL', 1, '2021-03-08 11:08:23', NULL),
+(3208, 'Singapore', 'SG', 1, '2021-03-08 11:08:23', NULL),
+(3209, 'Bratislava', 'SK', 1, '2021-03-08 11:08:23', NULL),
+(3210, 'Košice', 'SK', 1, '2021-03-08 11:08:23', NULL),
+(3211, 'Prešov', 'SK', 1, '2021-03-08 11:08:23', NULL),
+(3212, 'Ljubljana', 'SI', 1, '2021-03-08 11:08:23', NULL),
+(3213, 'Maribor', 'SI', 1, '2021-03-08 11:08:23', NULL),
+(3214, 'Mogadishu', 'SO', 1, '2021-03-08 11:08:23', NULL),
+(3215, 'Hargeysa', 'SO', 1, '2021-03-08 11:08:23', NULL),
+(3216, 'Kismaayo', 'SO', 1, '2021-03-08 11:08:23', NULL),
+(3217, 'Colombo', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3218, 'Dehiwala', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3219, 'Moratuwa', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3220, 'Jaffna', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3221, 'Kandy', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3222, 'Sri Jayawardenepura Kotte', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3223, 'Negombo', 'LK', 1, '2021-03-08 11:08:23', NULL),
+(3224, 'Omdurman', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3225, 'Khartum', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3226, 'Sharq al-Nil', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3227, 'Port Sudan', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3228, 'Kassala', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3229, 'Obeid', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3230, 'Nyala', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3231, 'Wad Madani', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3232, 'al-Qadarif', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3233, 'Kusti', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3234, 'al-Fashir', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3235, 'Juba', 'SD', 1, '2021-03-08 11:08:23', NULL),
+(3236, 'Helsinki [Helsingfors]', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3237, 'Espoo', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3238, 'Tampere', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3239, 'Vantaa', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3240, 'Turku [Åbo]', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3241, 'Oulu', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3242, 'Lahti', 'FI', 1, '2021-03-08 11:08:23', NULL),
+(3243, 'Paramaribo', 'SR', 1, '2021-03-08 11:08:23', NULL),
+(3244, 'Mbabane', 'SZ', 1, '2021-03-08 11:08:23', NULL),
+(3245, 'Zürich', 'CH', 1, '2021-03-08 11:08:23', NULL),
+(3246, 'Geneve', 'CH', 1, '2021-03-08 11:08:23', NULL),
+(3247, 'Basel', 'CH', 1, '2021-03-08 11:08:23', NULL),
+(3248, 'Bern', 'CH', 1, '2021-03-08 11:08:23', NULL),
+(3249, 'Lausanne', 'CH', 1, '2021-03-08 11:08:23', NULL),
+(3250, 'Damascus', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3251, 'Aleppo', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3252, 'Hims', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3253, 'Hama', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3254, 'Latakia', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3255, 'al-Qamishliya', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3256, 'Dayr al-Zawr', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3257, 'Jaramana', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3258, 'Duma', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3259, 'al-Raqqa', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3260, 'Idlib', 'SY', 1, '2021-03-08 11:08:23', NULL),
+(3261, 'Dushanbe', 'TJ', 1, '2021-03-08 11:08:23', NULL),
+(3262, 'Khujand', 'TJ', 1, '2021-03-08 11:08:23', NULL),
+(3263, 'Taipei', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3264, 'Kaohsiung', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3265, 'Taichung', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3266, 'Tainan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3267, 'Panchiao', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3268, 'Chungho', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3269, 'Keelung (Chilung)', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3270, 'Sanchung', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3271, 'Hsinchuang', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3272, 'Hsinchu', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3273, 'Chungli', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3274, 'Fengshan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3275, 'Taoyuan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3276, 'Chiayi', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3277, 'Hsintien', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3278, 'Changhwa', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3279, 'Yungho', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3280, 'Tucheng', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3281, 'Pingtung', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3282, 'Yungkang', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3283, 'Pingchen', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3284, 'Tali', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3285, 'Taiping', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3286, 'Pate', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3287, 'Fengyuan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3288, 'Luchou', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3289, 'Hsichuh', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3290, 'Shulin', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3291, 'Yuanlin', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3292, 'Yangmei', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3293, 'Taliao', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3294, 'Kueishan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3295, 'Tanshui', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3296, 'Taitung', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3297, 'Hualien', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3298, 'Nantou', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3299, 'Lungtan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3300, 'Touliu', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3301, 'Tsaotun', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3302, 'Kangshan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3303, 'Ilan', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3304, 'Miaoli', 'TW', 1, '2021-03-08 11:08:23', NULL),
+(3305, 'Dar es Salaam', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3306, 'Dodoma', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3307, 'Mwanza', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3308, 'Zanzibar', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3309, 'Tanga', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3310, 'Mbeya', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3311, 'Morogoro', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3312, 'Arusha', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3313, 'Moshi', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3314, 'Tabora', 'TZ', 1, '2021-03-08 11:08:23', NULL),
+(3315, 'København', 'DK', 1, '2021-03-08 11:08:23', NULL),
+(3316, 'Århus', 'DK', 1, '2021-03-08 11:08:23', NULL),
+(3317, 'Odense', 'DK', 1, '2021-03-08 11:08:23', NULL),
+(3318, 'Aalborg', 'DK', 1, '2021-03-08 11:08:23', NULL),
+(3319, 'Frederiksberg', 'DK', 1, '2021-03-08 11:08:23', NULL),
+(3320, 'Bangkok', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3321, 'Nonthaburi', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3322, 'Nakhon Ratchasima', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3323, 'Chiang Mai', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3324, 'Udon Thani', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3325, 'Hat Yai', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3326, 'Khon Kaen', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3327, 'Pak Kret', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3328, 'Nakhon Sawan', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3329, 'Ubon Ratchathani', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3330, 'Songkhla', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3331, 'Nakhon Pathom', 'TH', 1, '2021-03-08 11:08:23', NULL),
+(3332, 'Lomé', 'TG', 1, '2021-03-08 11:08:23', NULL),
+(3333, 'Fakaofo', 'TK', 1, '2021-03-08 11:08:23', NULL),
+(3334, 'Nuku´alofa', 'TO', 1, '2021-03-08 11:08:23', NULL),
+(3335, 'Chaguanas', 'TT', 1, '2021-03-08 11:08:23', NULL),
+(3336, 'Port-of-Spain', 'TT', 1, '2021-03-08 11:08:23', NULL),
+(3337, 'N´Djaména', 'TD', 1, '2021-03-08 11:08:23', NULL),
+(3338, 'Moundou', 'TD', 1, '2021-03-08 11:08:23', NULL),
+(3339, 'Praha', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3340, 'Brno', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3341, 'Ostrava', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3342, 'Plzen', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3343, 'Olomouc', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3344, 'Liberec', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3345, 'Ceské Budejovice', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3346, 'Hradec Králové', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3347, 'Ústí nad Labem', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3348, 'Pardubice', 'CZ', 1, '2021-03-08 11:08:23', NULL),
+(3349, 'Tunis', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3350, 'Sfax', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3351, 'Ariana', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3352, 'Ettadhamen', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3353, 'Sousse', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3354, 'Kairouan', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3355, 'Biserta', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3356, 'Gabès', 'TN', 1, '2021-03-08 11:08:23', NULL),
+(3357, 'Istanbul', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3358, 'Ankara', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3359, 'Izmir', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3360, 'Adana', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3361, 'Bursa', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3362, 'Gaziantep', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3363, 'Konya', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3364, 'Mersin (Içel)', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3365, 'Antalya', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3366, 'Diyarbakir', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3367, 'Kayseri', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3368, 'Eskisehir', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3369, 'Sanliurfa', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3370, 'Samsun', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3371, 'Malatya', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3372, 'Gebze', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3373, 'Denizli', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3374, 'Sivas', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3375, 'Erzurum', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3376, 'Tarsus', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3377, 'Kahramanmaras', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3378, 'Elâzig', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3379, 'Van', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3380, 'Sultanbeyli', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3381, 'Izmit (Kocaeli)', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3382, 'Manisa', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3383, 'Batman', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3384, 'Balikesir', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3385, 'Sakarya (Adapazari)', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3386, 'Iskenderun', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3387, 'Osmaniye', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3388, 'Çorum', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3389, 'Kütahya', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3390, 'Hatay (Antakya)', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3391, 'Kirikkale', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3392, 'Adiyaman', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3393, 'Trabzon', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3394, 'Ordu', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3395, 'Aydin', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3396, 'Usak', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3397, 'Edirne', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3398, 'Çorlu', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3399, 'Isparta', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3400, 'Karabük', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3401, 'Kilis', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3402, 'Alanya', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3403, 'Kiziltepe', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3404, 'Zonguldak', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3405, 'Siirt', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3406, 'Viransehir', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3407, 'Tekirdag', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3408, 'Karaman', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3409, 'Afyon', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3410, 'Aksaray', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3411, 'Ceyhan', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3412, 'Erzincan', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3413, 'Bismil', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3414, 'Nazilli', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3415, 'Tokat', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3416, 'Kars', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3417, 'Inegöl', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3418, 'Bandirma', 'TR', 1, '2021-03-08 11:08:23', NULL),
+(3419, 'Ashgabat', 'TM', 1, '2021-03-08 11:08:23', NULL),
+(3420, 'Chärjew', 'TM', 1, '2021-03-08 11:08:23', NULL),
+(3421, 'Dashhowuz', 'TM', 1, '2021-03-08 11:08:23', NULL),
+(3422, 'Mary', 'TM', 1, '2021-03-08 11:08:23', NULL),
+(3423, 'Cockburn Town', 'TC', 1, '2021-03-08 11:08:23', NULL),
+(3424, 'Funafuti', 'TV', 1, '2021-03-08 11:08:23', NULL),
+(3425, 'Kampala', 'UG', 1, '2021-03-08 11:08:23', NULL),
+(3426, 'Kyiv', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3427, 'Harkova [Harkiv]', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3428, 'Dnipropetrovsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3429, 'Donetsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3430, 'Odesa', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3431, 'Zaporizzja', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3432, 'Lviv', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3433, 'Kryvyi Rig', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3434, 'Mykolajiv', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3435, 'Mariupol', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3436, 'Lugansk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3437, 'Vinnytsja', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3438, 'Makijivka', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3439, 'Herson', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3440, 'Sevastopol', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3441, 'Simferopol', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3442, 'Pultava [Poltava]', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3443, 'Tšernigiv', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3444, 'Tšerkasy', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3445, 'Gorlivka', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3446, 'Zytomyr', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3447, 'Sumy', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3448, 'Dniprodzerzynsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3449, 'Kirovograd', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3450, 'Hmelnytskyi', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3451, 'Tšernivtsi', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3452, 'Rivne', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3453, 'Krementšuk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3454, 'Ivano-Frankivsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3455, 'Ternopil', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3456, 'Lutsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3457, 'Bila Tserkva', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3458, 'Kramatorsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3459, 'Melitopol', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3460, 'Kertš', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3461, 'Nikopol', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3462, 'Berdjansk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3463, 'Pavlograd', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3464, 'Sjeverodonetsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3465, 'Slovjansk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3466, 'Uzgorod', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3467, 'Altševsk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3468, 'Lysytšansk', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3469, 'Jevpatorija', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3470, 'Kamjanets-Podilskyi', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3471, 'Jenakijeve', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3472, 'Krasnyi Lutš', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3473, 'Stahanov', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3474, 'Oleksandrija', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3475, 'Konotop', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3476, 'Kostjantynivka', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3477, 'Berdytšiv', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3478, 'Izmajil', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3479, 'Šostka', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3480, 'Uman', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3481, 'Brovary', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3482, 'Mukatševe', 'UA', 1, '2021-03-08 11:08:23', NULL),
+(3483, 'Budapest', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3484, 'Debrecen', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3485, 'Miskolc', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3486, 'Szeged', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3487, 'Pécs', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3488, 'Györ', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3489, 'Nyiregyháza', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3490, 'Kecskemét', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3491, 'Székesfehérvár', 'HU', 1, '2021-03-08 11:08:23', NULL),
+(3492, 'Montevideo', 'UY', 1, '2021-03-08 11:08:23', NULL),
+(3493, 'Nouméa', 'NC', 1, '2021-03-08 11:08:23', NULL),
+(3494, 'Auckland', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3495, 'Christchurch', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3496, 'Manukau', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3497, 'North Shore', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3498, 'Waitakere', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3499, 'Wellington', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3500, 'Dunedin', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3501, 'Hamilton', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3502, 'Lower Hutt', 'NZ', 1, '2021-03-08 11:08:23', NULL),
+(3503, 'Toskent', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3504, 'Namangan', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3505, 'Samarkand', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3506, 'Andijon', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3507, 'Buhoro', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3508, 'Karsi', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3509, 'Nukus', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3510, 'Kükon', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3511, 'Fargona', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3512, 'Circik', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3513, 'Margilon', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3514, 'Ürgenc', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3515, 'Angren', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3516, 'Cizah', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3517, 'Navoi', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3518, 'Olmalik', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3519, 'Termiz', 'UZ', 1, '2021-03-08 11:08:23', NULL),
+(3520, 'Minsk', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3521, 'Gomel', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3522, 'Mogiljov', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3523, 'Vitebsk', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3524, 'Grodno', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3525, 'Brest', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3526, 'Bobruisk', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3527, 'Baranovitši', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3528, 'Borisov', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3529, 'Pinsk', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3530, 'Orša', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3531, 'Mozyr', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3532, 'Novopolotsk', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3533, 'Lida', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3534, 'Soligorsk', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3535, 'Molodetšno', 'BY', 1, '2021-03-08 11:08:23', NULL),
+(3536, 'Mata-Utu', 'WF', 1, '2021-03-08 11:08:23', NULL),
+(3537, 'Port-Vila', 'VU', 1, '2021-03-08 11:08:23', NULL),
+(3538, 'Città del Vaticano', 'VA', 1, '2021-03-08 11:08:23', NULL),
+(3539, 'Caracas', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3540, 'Maracaíbo', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3541, 'Barquisimeto', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3542, 'Valencia', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3543, 'Ciudad Guayana', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3544, 'Petare', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3545, 'Maracay', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3546, 'Barcelona', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3547, 'Maturín', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3548, 'San Cristóbal', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3549, 'Ciudad Bolívar', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3550, 'Cumaná', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3551, 'Mérida', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3552, 'Cabimas', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3553, 'Barinas', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3554, 'Turmero', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3555, 'Baruta', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3556, 'Puerto Cabello', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3557, 'Santa Ana de Coro', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3558, 'Los Teques', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3559, 'Punto Fijo', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3560, 'Guarenas', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3561, 'Acarigua', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3562, 'Puerto La Cruz', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3563, 'Ciudad Losada', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3564, 'Guacara', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3565, 'Valera', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3566, 'Guanare', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3567, 'Carúpano', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3568, 'Catia La Mar', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3569, 'El Tigre', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3570, 'Guatire', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3571, 'Calabozo', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3572, 'Pozuelos', 'VE', 1, '2021-03-08 11:08:23', NULL);
+INSERT INTO `tbl_cities` (`id`, `city_name`, `country_code`, `enabled`, `updated_at`, `deleted_at`) VALUES
+(3573, 'Ciudad Ojeda', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3574, 'Ocumare del Tuy', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3575, 'Valle de la Pascua', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3576, 'Araure', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3577, 'San Fernando de Apure', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3578, 'San Felipe', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3579, 'El Limón', 'VE', 1, '2021-03-08 11:08:23', NULL),
+(3580, 'Moscow', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3581, 'St Petersburg', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3582, 'Novosibirsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3583, 'Nizni Novgorod', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3584, 'Jekaterinburg', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3585, 'Samara', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3586, 'Omsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3587, 'Kazan', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3588, 'Ufa', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3589, 'Tšeljabinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3590, 'Rostov-na-Donu', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3591, 'Perm', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3592, 'Volgograd', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3593, 'Voronez', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3594, 'Krasnojarsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3595, 'Saratov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3596, 'Toljatti', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3597, 'Uljanovsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3598, 'Izevsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3599, 'Krasnodar', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3600, 'Jaroslavl', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3601, 'Habarovsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3602, 'Vladivostok', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3603, 'Irkutsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3604, 'Barnaul', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3605, 'Novokuznetsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3606, 'Penza', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3607, 'Rjazan', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3608, 'Orenburg', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3609, 'Lipetsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3610, 'Nabereznyje Tšelny', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3611, 'Tula', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3612, 'Tjumen', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3613, 'Kemerovo', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3614, 'Astrahan', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3615, 'Tomsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3616, 'Kirov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3617, 'Ivanovo', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3618, 'Tšeboksary', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3619, 'Brjansk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3620, 'Tver', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3621, 'Kursk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3622, 'Magnitogorsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3623, 'Kaliningrad', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3624, 'Nizni Tagil', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3625, 'Murmansk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3626, 'Ulan-Ude', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3627, 'Kurgan', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3628, 'Arkangeli', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3629, 'Sotši', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3630, 'Smolensk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3631, 'Orjol', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3632, 'Stavropol', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3633, 'Belgorod', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3634, 'Kaluga', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3635, 'Vladimir', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3636, 'Mahatškala', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3637, 'Tšerepovets', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3638, 'Saransk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3639, 'Tambov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3640, 'Vladikavkaz', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3641, 'Tšita', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3642, 'Vologda', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3643, 'Veliki Novgorod', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3644, 'Komsomolsk-na-Amure', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3645, 'Kostroma', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3646, 'Volzski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3647, 'Taganrog', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3648, 'Petroskoi', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3649, 'Bratsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3650, 'Dzerzinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3651, 'Surgut', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3652, 'Orsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3653, 'Sterlitamak', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3654, 'Angarsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3655, 'Joškar-Ola', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3656, 'Rybinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3657, 'Prokopjevsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3658, 'Niznevartovsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3659, 'Naltšik', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3660, 'Syktyvkar', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3661, 'Severodvinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3662, 'Bijsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3663, 'Niznekamsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3664, 'Blagoveštšensk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3665, 'Šahty', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3666, 'Staryi Oskol', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3667, 'Zelenograd', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3668, 'Balakovo', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3669, 'Novorossijsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3670, 'Pihkova', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3671, 'Zlatoust', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3672, 'Jakutsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3673, 'Podolsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3674, 'Petropavlovsk-Kamtšatski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3675, 'Kamensk-Uralski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3676, 'Engels', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3677, 'Syzran', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3678, 'Grozny', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3679, 'Novotšerkassk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3680, 'Berezniki', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3681, 'Juzno-Sahalinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3682, 'Volgodonsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3683, 'Abakan', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3684, 'Maikop', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3685, 'Miass', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3686, 'Armavir', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3687, 'Ljubertsy', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3688, 'Rubtsovsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3689, 'Kovrov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3690, 'Nahodka', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3691, 'Ussurijsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3692, 'Salavat', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3693, 'Mytištši', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3694, 'Kolomna', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3695, 'Elektrostal', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3696, 'Murom', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3697, 'Kolpino', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3698, 'Norilsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3699, 'Almetjevsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3700, 'Novomoskovsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3701, 'Dimitrovgrad', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3702, 'Pervouralsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3703, 'Himki', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3704, 'Balašiha', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3705, 'Nevinnomyssk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3706, 'Pjatigorsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3707, 'Korolev', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3708, 'Serpuhov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3709, 'Odintsovo', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3710, 'Orehovo-Zujevo', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3711, 'Kamyšin', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3712, 'Novotšeboksarsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3713, 'Tšerkessk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3714, 'Atšinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3715, 'Magadan', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3716, 'Mitšurinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3717, 'Kislovodsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3718, 'Jelets', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3719, 'Seversk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3720, 'Noginsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3721, 'Velikije Luki', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3722, 'Novokuibyševsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3723, 'Neftekamsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3724, 'Leninsk-Kuznetski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3725, 'Oktjabrski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3726, 'Sergijev Posad', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3727, 'Arzamas', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3728, 'Kiseljovsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3729, 'Novotroitsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3730, 'Obninsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3731, 'Kansk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3732, 'Glazov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3733, 'Solikamsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3734, 'Sarapul', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3735, 'Ust-Ilimsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3736, 'Štšolkovo', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3737, 'Mezduretšensk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3738, 'Usolje-Sibirskoje', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3739, 'Elista', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3740, 'Novošahtinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3741, 'Votkinsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3742, 'Kyzyl', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3743, 'Serov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3744, 'Zelenodolsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3745, 'Zeleznodoroznyi', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3746, 'Kinešma', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3747, 'Kuznetsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3748, 'Uhta', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3749, 'Jessentuki', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3750, 'Tobolsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3751, 'Neftejugansk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3752, 'Bataisk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3753, 'Nojabrsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3754, 'Balašov', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3755, 'Zeleznogorsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3756, 'Zukovski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3757, 'Anzero-Sudzensk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3758, 'Bugulma', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3760, 'Novouralsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3761, 'Puškin', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3762, 'Vorkuta', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3763, 'Derbent', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3764, 'Kirovo-Tšepetsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3765, 'Krasnogorsk', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3766, 'Klin', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3767, 'Tšaikovski', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3768, 'Novyi Urengoi', 'RU', 1, '2021-03-08 11:08:23', NULL),
+(3769, 'Ho Chi Minh City', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3770, 'Hanoi', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3771, 'Haiphong', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3772, 'Da Nang', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3773, 'Biên Hoa', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3774, 'Nha Trang', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3775, 'Hue', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3776, 'Can Tho', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3777, 'Cam Pha', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3778, 'Nam Dinh', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3779, 'Quy Nhon', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3780, 'Vung Tau', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3781, 'Rach Gia', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3782, 'Long Xuyen', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3783, 'Thai Nguyen', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3784, 'Hong Gai', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3785, 'Phan Thiêt', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3786, 'Cam Ranh', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3787, 'Vinh', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3788, 'My Tho', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3789, 'Da Lat', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3790, 'Buon Ma Thuot', 'VN', 1, '2021-03-08 11:08:23', NULL),
+(3791, 'Tallinn', 'EE', 1, '2021-03-08 11:08:23', NULL),
+(3792, 'Tartu', 'EE', 1, '2021-03-08 11:08:23', NULL),
+(3793, 'New York', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3794, 'Los Angeles', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3795, 'Chicago', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3796, 'Houston', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3797, 'Philadelphia', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3798, 'Phoenix', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3799, 'San Diego', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3800, 'Dallas', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3801, 'San Antonio', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3802, 'Detroit', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3803, 'San Jose', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3804, 'Indianapolis', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3805, 'San Francisco', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3806, 'Jacksonville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3807, 'Columbus', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3808, 'Austin', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3809, 'Baltimore', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3810, 'Memphis', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3811, 'Milwaukee', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3812, 'Boston', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3813, 'Washington', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3814, 'Nashville-Davidson', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3815, 'El Paso', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3816, 'Seattle', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3817, 'Denver', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3818, 'Charlotte', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3819, 'Fort Worth', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3820, 'Portland', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3821, 'Oklahoma City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3822, 'Tucson', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3823, 'New Orleans', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3824, 'Las Vegas', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3825, 'Cleveland', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3826, 'Long Beach', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3827, 'Albuquerque', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3828, 'Kansas City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3829, 'Fresno', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3830, 'Virginia Beach', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3831, 'Atlanta', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3832, 'Sacramento', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3833, 'Oakland', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3834, 'Mesa', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3835, 'Tulsa', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3836, 'Omaha', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3837, 'Minneapolis', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3838, 'Honolulu', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3839, 'Miami', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3840, 'Colorado Springs', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3841, 'Saint Louis', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3842, 'Wichita', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3843, 'Santa Ana', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3844, 'Pittsburgh', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3845, 'Arlington', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3846, 'Cincinnati', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3847, 'Anaheim', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3848, 'Toledo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3849, 'Tampa', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3850, 'Buffalo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3851, 'Saint Paul', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3852, 'Corpus Christi', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3853, 'Aurora', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3854, 'Raleigh', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3855, 'Newark', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3856, 'Lexington-Fayette', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3857, 'Anchorage', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3858, 'Louisville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3859, 'Riverside', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3860, 'Saint Petersburg', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3861, 'Bakersfield', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3862, 'Stockton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3863, 'Birmingham', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3864, 'Jersey City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3865, 'Norfolk', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3866, 'Baton Rouge', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3867, 'Hialeah', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3868, 'Lincoln', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3869, 'Greensboro', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3870, 'Plano', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3871, 'Rochester', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3872, 'Glendale', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3873, 'Akron', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3874, 'Garland', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3875, 'Madison', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3876, 'Fort Wayne', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3877, 'Fremont', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3878, 'Scottsdale', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3879, 'Montgomery', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3880, 'Shreveport', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3881, 'Augusta-Richmond County', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3882, 'Lubbock', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3883, 'Chesapeake', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3884, 'Mobile', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3885, 'Des Moines', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3886, 'Grand Rapids', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3887, 'Richmond', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3888, 'Yonkers', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3889, 'Spokane', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3891, 'Tacoma', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3892, 'Irving', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3893, 'Huntington Beach', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3894, 'Modesto', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3895, 'Durham', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3897, 'Orlando', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3898, 'Boise City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3899, 'Winston-Salem', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3900, 'San Bernardino', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3901, 'Jackson', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3902, 'Little Rock', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3903, 'Salt Lake City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3904, 'Reno', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3905, 'Newport News', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3906, 'Chandler', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3907, 'Laredo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3908, 'Henderson', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3910, 'Knoxville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3911, 'Amarillo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3912, 'Providence', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3913, 'Chula Vista', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3914, 'Worcester', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3915, 'Oxnard', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3916, 'Dayton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3917, 'Garden Grove', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3918, 'Oceanside', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3919, 'Tempe', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3920, 'Huntsville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3921, 'Ontario', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3922, 'Chattanooga', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3923, 'Fort Lauderdale', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3924, 'Springfield', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3926, 'Santa Clarita', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3927, 'Salinas', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3928, 'Tallahassee', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3929, 'Rockford', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3930, 'Pomona', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3931, 'Metairie', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3932, 'Paterson', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3933, 'Overland Park', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3934, 'Santa Rosa', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3935, 'Syracuse', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3937, 'Hampton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3938, 'Lakewood', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3939, 'Vancouver', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3940, 'Irvine', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3942, 'Moreno Valley', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3943, 'Pasadena', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3944, 'Hayward', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3945, 'Brownsville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3946, 'Bridgeport', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3947, 'Hollywood', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3948, 'Warren', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3949, 'Torrance', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3950, 'Eugene', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3951, 'Pembroke Pines', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3952, 'Salem', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3954, 'Escondido', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3955, 'Sunnyvale', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3956, 'Savannah', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3957, 'Fontana', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3958, 'Orange', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3959, 'Naperville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3960, 'Alexandria', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3961, 'Rancho Cucamonga', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3962, 'Grand Prairie', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3963, 'East Los Angeles', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3964, 'Fullerton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3965, 'Corona', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3966, 'Flint', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3967, 'Paradise', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3968, 'Mesquite', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3969, 'Sterling Heights', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3970, 'Sioux Falls', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3971, 'New Haven', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3972, 'Topeka', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3973, 'Concord', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3974, 'Evansville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3975, 'Hartford', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3976, 'Fayetteville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3977, 'Cedar Rapids', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3978, 'Elizabeth', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3979, 'Lansing', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3980, 'Lancaster', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3981, 'Fort Collins', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3982, 'Coral Springs', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3983, 'Stamford', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3984, 'Thousand Oaks', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3985, 'Vallejo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3986, 'Palmdale', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3987, 'Columbia', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3988, 'El Monte', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3989, 'Abilene', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3990, 'North Las Vegas', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3991, 'Ann Arbor', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3992, 'Beaumont', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3993, 'Waco', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3994, 'Macon', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3995, 'Independence', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3996, 'Peoria', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3997, 'Inglewood', 'US', 1, '2021-03-08 11:08:23', NULL),
+(3999, 'Simi Valley', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4000, 'Lafayette', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4001, 'Gilbert', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4002, 'Carrollton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4003, 'Bellevue', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4004, 'West Valley City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4005, 'Clarksville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4006, 'Costa Mesa', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4008, 'South Bend', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4009, 'Downey', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4010, 'Waterbury', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4011, 'Manchester', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4012, 'Allentown', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4013, 'McAllen', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4014, 'Joliet', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4015, 'Lowell', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4016, 'Provo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4017, 'West Covina', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4018, 'Wichita Falls', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4019, 'Erie', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4020, 'Daly City', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4021, 'Citrus Heights', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4022, 'Norwalk', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4023, 'Gary', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4024, 'Berkeley', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4025, 'Santa Clara', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4026, 'Green Bay', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4027, 'Cape Coral', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4028, 'Arvada', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4029, 'Pueblo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4030, 'Sandy', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4031, 'Athens-Clarke County', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4032, 'Cambridge', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4033, 'Westminster', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4034, 'San Buenaventura', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4035, 'Portsmouth', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4036, 'Livonia', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4037, 'Burbank', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4038, 'Clearwater', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4039, 'Midland', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4040, 'Davenport', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4041, 'Mission Viejo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4042, 'Miami Beach', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4043, 'Sunrise Manor', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4044, 'New Bedford', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4045, 'El Cajon', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4046, 'Norman', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4048, 'Albany', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4049, 'Brockton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4050, 'Roanoke', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4051, 'Billings', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4052, 'Compton', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4053, 'Gainesville', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4054, 'Fairfield', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4055, 'Arden-Arcade', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4056, 'San Mateo', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4057, 'Visalia', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4058, 'Boulder', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4059, 'Cary', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4060, 'Santa Monica', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4061, 'Fall River', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4062, 'Kenosha', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4063, 'Elgin', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4064, 'Odessa', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4065, 'Carson', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4066, 'Charleston', 'US', 1, '2021-03-08 11:08:23', NULL),
+(4067, 'Charlotte Amalie', 'VI', 1, '2021-03-08 11:08:23', NULL),
+(4068, 'Harare', 'ZW', 1, '2021-03-08 11:08:23', NULL),
+(4069, 'Bulawayo', 'ZW', 1, '2021-03-08 11:08:23', NULL),
+(4070, 'Chitungwiza', 'ZW', 1, '2021-03-08 11:08:23', NULL),
+(4071, 'Mount Darwin', 'ZW', 1, '2021-03-08 11:08:23', NULL),
+(4072, 'Mutare', 'ZW', 1, '2021-03-08 11:08:23', NULL),
+(4073, 'Gweru', 'ZW', 1, '2021-03-08 11:08:23', NULL),
+(4074, 'Gaza', 'PS', 1, '2021-03-08 11:08:23', NULL),
+(4075, 'Khan Yunis', 'PS', 1, '2021-03-08 11:08:23', NULL),
+(4076, 'Hebron', 'PS', 1, '2021-03-08 11:08:23', NULL),
+(4077, 'Jabaliya', 'PS', 1, '2021-03-08 11:08:23', NULL),
+(4078, 'Nablus', 'PS', 1, '2021-03-08 11:08:23', NULL),
+(4079, 'Rafah', 'PS', 1, '2021-03-08 11:08:23', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_countries`
+--
+
 CREATE TABLE `tbl_countries` (
   `iso_code` char(2) COLLATE utf8_unicode_ci NOT NULL,
   `country_name` varchar(60) COLLATE utf8_unicode_ci NOT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`iso_code`) USING BTREE,
-  UNIQUE KEY `IND_iso_code` (`iso_code`) USING BTREE,
-  UNIQUE KEY `IND_country_name` (`country_name`) USING BTREE
+  `deleted_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- ----------------------------
--- Records of tbl_countries
--- ----------------------------
-BEGIN;
-INSERT INTO `tbl_countries` VALUES ('AD', 'Andorra', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AE', 'United Arab Emirates', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AF', 'Afghanistan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AG', 'Antigua and Barbuda', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AI', 'Anguilla', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AL', 'Albania', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AM', 'Armenia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AN', 'Netherlands Antilles', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AO', 'Angola', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AQ', 'Antarctica', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AR', 'Argentina', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AS', 'American Samoa', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AT', 'Austria', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AU', 'Australia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AW', 'Aruba', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('AZ', 'Azerbaijan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BA', 'Bosnia and Herzegovina', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BB', 'Barbados', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BD', 'Bangladesh', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BE', 'Belgium', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BF', 'Burkina Faso', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BG', 'Bulgaria', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BH', 'Bahrain', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BI', 'Burundi', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BJ', 'Benin', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BM', 'Bermuda', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BN', 'Brunei', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BO', 'Bolivia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BR', 'Brazil', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BS', 'Bahamas', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BT', 'Bhutan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BV', 'Bouvet Island', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BW', 'Botswana', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BY', 'Belarus', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('BZ', 'Belize', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CA', 'Canada', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CC', 'Cocos (Keeling) Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CD', 'Congo, the Democratic Republic of the', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CF', 'Central African Republic', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CG', 'Congo', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CH', 'Switzerland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CI', 'Ivory Coast', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CK', 'Cook Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CL', 'Chile', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CM', 'Cameroon', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CN', 'China', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CO', 'Colombia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CR', 'Costa Rica', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CU', 'Cuba', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CV', 'Cape Verde', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CX', 'Christmas Island', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CY', 'Cyprus', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('CZ', 'Czech Republic', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('DE', 'Germany', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('DJ', 'Djibouti', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('DK', 'Denmark', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('DM', 'Dominica', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('DO', 'Dominican Republic', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('DZ', 'Algeria', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('EC', 'Ecuador', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('EE', 'Estonia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('EG', 'Egypt', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('EH', 'Western Sahara', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ER', 'Eritrea', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ES', 'Spain', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ET', 'Ethiopia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('FI', 'Finland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('FJ', 'Fiji', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('FK', 'Falkland Islands (Malvinas)', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('FM', 'Micronesia, Federated States of', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('FO', 'Faroe Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('FR', 'France', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GA', 'Gabon', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GB', 'United Kingdom', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GD', 'Grenada', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GE', 'Georgia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GF', 'French Guiana', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GG', 'Guernsey', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GH', 'Ghana', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GI', 'Gibraltar', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GL', 'Greenland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GM', 'Gambia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GN', 'Guinea', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GP', 'Guadeloupe', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GQ', 'Equatorial Guinea', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GR', 'Greece', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GS', 'South Georgia and the South Sandwich Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GT', 'Guatemala', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GU', 'Guam', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GW', 'Guinea-Bissau', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('GY', 'Guyana', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('HK', 'Hong Kong', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('HM', 'Heard Island and McDonald Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('HN', 'Honduras', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('HR', 'Croatia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('HT', 'Haiti', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('HU', 'Hungary', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ID', 'Indonesia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IE', 'Ireland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IL', 'Israel', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IM', 'Isle of Man', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IN', 'India', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IO', 'British Indian Ocean Territory', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IQ', 'Iraq', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IR', 'Iran, Islamic Republic of', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IS', 'Iceland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('IT', 'Italy', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('JE', 'Jersey', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('JM', 'Jamaica', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('JO', 'Jordan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('JP', 'Japan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KE', 'Kenya', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KG', 'Kyrgyzstan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KH', 'Cambodia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KI', 'Kiribati', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KM', 'Comoros', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KN', 'Saint Kitts and Nevis', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KP', 'Korea, Democratic People\'s Republic of', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KR', 'South Korea', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KW', 'Kuwait', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KY', 'Cayman Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('KZ', 'Kazakhstan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LA', 'Lao People\'s Democratic Republic', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LB', 'Lebanon', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LC', 'Saint Lucia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LI', 'Liechtenstein', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LK', 'Sri Lanka', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LR', 'Liberia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LS', 'Lesotho', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LT', 'Lithuania', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LU', 'Luxembourg', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LV', 'Latvia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('LY', 'Libya', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MA', 'Morocco', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MC', 'Monaco', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MD', 'Moldova, Republic of', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ME', 'Montenegro', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MG', 'Madagascar', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MH', 'Marshall Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MK', 'Macedonia, the former Yugoslav Republic of', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ML', 'Mali', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MM', 'Burma', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MN', 'Mongolia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MO', 'Macao', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MP', 'Northern Mariana Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MQ', 'Martinique', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MR', 'Mauritania', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MS', 'Montserrat', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MT', 'Malta', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MU', 'Mauritius', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MV', 'Maldives', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MW', 'Malawi', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MX', 'Mexico', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MY', 'Malaysia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('MZ', 'Mozambique', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NA', 'Namibia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NC', 'New Caledonia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NE', 'Niger', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NF', 'Norfolk Island', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NG', 'Nigeria', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NI', 'Nicaragua', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NL', 'Netherlands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NO', 'Norway', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NP', 'Nepal', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NR', 'Nauru', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NU', 'Niue', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('NZ', 'New Zealand', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('OM', 'Oman', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PA', 'Panama', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PE', 'Peru', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PF', 'French Polynesia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PG', 'Papua New Guinea', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PH', 'Philippines', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PK', 'Pakistan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PL', 'Poland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PM', 'Saint Pierre and Miquelon', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PN', 'Pitcairn', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PR', 'Puerto Rico', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PS', 'Palestinian Territory, Occupied', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PT', 'Portugal', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PW', 'Palau', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('PY', 'Paraguay', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('QA', 'Qatar', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('RE', 'Réunion', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('RO', 'Romania', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('RS', 'Serbia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('RU', 'Russia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('RW', 'Rwanda', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SA', 'Saudi Arabia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SB', 'Solomon Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SC', 'Seychelles', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SD', 'Sudan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SE', 'Sweden', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SG', 'Singapore', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SH', 'Saint Helena, Ascension and Tristan da Cunha', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SI', 'Slovenia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SJ', 'Svalbard and Jan Mayen', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SK', 'Slovakia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SL', 'Sierra Leone', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SM', 'San Marino', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SN', 'Senegal', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SO', 'Somalia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SR', 'Suriname', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SS', 'South Sudan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ST', 'Sao Tome and Principe', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SV', 'El Salvador', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SY', 'Syrian Arab Republic', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('SZ', 'Swaziland', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TC', 'Turks and Caicos Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TD', 'Chad', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TF', 'French Southern Territories', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TG', 'Togo', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TH', 'Thailand', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TJ', 'Tajikistan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TK', 'Tokelau', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TL', 'Timor-Leste', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TM', 'Turkmenistan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TN', 'Tunisia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TO', 'Tonga', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TP', 'East Timor', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TR', 'Turkey', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TT', 'Trinidad and Tobago', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TV', 'Tuvalu', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TW', 'Taiwan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('TZ', 'Tanzania, United Republic of', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('UA', 'Ukraine', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('UG', 'Uganda', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('UM', 'United States Minor Outlying Islands', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('US', 'United States', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('UY', 'Uruguay', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('UZ', 'Uzbekistan', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VA', 'Holy See (Vatican City State)', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VC', 'St. Vincent and the Grenadines', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VE', 'Venezuela', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VG', 'Virgin Islands, British', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VI', 'Virgin Islands, U.S.', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VN', 'Vietnam', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('VU', 'Vanuatu', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('WF', 'Wallis and Futuna', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('WS', 'Samoa', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('YE', 'Yemen', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('YT', 'Mayotte', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('YU', 'Yugoslavia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ZA', 'South Africa', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ZM', 'Zambia', 1, '2021-03-08 13:25:24', NULL);
-INSERT INTO `tbl_countries` VALUES ('ZW', 'Zimbabwe', 1, '2021-03-08 13:25:24', NULL);
-COMMIT;
+--
+-- Dumping data for table `tbl_countries`
+--
 
--- ----------------------------
--- Table structure for tbl_people
--- ----------------------------
-DROP TABLE IF EXISTS `tbl_people`;
+INSERT INTO `tbl_countries` (`iso_code`, `country_name`, `enabled`, `updated_at`, `deleted_at`) VALUES
+('AD', 'Andorra', 1, '2021-03-08 07:55:24', NULL),
+('AE', 'United Arab Emirates', 1, '2021-03-08 07:55:24', NULL),
+('AF', 'Afghanistan', 1, '2021-03-08 07:55:24', NULL),
+('AG', 'Antigua and Barbuda', 1, '2021-03-08 07:55:24', NULL),
+('AI', 'Anguilla', 1, '2021-03-08 07:55:24', NULL),
+('AL', 'Albania', 1, '2021-03-08 07:55:24', NULL),
+('AM', 'Armenia', 1, '2021-03-08 07:55:24', NULL),
+('AN', 'Netherlands Antilles', 1, '2021-03-08 07:55:24', NULL),
+('AO', 'Angola', 1, '2021-03-08 07:55:24', NULL),
+('AQ', 'Antarctica', 1, '2021-03-08 07:55:24', NULL),
+('AR', 'Argentina', 1, '2021-03-08 07:55:24', NULL),
+('AS', 'American Samoa', 1, '2021-03-08 07:55:24', NULL),
+('AT', 'Austria', 1, '2021-03-08 07:55:24', NULL),
+('AU', 'Australia', 1, '2021-03-08 07:55:24', NULL),
+('AW', 'Aruba', 1, '2021-03-08 07:55:24', NULL),
+('AZ', 'Azerbaijan', 1, '2021-03-08 07:55:24', NULL),
+('BA', 'Bosnia and Herzegovina', 1, '2021-03-08 07:55:24', NULL),
+('BB', 'Barbados', 1, '2021-03-08 07:55:24', NULL),
+('BD', 'Bangladesh', 1, '2021-03-08 07:55:24', NULL),
+('BE', 'Belgium', 1, '2021-03-08 07:55:24', NULL),
+('BF', 'Burkina Faso', 1, '2021-03-08 07:55:24', NULL),
+('BG', 'Bulgaria', 1, '2021-03-08 07:55:24', NULL),
+('BH', 'Bahrain', 1, '2021-03-08 07:55:24', NULL),
+('BI', 'Burundi', 1, '2021-03-08 07:55:24', NULL),
+('BJ', 'Benin', 1, '2021-03-08 07:55:24', NULL),
+('BM', 'Bermuda', 1, '2021-03-08 07:55:24', NULL),
+('BN', 'Brunei', 1, '2021-03-08 07:55:24', NULL),
+('BO', 'Bolivia', 1, '2021-03-08 07:55:24', NULL),
+('BR', 'Brazil', 1, '2021-03-08 07:55:24', NULL),
+('BS', 'Bahamas', 1, '2021-03-08 07:55:24', NULL),
+('BT', 'Bhutan', 1, '2021-03-08 07:55:24', NULL),
+('BV', 'Bouvet Island', 1, '2021-03-08 07:55:24', NULL),
+('BW', 'Botswana', 1, '2021-03-08 07:55:24', NULL),
+('BY', 'Belarus', 1, '2021-03-08 07:55:24', NULL),
+('BZ', 'Belize', 1, '2021-03-08 07:55:24', NULL),
+('CA', 'Canada', 1, '2021-03-08 07:55:24', NULL),
+('CC', 'Cocos (Keeling) Islands', 1, '2021-03-08 07:55:24', NULL),
+('CD', 'Congo, the Democratic Republic of the', 1, '2021-03-08 07:55:24', NULL),
+('CF', 'Central African Republic', 1, '2021-03-08 07:55:24', NULL),
+('CG', 'Congo', 1, '2021-03-08 07:55:24', NULL),
+('CH', 'Switzerland', 1, '2021-03-08 07:55:24', NULL),
+('CI', 'Ivory Coast', 1, '2021-03-08 07:55:24', NULL),
+('CK', 'Cook Islands', 1, '2021-03-08 07:55:24', NULL),
+('CL', 'Chile', 1, '2021-03-08 07:55:24', NULL),
+('CM', 'Cameroon', 1, '2021-03-08 07:55:24', NULL),
+('CN', 'China', 1, '2021-03-08 07:55:24', NULL),
+('CO', 'Colombia', 1, '2021-03-08 07:55:24', NULL),
+('CR', 'Costa Rica', 1, '2021-03-08 07:55:24', NULL),
+('CU', 'Cuba', 1, '2021-03-08 07:55:24', NULL),
+('CV', 'Cape Verde', 1, '2021-03-08 07:55:24', NULL),
+('CX', 'Christmas Island', 1, '2021-03-08 07:55:24', NULL),
+('CY', 'Cyprus', 1, '2021-03-08 07:55:24', NULL),
+('CZ', 'Czech Republic', 1, '2021-03-08 07:55:24', NULL),
+('DE', 'Germany', 1, '2021-03-08 07:55:24', NULL),
+('DJ', 'Djibouti', 1, '2021-03-08 07:55:24', NULL),
+('DK', 'Denmark', 1, '2021-03-08 07:55:24', NULL),
+('DM', 'Dominica', 1, '2021-03-08 07:55:24', NULL),
+('DO', 'Dominican Republic', 1, '2021-03-08 07:55:24', NULL),
+('DZ', 'Algeria', 1, '2021-03-08 07:55:24', NULL),
+('EC', 'Ecuador', 1, '2021-03-08 07:55:24', NULL),
+('EE', 'Estonia', 1, '2021-03-08 07:55:24', NULL),
+('EG', 'Egypt', 1, '2021-03-08 07:55:24', NULL),
+('EH', 'Western Sahara', 1, '2021-03-08 07:55:24', NULL),
+('ER', 'Eritrea', 1, '2021-03-08 07:55:24', NULL),
+('ES', 'Spain', 1, '2021-03-08 07:55:24', NULL),
+('ET', 'Ethiopia', 1, '2021-03-08 07:55:24', NULL),
+('FI', 'Finland', 1, '2021-03-08 07:55:24', NULL),
+('FJ', 'Fiji', 1, '2021-03-08 07:55:24', NULL),
+('FK', 'Falkland Islands (Malvinas)', 1, '2021-03-08 07:55:24', NULL),
+('FM', 'Micronesia, Federated States of', 1, '2021-03-08 07:55:24', NULL),
+('FO', 'Faroe Islands', 1, '2021-03-08 07:55:24', NULL),
+('FR', 'France', 1, '2021-03-08 07:55:24', NULL),
+('GA', 'Gabon', 1, '2021-03-08 07:55:24', NULL),
+('GB', 'United Kingdom', 1, '2021-03-08 07:55:24', NULL),
+('GD', 'Grenada', 1, '2021-03-08 07:55:24', NULL),
+('GE', 'Georgia', 1, '2021-03-08 07:55:24', NULL),
+('GF', 'French Guiana', 1, '2021-03-08 07:55:24', NULL),
+('GG', 'Guernsey', 1, '2021-03-08 07:55:24', NULL),
+('GH', 'Ghana', 1, '2021-03-08 07:55:24', NULL),
+('GI', 'Gibraltar', 1, '2021-03-08 07:55:24', NULL),
+('GL', 'Greenland', 1, '2021-03-08 07:55:24', NULL),
+('GM', 'Gambia', 1, '2021-03-08 07:55:24', NULL),
+('GN', 'Guinea', 1, '2021-03-08 07:55:24', NULL),
+('GP', 'Guadeloupe', 1, '2021-03-08 07:55:24', NULL),
+('GQ', 'Equatorial Guinea', 1, '2021-03-08 07:55:24', NULL),
+('GR', 'Greece', 1, '2021-03-08 07:55:24', NULL),
+('GS', 'South Georgia and the South Sandwich Islands', 1, '2021-03-08 07:55:24', NULL),
+('GT', 'Guatemala', 1, '2021-03-08 07:55:24', NULL),
+('GU', 'Guam', 1, '2021-03-08 07:55:24', NULL),
+('GW', 'Guinea-Bissau', 1, '2021-03-08 07:55:24', NULL),
+('GY', 'Guyana', 1, '2021-03-08 07:55:24', NULL),
+('HK', 'Hong Kong', 1, '2021-03-08 07:55:24', NULL),
+('HM', 'Heard Island and McDonald Islands', 1, '2021-03-08 07:55:24', NULL),
+('HN', 'Honduras', 1, '2021-03-08 07:55:24', NULL),
+('HR', 'Croatia', 1, '2021-03-08 07:55:24', NULL),
+('HT', 'Haiti', 1, '2021-03-08 07:55:24', NULL),
+('HU', 'Hungary', 1, '2021-03-08 07:55:24', NULL),
+('ID', 'Indonesia', 1, '2021-03-08 07:55:24', NULL),
+('IE', 'Ireland', 1, '2021-03-08 07:55:24', NULL),
+('IL', 'Israel', 1, '2021-03-08 07:55:24', NULL),
+('IM', 'Isle of Man', 1, '2021-03-08 07:55:24', NULL),
+('IN', 'India', 1, '2021-03-08 07:55:24', NULL),
+('IO', 'British Indian Ocean Territory', 1, '2021-03-08 07:55:24', NULL),
+('IQ', 'Iraq', 1, '2021-03-08 07:55:24', NULL),
+('IR', 'Iran, Islamic Republic of', 1, '2021-03-08 07:55:24', NULL),
+('IS', 'Iceland', 1, '2021-03-08 07:55:24', NULL),
+('IT', 'Italy', 1, '2021-03-08 07:55:24', NULL),
+('JE', 'Jersey', 1, '2021-03-08 07:55:24', NULL),
+('JM', 'Jamaica', 1, '2021-03-08 07:55:24', NULL),
+('JO', 'Jordan', 1, '2021-03-08 07:55:24', NULL),
+('JP', 'Japan', 1, '2021-03-08 07:55:24', NULL),
+('KE', 'Kenya', 1, '2021-03-08 07:55:24', NULL),
+('KG', 'Kyrgyzstan', 1, '2021-03-08 07:55:24', NULL),
+('KH', 'Cambodia', 1, '2021-03-08 07:55:24', NULL),
+('KI', 'Kiribati', 1, '2021-03-08 07:55:24', NULL),
+('KM', 'Comoros', 1, '2021-03-08 07:55:24', NULL),
+('KN', 'Saint Kitts and Nevis', 1, '2021-03-08 07:55:24', NULL),
+('KP', 'Korea, Democratic People\'s Republic of', 1, '2021-03-08 07:55:24', NULL),
+('KR', 'South Korea', 1, '2021-03-08 07:55:24', NULL),
+('KW', 'Kuwait', 1, '2021-03-08 07:55:24', NULL),
+('KY', 'Cayman Islands', 1, '2021-03-08 07:55:24', NULL),
+('KZ', 'Kazakhstan', 1, '2021-03-08 07:55:24', NULL),
+('LA', 'Lao People\'s Democratic Republic', 1, '2021-03-08 07:55:24', NULL),
+('LB', 'Lebanon', 1, '2021-03-08 07:55:24', NULL),
+('LC', 'Saint Lucia', 1, '2021-03-08 07:55:24', NULL),
+('LI', 'Liechtenstein', 1, '2021-03-08 07:55:24', NULL),
+('LK', 'Sri Lanka', 1, '2021-03-08 07:55:24', NULL),
+('LR', 'Liberia', 1, '2021-03-08 07:55:24', NULL),
+('LS', 'Lesotho', 1, '2021-03-08 07:55:24', NULL),
+('LT', 'Lithuania', 1, '2021-03-08 07:55:24', NULL),
+('LU', 'Luxembourg', 1, '2021-03-08 07:55:24', NULL),
+('LV', 'Latvia', 1, '2021-03-08 07:55:24', NULL),
+('LY', 'Libya', 1, '2021-03-08 07:55:24', NULL),
+('MA', 'Morocco', 1, '2021-03-08 07:55:24', NULL),
+('MC', 'Monaco', 1, '2021-03-08 07:55:24', NULL),
+('MD', 'Moldova, Republic of', 1, '2021-03-08 07:55:24', NULL),
+('ME', 'Montenegro', 1, '2021-03-08 07:55:24', NULL),
+('MG', 'Madagascar', 1, '2021-03-08 07:55:24', NULL),
+('MH', 'Marshall Islands', 1, '2021-03-08 07:55:24', NULL),
+('MK', 'Macedonia, the former Yugoslav Republic of', 1, '2021-03-08 07:55:24', NULL),
+('ML', 'Mali', 1, '2021-03-08 07:55:24', NULL),
+('MM', 'Burma', 1, '2021-03-08 07:55:24', NULL),
+('MN', 'Mongolia', 1, '2021-03-08 07:55:24', NULL),
+('MO', 'Macao', 1, '2021-03-08 07:55:24', NULL),
+('MP', 'Northern Mariana Islands', 1, '2021-03-08 07:55:24', NULL),
+('MQ', 'Martinique', 1, '2021-03-08 07:55:24', NULL),
+('MR', 'Mauritania', 1, '2021-03-08 07:55:24', NULL),
+('MS', 'Montserrat', 1, '2021-03-08 07:55:24', NULL),
+('MT', 'Malta', 1, '2021-03-08 07:55:24', NULL),
+('MU', 'Mauritius', 1, '2021-03-08 07:55:24', NULL),
+('MV', 'Maldives', 1, '2021-03-08 07:55:24', NULL),
+('MW', 'Malawi', 1, '2021-03-08 07:55:24', NULL),
+('MX', 'Mexico', 1, '2021-03-08 07:55:24', NULL),
+('MY', 'Malaysia', 1, '2021-03-08 07:55:24', NULL),
+('MZ', 'Mozambique', 1, '2021-03-08 07:55:24', NULL),
+('NA', 'Namibia', 1, '2021-03-08 07:55:24', NULL),
+('NC', 'New Caledonia', 1, '2021-03-08 07:55:24', NULL),
+('NE', 'Niger', 1, '2021-03-08 07:55:24', NULL),
+('NF', 'Norfolk Island', 1, '2021-03-08 07:55:24', NULL),
+('NG', 'Nigeria', 1, '2021-03-08 07:55:24', NULL),
+('NI', 'Nicaragua', 1, '2021-03-08 07:55:24', NULL),
+('NL', 'Netherlands', 1, '2021-03-08 07:55:24', NULL),
+('NO', 'Norway', 1, '2021-03-08 07:55:24', NULL),
+('NP', 'Nepal', 1, '2021-03-08 07:55:24', NULL),
+('NR', 'Nauru', 1, '2021-03-08 07:55:24', NULL),
+('NU', 'Niue', 1, '2021-03-08 07:55:24', NULL),
+('NZ', 'New Zealand', 1, '2021-03-08 07:55:24', NULL),
+('OM', 'Oman', 1, '2021-03-08 07:55:24', NULL),
+('PA', 'Panama', 1, '2021-03-08 07:55:24', NULL),
+('PE', 'Peru', 1, '2021-03-08 07:55:24', NULL),
+('PF', 'French Polynesia', 1, '2021-03-08 07:55:24', NULL),
+('PG', 'Papua New Guinea', 1, '2021-03-08 07:55:24', NULL),
+('PH', 'Philippines', 1, '2021-03-08 07:55:24', NULL),
+('PK', 'Pakistan', 1, '2021-03-08 07:55:24', NULL),
+('PL', 'Poland', 1, '2021-03-08 07:55:24', NULL),
+('PM', 'Saint Pierre and Miquelon', 1, '2021-03-08 07:55:24', NULL),
+('PN', 'Pitcairn', 1, '2021-03-08 07:55:24', NULL),
+('PR', 'Puerto Rico', 1, '2021-03-08 07:55:24', NULL),
+('PS', 'Palestinian Territory, Occupied', 1, '2021-03-08 07:55:24', NULL),
+('PT', 'Portugal', 1, '2021-03-08 07:55:24', NULL),
+('PW', 'Palau', 1, '2021-03-08 07:55:24', NULL),
+('PY', 'Paraguay', 1, '2021-03-08 07:55:24', NULL),
+('QA', 'Qatar', 1, '2021-03-08 07:55:24', NULL),
+('RE', 'Réunion', 1, '2021-03-08 07:55:24', NULL),
+('RO', 'Romania', 1, '2021-03-08 07:55:24', NULL),
+('RS', 'Serbia', 1, '2021-03-08 07:55:24', NULL),
+('RU', 'Russia', 1, '2021-03-08 07:55:24', NULL),
+('RW', 'Rwanda', 1, '2021-03-08 07:55:24', NULL),
+('SA', 'Saudi Arabia', 1, '2021-03-08 07:55:24', NULL),
+('SB', 'Solomon Islands', 1, '2021-03-08 07:55:24', NULL),
+('SC', 'Seychelles', 1, '2021-03-08 07:55:24', NULL),
+('SD', 'Sudan', 1, '2021-03-08 07:55:24', NULL),
+('SE', 'Sweden', 1, '2021-03-08 07:55:24', NULL),
+('SG', 'Singapore', 1, '2021-03-08 07:55:24', NULL),
+('SH', 'Saint Helena, Ascension and Tristan da Cunha', 1, '2021-03-08 07:55:24', NULL),
+('SI', 'Slovenia', 1, '2021-03-08 07:55:24', NULL),
+('SJ', 'Svalbard and Jan Mayen', 1, '2021-03-08 07:55:24', NULL),
+('SK', 'Slovakia', 1, '2021-03-08 07:55:24', NULL),
+('SL', 'Sierra Leone', 1, '2021-03-08 07:55:24', NULL),
+('SM', 'San Marino', 1, '2021-03-08 07:55:24', NULL),
+('SN', 'Senegal', 1, '2021-03-08 07:55:24', NULL),
+('SO', 'Somalia', 1, '2021-03-08 07:55:24', NULL),
+('SR', 'Suriname', 1, '2021-03-08 07:55:24', NULL),
+('SS', 'South Sudan', 1, '2021-03-08 07:55:24', NULL),
+('ST', 'Sao Tome and Principe', 1, '2021-03-08 07:55:24', NULL),
+('SV', 'El Salvador', 1, '2021-03-08 07:55:24', NULL),
+('SY', 'Syrian Arab Republic', 1, '2021-03-08 07:55:24', NULL),
+('SZ', 'Swaziland', 1, '2021-03-08 07:55:24', NULL),
+('TC', 'Turks and Caicos Islands', 1, '2021-03-08 07:55:24', NULL),
+('TD', 'Chad', 1, '2021-03-08 07:55:24', NULL),
+('TF', 'French Southern Territories', 1, '2021-03-08 07:55:24', NULL),
+('TG', 'Togo', 1, '2021-03-08 07:55:24', NULL),
+('TH', 'Thailand', 1, '2021-03-08 07:55:24', NULL),
+('TJ', 'Tajikistan', 1, '2021-03-08 07:55:24', NULL),
+('TK', 'Tokelau', 1, '2021-03-08 07:55:24', NULL),
+('TL', 'Timor-Leste', 1, '2021-03-08 07:55:24', NULL),
+('TM', 'Turkmenistan', 1, '2021-03-08 07:55:24', NULL),
+('TN', 'Tunisia', 1, '2021-03-08 07:55:24', NULL),
+('TO', 'Tonga', 1, '2021-03-08 07:55:24', NULL),
+('TP', 'East Timor', 1, '2021-03-08 07:55:24', NULL),
+('TR', 'Turkey', 1, '2021-03-08 07:55:24', NULL),
+('TT', 'Trinidad and Tobago', 1, '2021-03-08 07:55:24', NULL),
+('TV', 'Tuvalu', 1, '2021-03-08 07:55:24', NULL),
+('TW', 'Taiwan', 1, '2021-03-08 07:55:24', NULL),
+('TZ', 'Tanzania, United Republic of', 1, '2021-03-08 07:55:24', NULL),
+('UA', 'Ukraine', 1, '2021-03-08 07:55:24', NULL),
+('UG', 'Uganda', 1, '2021-03-08 07:55:24', NULL),
+('UM', 'United States Minor Outlying Islands', 1, '2021-03-08 07:55:24', NULL),
+('US', 'United States', 1, '2021-03-08 07:55:24', NULL),
+('UY', 'Uruguay', 1, '2021-03-08 07:55:24', NULL),
+('UZ', 'Uzbekistan', 1, '2021-03-08 07:55:24', NULL),
+('VA', 'Holy See (Vatican City State)', 1, '2021-03-08 07:55:24', NULL),
+('VC', 'St. Vincent and the Grenadines', 1, '2021-03-08 07:55:24', NULL),
+('VE', 'Venezuela', 1, '2021-03-08 07:55:24', NULL),
+('VG', 'Virgin Islands, British', 1, '2021-03-08 07:55:24', NULL),
+('VI', 'Virgin Islands, U.S.', 1, '2021-03-08 07:55:24', NULL),
+('VN', 'Vietnam', 1, '2021-03-08 07:55:24', NULL),
+('VU', 'Vanuatu', 1, '2021-03-08 07:55:24', NULL),
+('WF', 'Wallis and Futuna', 1, '2021-03-08 07:55:24', NULL),
+('WS', 'Samoa', 1, '2021-03-08 07:55:24', NULL),
+('YE', 'Yemen', 1, '2021-03-08 07:55:24', NULL),
+('YT', 'Mayotte', 1, '2021-03-08 07:55:24', NULL),
+('YU', 'Yugoslavia', 1, '2021-03-08 07:55:24', NULL),
+('ZA', 'South Africa', 1, '2021-03-08 07:55:24', NULL),
+('ZM', 'Zambia', 1, '2021-03-08 07:55:24', NULL),
+('ZW', 'Zimbabwe', 1, '2021-03-08 07:55:24', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_people`
+--
+
 CREATE TABLE `tbl_people` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `first_name` varchar(40) COLLATE utf8_unicode_ci NOT NULL,
   `middle_name` varchar(40) COLLATE utf8_unicode_ci DEFAULT NULL,
   `last_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
@@ -4430,33 +4513,153 @@ CREATE TABLE `tbl_people` (
   `person_type` enum('unspecified','colleague','employee','customer','friend') COLLATE utf8_unicode_ci DEFAULT NULL,
   `birth_date` date DEFAULT NULL,
   `age` smallint(6) DEFAULT NULL,
-  `is_friend` tinyint(1) NOT NULL DEFAULT '0',
-  `notes` text COLLATE utf8_unicode_ci,
+  `is_friend` tinyint(1) NOT NULL DEFAULT 0,
+  `notes` text COLLATE utf8_unicode_ci DEFAULT NULL,
   `photo` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `enabled` tinyint(1) NOT NULL DEFAULT 0,
   `score` decimal(5,2) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
-  `deleted_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  KEY `FK_people_4_city` (`city_id`),
-  CONSTRAINT `FK_people_4_city` FOREIGN KEY (`city_id`) REFERENCES `tbl_cities` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
--- ----------------------------
--- Records of tbl_people
--- ----------------------------
-BEGIN;
-INSERT INTO `tbl_people` VALUES (1, 'Elliot', NULL, 'Alderson', 'M', NULL, 'mrr@f-society.xyz', 'US', 3793, NULL, '1980-01-02', 29, 1, 'Hello friend.', NULL, 1, 93.00, '2020-03-03 12:00:00', '2021-03-12 11:09:12', NULL);
-INSERT INTO `tbl_people` VALUES (2, 'Nestor', NULL, 'Burma', 'M', NULL, 'nestor.burma@yahoo.fr', 'FR', 2974, 'friend', '1950-10-07', NULL, 0, NULL, NULL, 1, 77.00, '2020-03-03 12:00:00', '2021-03-12 11:13:33', NULL);
-INSERT INTO `tbl_people` VALUES (3, 'Peggy', NULL, 'Mitchell', 'F', NULL, 'peggy@yahoo.co.uk', 'GB', 735, 'unspecified', NULL, NULL, 0, 'From EastEnders soap-opera...', NULL, 1, 50.00, '2020-03-03 12:00:00', '2021-03-12 11:17:20', NULL);
-INSERT INTO `tbl_people` VALUES (4, 'Otto', NULL, 'Hantzen', 'M', NULL, 'otto.hantzen@yahoo.de', 'DE', 3068, 'unspecified', NULL, NULL, 0, NULL, NULL, 0, 50.00, '2020-03-03 12:00:00', '2021-03-12 11:18:36', NULL);
-INSERT INTO `tbl_people` VALUES (5, 'Meltem', NULL, 'Çetinoğlu', 'F', NULL, 'meltem.cetinoglu@mynet.com.tr', 'TR', 3357, 'customer', NULL, NULL, 0, NULL, NULL, 1, 77.00, '2020-03-03 12:00:00', '2021-03-12 11:14:54', NULL);
-INSERT INTO `tbl_people` VALUES (6, 'Gökhan', NULL, 'Ozar', 'M', '123-456-7890', 'inexistent@email.address', NULL, 3357, 'friend', NULL, NULL, 1, 'The only non-fictional person in this database. Maker of the code generator.', '', 1, 100.00, '2020-03-03 12:00:00', '2021-03-12 11:14:10', NULL);
-INSERT INTO `tbl_people` VALUES (7, 'Arsen', NULL, 'Lupen', 'M', NULL, 'arsenlupen@yahoo.fr', NULL, 2974, 'unspecified', NULL, NULL, 0, 'Probably dead by now.', '', 0, 89.00, '2020-03-03 12:00:00', '2021-03-12 11:15:32', NULL);
-INSERT INTO `tbl_people` VALUES (8, 'Bea', NULL, 'Smith', 'F', NULL, 'bea.smith@email.com', 'AU', 131, NULL, '1975-06-20', 0, 0, 'Another fictional character from the Australian television drama Wentworth, portrayed by Danielle Cormack.', '', 1, 44.00, '2020-03-03 12:00:00', '2021-03-12 11:19:37', NULL);
-INSERT INTO `tbl_people` VALUES (9, 'Wilma', NULL, 'Burley', 'F', '432432', NULL, 'FR', 3921, 'unspecified', '1948-06-24', NULL, 1, 'Another fictional character...', NULL, 0, 24.00, '2020-03-03 12:00:00', '2021-03-12 11:21:07', NULL);
-INSERT INTO `tbl_people` VALUES (10, 'Raymond', NULL, 'Parker', 'M', NULL, 'raypark2@gmail.com', 'GB', 568, 'unspecified', '1987-06-21', NULL, 0, 'Most promising newcomer', NULL, 1, 68.00, '2020-03-03 12:00:00', '2021-03-12 11:21:42', NULL);
+--
+-- Dumping data for table `tbl_people`
+--
+
+INSERT INTO `tbl_people` (`id`, `first_name`, `middle_name`, `last_name`, `sex`, `phone_number`, `email_address`, `country_code`, `city_id`, `person_type`, `birth_date`, `age`, `is_friend`, `notes`, `photo`, `enabled`, `score`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'Elliot', NULL, 'Alderson', 'M', NULL, 'mrr@f-society.xyz', 'US', 3793, NULL, '1980-01-02', 29, 1, 'Hello friend.', NULL, 1, '93.00', '2020-03-03 06:30:00', '2021-03-12 05:39:12', NULL),
+(2, 'Nestor', NULL, 'Burma', 'M', NULL, 'nestor.burma@yahoo.fr', 'FR', 2974, 'friend', '1950-10-07', NULL, 0, NULL, NULL, 1, '77.00', '2020-03-03 06:30:00', '2021-03-12 05:43:33', NULL),
+(3, 'Peggy', NULL, 'Mitchell', 'F', NULL, 'peggy@yahoo.co.uk', 'GB', 735, 'unspecified', NULL, NULL, 0, 'From EastEnders soap-opera...', NULL, 1, '50.00', '2020-03-03 06:30:00', '2021-03-12 05:47:20', NULL),
+(4, 'Otto', NULL, 'Hantzen', 'M', NULL, 'otto.hantzen@yahoo.de', 'DE', 3068, 'unspecified', NULL, NULL, 0, NULL, NULL, 0, '50.00', '2020-03-03 06:30:00', '2021-03-12 05:48:36', NULL),
+(5, 'Meltem', NULL, 'Çetinoğlu', 'F', NULL, 'meltem.cetinoglu@mynet.com.tr', 'TR', 3357, 'customer', NULL, NULL, 0, NULL, NULL, 1, '77.00', '2020-03-03 06:30:00', '2021-03-12 05:44:54', NULL),
+(6, 'Gökhan', NULL, 'Ozar', 'M', '123-456-7890', 'inexistent@email.address', NULL, 3357, 'friend', NULL, NULL, 1, 'The only non-fictional person in this database. Maker of the code generator.', '', 1, '100.00', '2020-03-03 06:30:00', '2021-03-12 05:44:10', NULL),
+(7, 'Arsen', NULL, 'Lupen', 'M', NULL, 'arsenlupen@yahoo.fr', NULL, 2974, 'unspecified', NULL, NULL, 0, 'Probably dead by now.', '', 0, '89.00', '2020-03-03 06:30:00', '2021-03-12 05:45:32', NULL),
+(8, 'Bea', NULL, 'Smith', 'F', NULL, 'bea.smith@email.com', 'AU', 131, NULL, '1975-06-20', 0, 0, 'Another fictional character from the Australian television drama Wentworth, portrayed by Danielle Cormack.', '', 1, '44.00', '2020-03-03 06:30:00', '2021-03-12 05:49:37', NULL),
+(9, 'Wilma', NULL, 'Burley', 'F', '432432', NULL, 'FR', 3921, 'unspecified', '1948-06-24', NULL, 1, 'Another fictional character...', NULL, 0, '24.00', '2020-03-03 06:30:00', '2021-03-12 05:51:07', NULL),
+(10, 'Raymond', NULL, 'Parker', 'M', NULL, 'raypark2@gmail.com', 'GB', 568, 'unspecified', '1987-06-21', NULL, 0, 'Most promising newcomer', NULL, 1, '68.00', '2020-03-03 06:30:00', '2021-03-12 05:51:42', NULL);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `candidate`
+--
+ALTER TABLE `candidate`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `hr_sub_task`
+--
+ALTER TABLE `hr_sub_task`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `hr_task_id` (`hr_task_id`);
+
+--
+-- Indexes for table `hr_task`
+--
+ALTER TABLE `hr_task`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `status_info`
+--
+ALTER TABLE `status_info`
+  ADD PRIMARY KEY (`status_info_id`);
+
+--
+-- Indexes for table `task_to_process`
+--
+ALTER TABLE `task_to_process`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `tbl_cities`
+--
+ALTER TABLE `tbl_cities`
+  ADD PRIMARY KEY (`id`) USING BTREE,
+  ADD UNIQUE KEY `ind_unique_city_name` (`city_name`,`country_code`) USING BTREE,
+  ADD KEY `fk_city_4_country` (`country_code`) USING BTREE;
+
+--
+-- Indexes for table `tbl_countries`
+--
+ALTER TABLE `tbl_countries`
+  ADD PRIMARY KEY (`iso_code`) USING BTREE,
+  ADD UNIQUE KEY `IND_iso_code` (`iso_code`) USING BTREE,
+  ADD UNIQUE KEY `IND_country_name` (`country_name`) USING BTREE;
+
+--
+-- Indexes for table `tbl_people`
+--
+ALTER TABLE `tbl_people`
+  ADD PRIMARY KEY (`id`) USING BTREE,
+  ADD KEY `FK_people_4_city` (`city_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `candidate`
+--
+ALTER TABLE `candidate`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `hr_sub_task`
+--
+ALTER TABLE `hr_sub_task`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
+-- AUTO_INCREMENT for table `hr_task`
+--
+ALTER TABLE `hr_task`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `task_to_process`
+--
+ALTER TABLE `task_to_process`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+--
+-- AUTO_INCREMENT for table `tbl_cities`
+--
+ALTER TABLE `tbl_cities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4080;
+
+--
+-- AUTO_INCREMENT for table `tbl_people`
+--
+ALTER TABLE `tbl_people`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `hr_sub_task`
+--
+ALTER TABLE `hr_sub_task`
+  ADD CONSTRAINT `hr_sub_task_ibfk_1` FOREIGN KEY (`hr_task_id`) REFERENCES `hr_task` (`id`);
+
+--
+-- Constraints for table `tbl_cities`
+--
+ALTER TABLE `tbl_cities`
+  ADD CONSTRAINT `fk_city_4_country` FOREIGN KEY (`country_code`) REFERENCES `tbl_countries` (`iso_code`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tbl_people`
+--
+ALTER TABLE `tbl_people`
+  ADD CONSTRAINT `FK_people_4_city` FOREIGN KEY (`city_id`) REFERENCES `tbl_cities` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
-SET FOREIGN_KEY_CHECKS = 1;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

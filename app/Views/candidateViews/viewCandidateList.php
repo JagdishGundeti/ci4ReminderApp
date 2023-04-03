@@ -57,7 +57,7 @@
 									<?= esc($item->phone) ?>
 								</td>
 								<td class="align-middle">
-									<?= esc($item->start_date) ?>
+									<?= esc($item->joining_date) ?>
 								</td>
 								<td class="align-middle">
 									<?= esc($item->department) ?>

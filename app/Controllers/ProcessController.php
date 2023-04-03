@@ -1,7 +1,7 @@
 <?php  namespace App\Controllers;
 
 
-use App\Models\CityModel;
+use App\Models\StatusInfoModel;
 
 use App\Models\ProcessModel;
 use App\Entities\Process;
@@ -33,15 +33,14 @@ class ProcessController extends GoBaseController {
 		'score' => 'decimal|permit_empty',
 		'middle_name' => 'trim|max_length[40]',
 		'process_type' => 'max_length[31]',
-		*/
+    */
 		];
 
     public function index() {
 
          $this->viewData['usingClientSideDataTable'] = true;
-         
-		 $this->viewData['pendingAssignmnet'] = $this->primaryModel->findAllWithCities('*');
-		 $this->viewData['processList'] = $this->primaryModel->findAllProcessList('*');
+         $this->viewData['pendingAssignmnet'] = $this->primaryModel->findAllWithCities('*');
+         $this->viewData['processList'] = $this->primaryModel->findAllProcessList('*');
 
          parent::index();
 
@@ -235,6 +234,8 @@ class ProcessController extends GoBaseController {
             $thenRedirect = true;
 
             if ($successfulResult) :
+            	//create History table and insert previous data into it
+                //code area
                 $theId = $process->id;
                 $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $process->{$this->primaryModel::$labelField} . '</b>' : '');
                 $message .= ' was successfully updated. ';
@@ -262,17 +263,25 @@ class ProcessController extends GoBaseController {
         endif; // ($requestMethod === 'post')
 
         $this->viewData['process'] = $process;
-		$this->viewData['processTypeList'] = $this->getProcessTypeOptions();
-		//$this->viewData['sexList'] = $this->getSexOptions();
+        $this->viewData['statusInfoList'] = $this->getStatusInfoListItems();
+        $this->viewData['processTypeList'] = $this->getProcessTypeOptions();
+        $this->viewData['processItem'] = $this->primaryModel->findAllProcessList('*',$requestedId);
 
         
         $theId = $id;
-		$this->viewData['formAction'] = route_to('updateProcess', $theId);
+        $this->viewData['formAction'] = route_to('updateProcess', $theId);
 
-        
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
 
+
+	protected function getStatusInfoListItems() { 
+		$statusInfoModel = new StatusInfoModel();
+		$onlyActiveOnes = true;
+		$data = $statusInfoModel->getAllForMenu('status_info_id, text','active', $onlyActiveOnes );
+
+		return $data;
+	}
 
 
 	protected function getProcessTypeOptions() { 

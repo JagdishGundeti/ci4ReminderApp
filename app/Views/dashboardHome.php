@@ -53,22 +53,7 @@
 
 			<div class="small-box bg-warning">
 				<div class="inner">
-					<h3><?= $totalNrOfEmployee; ?></h3>
-					<p>Total Employee</p>
-				</div>
-				<div class="icon">
-					<i class="fas fa-chart-bar"></i>
-				</div>
-				<?= anchor(route_to('employee'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
-
-			</div><!-- /.small-box -->
-
-		</div><!-- /.col -->
-		<div class="col-lg-3 col-6">
-
-			<div class="small-box bg-warning">
-				<div class="inner">
-					<h3><?= $totalNrOfEmployee; ?></h3>
+					<h3><?= 0; ?></h3>
 					<p>Total Task</p>
 				</div>
 				<div class="icon">
@@ -84,7 +69,7 @@
 
 			<div class="small-box bg-warning">
 				<div class="inner">
-					<h3><?= $totalNrOfEmployee; ?></h3>
+					<h3><?= 0; ?></h3>
 					<p>Total Task</p>
 				</div>
 				<div class="icon">

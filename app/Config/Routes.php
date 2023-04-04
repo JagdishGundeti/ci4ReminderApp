@@ -87,6 +87,9 @@ $routes->post('candidate/edit/(:num)', 'CandidateController::edit/$1', ['as' => 
 $routes->get('ci4sampleapp/public/candidate/delete/(:num)', 'CandidateController::delete/$1', ['as' => 'deleteCandidate']);
 $routes->get('candidate/delete/(:num)', 'CandidateController::delete/$1', ['as' => 'deleteCandidate']);
 
+$routes->get('candidateHist', 'CandidateHistController::index', ['as' => 'candidateHist']);
+$routes->get('candidateHist/view/(:num)', 'CandidateHistController::view/$1', ['as' => 'candidateHistview']);
+
 
 
 $routes->get('process', 'ProcessController::index', ['as' => 'process']);

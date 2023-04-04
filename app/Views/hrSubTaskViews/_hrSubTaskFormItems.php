@@ -20,6 +20,15 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+					<label for="description" class="col-md-4 col-form-label">
+						Description
+					</label>
+					<div class="col-md-8">
+						<input type="text" id="description" name="description" required maxLength="2000" class="form-control" value="<?=old('description', $hrSubTask->description) ?>">
+					</div><!--//.col -->
+				</div><!--//.form-group -->
+
+				<div class="form-group row">
 					<label for="start_date" class="col-md-4 col-form-label">
 						Start Date
 					</label>

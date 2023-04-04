@@ -104,7 +104,7 @@ class ProcessModel extends GoBaseModel
 					hst.deleted_at,
 					si.text as status_text
 				FROM hr_task ht
-						JOIN hr_sub_task hst ON (ht.id = hst.hr_task_id)
+						JOIN hr_sub_task hst ON (ht.id = hst.hr_task_id AND hst.active = 1)
 						JOIN task_to_process ttp ON (hst.id = ttp.hr_sub_task_id)
 						JOIN candidate cand ON (cand.id = ttp.process_group_id AND ttp.process_group = "CAND")
 						JOIN status_info si ON (si.status_info_id = ttp.status_info_id
@@ -132,6 +132,23 @@ class ProcessModel extends GoBaseModel
 		else{
 			$result = $query->getResultObject();
 		}
+		return $result;
+	}
+	
+	public function insertCandidateIntoT2PH(int $id , $sanitizedData) { 
+
+		$sql = ' INSERT INTO task_to_process_history(task_to_process_id, hr_sub_task_id, 
+		            process_group_id, process_group, note, created_at, updated_at, deleted_at, status_info_id)
+		         SELECT
+					id, hr_sub_task_id, process_group_id, process_group, note, created_at, updated_at, deleted_at, status_info_id
+				  FROM task_to_process ttp
+				 ';
+		$sql .= ' WHERE 1 = 1 ';
+		if (!is_null($id) && intval($id) > 0) {
+			$sql .= ' AND ttp.id = ' . intval($id);
+		}
+		$query = $this->db->query($sql);
+		$result = $query->getResultObject();
 		return $result;
 	}
 }

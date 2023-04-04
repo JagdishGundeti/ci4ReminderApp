@@ -126,8 +126,8 @@
 						</div><!--//.form-check -->
 
 						<div class="form-check">
-							<label for="employee" class="form-check-label">
-								<input type="radio" id="employee" name="person_type" value="employee" class="form-check-input" <?= $person->person_type == 'employee' ? 'checked' : '' ?>>
+							<label for="person_e" class="form-check-label">
+								<input type="radio" id="person_e" name="person_type" value="person_e" class="form-check-input" <?= $person->person_type == 'employee' ? 'checked' : '' ?>>
 								employee
 							</label>
 						</div><!--//.form-check -->

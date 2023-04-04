@@ -14,7 +14,7 @@
 				<?=view('candidateViews/_candidateFormItems') ?>
 			</div><!-- /.card-body -->
 			<div class="card-footer">
-				<?=anchor(route_to('employee'), 'Cancel', ['class'=>'btn btn-secondary float-left']); ?>
+				<?=anchor(route_to('candidate'), 'Cancel', ['class'=>'btn btn-secondary float-left']); ?>
 				<input type="submit" class="btn btn-primary float-right" name="save" value=" Save ">
 			</div><!-- /.card-footer -->
 			<?=form_close() ?>

@@ -36,7 +36,6 @@ class Home extends BaseController {
 
 		$this->viewData['totalNrOfPeople'] = 0;
 
-		$this->viewData['totalNrOfEmployee'] = 0;
 
 		$this->viewData['totalNrOfHRTask'] = $hrTaskModel->getCount();
 

@@ -1,46 +1,32 @@
 <?php  namespace App\Controllers;
 
+use App\Models\CandidateHistModel;
+use App\Entities\CandidateHist;
 
-use App\Models\StatusInfoModel;
+class CandidateHistController extends GoBaseController { 
 
-use App\Models\ProcessModel;
-use App\Entities\Process;
+    protected static $primaryModelName = 'CandidateHistModel';
+    protected static $singularObjectName = 'CandidateHist';
+    protected static $singularObjectNameCc = 'candidateHist';
+    protected static $singularObjectNameSc = 'candidateHist';
+    protected static $pluralObjectName = 'CandidateHist';
+    protected static $pluralObjectNameCc = 'candidateHist';
+    protected static $pluralObjectNameSc = 'candidateHist';
+    protected static $controllerSlug = 'candidateHist';
 
-class ProcessController extends GoBaseController { 
+    protected static $viewPath = 'candidateHistViews/';
 
-    protected static $primaryModelName = 'ProcessModel';
-    protected static $singularObjectName = 'Process';
-    protected static $singularObjectNameCc = 'process';
-    protected static $singularObjectNameSc = 'process';
-    protected static $pluralObjectName = 'Process';
-    protected static $pluralObjectNameCc = 'process';
-    protected static $pluralObjectNameSc = 'process';
-    protected static $controllerSlug = 'process';
-
-    protected static $viewPath = 'processViews/';
-
-    protected $indexRoute = 'process';
+    protected $indexRoute = 'candidateHist';
 
     protected $formValidationRules = [
-    /*
-		'notes' => 'trim|max_length[16313]',
-		'first_name' => 'trim|required|max_length[40]',
-		'birth_date' => 'valid_date|permit_empty',
-		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
-		'last_name' => 'trim|required|max_length[50]',
-		'phone_number' => 'trim|max_length[20]',
-		'sex' => 'trim',
-		'score' => 'decimal|permit_empty',
-		'middle_name' => 'trim|max_length[40]',
-		'process_type' => 'max_length[31]',
-    */
+
 		];
 
     public function index() {
 
          $this->viewData['usingClientSideDataTable'] = true;
-         $this->viewData['pendingAssignmnet'] = $this->primaryModel->findAllWithCities('*');
-         $this->viewData['processList'] = $this->primaryModel->findAllProcessList('*');
+         
+		 $this->viewData['candidateHistList'] = $this->primaryModel->findAllCandidates('*');
 
          parent::index();
 
@@ -48,7 +34,7 @@ class ProcessController extends GoBaseController {
 
     public function add() {
 
-        $processModel = $this->primaryModel; // = new ProcessModel();
+        $candidateHistModel = $this->primaryModel; // = new CandidateHistModel();
 
         $requestMethod = $this->request->getMethod();
 
@@ -62,7 +48,7 @@ class ProcessController extends GoBaseController {
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
 
-            $process = new Process($sanitizedData);
+            $candidateHist = new CandidateHist($sanitizedData);
             
 
             $noException = true;
@@ -71,7 +57,7 @@ class ProcessController extends GoBaseController {
             
             if ($formValid) :
                 try {
-                    $successfulResult = $processModel->save($process);
+                    $successfulResult = $candidateHistModel->save($candidateHist);
                 } catch (\Exception $e) {
                     $noException = false;
                     $successfulResult = false;
@@ -93,7 +79,7 @@ class ProcessController extends GoBaseController {
                 $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
 
-            // if ($formValid && !$successfulResult && !is_numeric($process->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
+            // if ($formValid && !$successfulResult && !is_numeric($candidateHist->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
 			if ($formValid && !$successfulResult && $noException) :
 			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
 			endif;
@@ -105,8 +91,8 @@ class ProcessController extends GoBaseController {
                 $insertedId = $this->primaryModel->db->insertID();
                 $theId = $insertedId;
 
-                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $process->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
-                $message .= anchor(route_to('editProcess', $theId), 'Continue editing?');
+                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $candidateHist->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
+                $message .= anchor(route_to('editCandidateHist', $theId), 'Continue editing?');
 
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
@@ -130,47 +116,13 @@ class ProcessController extends GoBaseController {
         
         endif; // ($requestMethod === 'post')
         
-        $this->viewData['process'] = $process ?? new Process();
-		$this->viewData['processTypeList'] = $this->getProcessTypeOptions();
+        $this->viewData['candidateHist'] = $candidateHist ?? new CandidateHist();
+		$this->viewData['candidateHistTypeList'] = $this->getCandidateHistTypeOptions();
 
 
-        $this->viewData['formAction'] = route_to('createProcess');
+        $this->viewData['formAction'] = route_to('createCandidateHist');
 
         $this->displayForm(__METHOD__);
-    }
-    public function addEntries($param1, $param2) {
-
-        $processModel = $this->primaryModel; // = new ProcessModel();
-        $requestMethod = $this->request->getMethod();
-
-		// Call the before event and check for a return
-		$eventData = [
-			'hr_sub_task_id' => $param1,
-			'process_group_id'   => $param2,
-			'process_group'   => 'CAND',
-		];
-
-        $sanitizedData = [];
-        foreach ($eventData as $k => $v) :
-            $sanitizationResult = goSanitize($v);
-            $sanitizedData[$k] = $sanitizationResult[0];
-        endforeach;
-        $process = new Process($sanitizedData);
-
-        $noException = true;
-
-        $formValid = $this->canValidate();
-        
-        if ($formValid) :
-            try {
-                $successfulResult = $processModel->save($process);
-                return $this->redirect2listView();
-            } catch (\Exception $e) {
-		}
-        else:
-            $successfulResult = false;
-            $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
-        endif;
     }
 
     public function edit($requestedId = null) {
@@ -179,10 +131,10 @@ class ProcessController extends GoBaseController {
             return $this->redirect2listView();
         endif;
         $id = filter_var($requestedId, FILTER_SANITIZE_URL);
-        $process = $this->primaryModel->find($id);
+        $candidateHist = $this->primaryModel->find($id);
 
-        if ($process == false) :
-            $message = 'No such process ( with identifier ' . $id . ') was found in the database.';
+        if ($candidateHist == false) :
+            $message = 'No such candidateHist ( with identifier ' . $id . ') was found in the database.';
             return $this->redirect2listView("errorMessage", $message);
         endif;
 
@@ -229,18 +181,15 @@ class ProcessController extends GoBaseController {
                 $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
         
-            $process = $process->mergeAttributes($sanitizedData);
+            $candidateHist = $candidateHist->mergeAttributes($sanitizedData);
 
             $thenRedirect = true;
 
             if ($successfulResult) :
-                //create History table and insert previous data into it
-                $successfulResult = $this->primaryModel->insertCandidateIntoT2PH($id, $sanitizedData);
-
-                $theId = $process->id;
-                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $process->{$this->primaryModel::$labelField} . '</b>' : '');
+                $theId = $candidateHist->id;
+                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $candidateHist->{$this->primaryModel::$labelField} . '</b>' : '');
                 $message .= ' was successfully updated. ';
-                $message .= anchor(route_to('editProcess', $theId), 'Continue editing?');
+                $message .= anchor(route_to('editCandidateHist', $theId), 'Continue editing?');
 
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
@@ -263,41 +212,51 @@ class ProcessController extends GoBaseController {
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
 
-        $this->viewData['process'] = $process;
-        $this->viewData['statusInfoList'] = $this->getStatusInfoListItems();
-        $this->viewData['processTypeList'] = $this->getProcessTypeOptions();
-        $this->viewData['processItem'] = $this->primaryModel->findAllProcessList('*',$requestedId);
+        $this->viewData['candidateHist'] = $candidateHist;
+		$this->viewData['candidateHistTypeList'] = $this->getCandidateHistTypeOptions();
 
         
         $theId = $id;
-        $this->viewData['formAction'] = route_to('updateProcess', $theId);
+		$this->viewData['formAction'] = route_to('updateCandidateHist', $theId);
 
+        
+        $this->displayForm(__METHOD__, $id);
+    } // function edit(...)
+    public function view($requestedId = null) {
+
+        if ($requestedId == null) :
+            return $this->redirect2listView();
+        endif;
+        
+        
+         $this->viewData['usingClientSideDataTable'] = true;
+         
+		 $this->viewData['candidateHistList'] = $this->primaryModel->findAllCandidates('*');
+
+		 $id = filter_var($requestedId, FILTER_SANITIZE_URL);
+		 //$candidateHist = $this->primaryModel->findCandidateHist($id);
+		 $this->viewData['candidateHist'] = $this->primaryModel->findCandidateHist($id);
+
+
+
+        $requestMethod = $this->request->getMethod();
+
+
+        
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
 
 
-	protected function getStatusInfoListItems() { 
-		$statusInfoModel = new StatusInfoModel();
-		$onlyActiveOnes = true;
-		$data = $statusInfoModel->getAllForMenu('status_info_id, text','active', $onlyActiveOnes );
-
-		return $data;
-	}
-
-
-	protected function getProcessTypeOptions() { 
-		$processTypeOptions = [ 
+	protected function getCandidateHistTypeOptions() { 
+		$candidateHistTypeOptions = [ 
 				'' => 'Please select...',
 				'unspecified' => 'unspecified',
 				'colleague' => 'colleague',
-				'process' => 'process',
+				'candidateHist' => 'candidateHist',
 				'customer' => 'customer',
 				'friend' => 'friend',
 			];
-		return $processTypeOptions;
+		return $candidateHistTypeOptions;
 	}
-
-
-
 
 }

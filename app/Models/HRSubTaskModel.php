@@ -10,6 +10,7 @@ class HRSubTaskModel extends GoBaseModel
 			'id',
 			'hr_task_id',
 			'subtask_name',
+			'description',
 			'task_name',
 			'start_date',
 			'end_date',
@@ -31,8 +32,10 @@ class HRSubTaskModel extends GoBaseModel
 		$sql = 'SELECT hr_sub_task.id,subtask_name,task_name,hr_sub_task.start_date,hr_sub_task.end_date,task_name		
 		 FROM hr_sub_task JOIN hr_task on hr_task_id = hr_task.id';
 */
-		$sql = 'SELECT hst.id,subtask_name,task_name,hst.start_date,hst.end_date,task_name, hst.priority
-		 FROM hr_sub_task hst JOIN hr_task on hr_task_id = hr_task.id';
+		$sql = 'SELECT hst.id,subtask_name,hst.description,task_name,hst.start_date,hst.end_date,task_name, hst.priority
+		 FROM hr_sub_task hst JOIN hr_task on hr_task_id = hr_task.id
+		   WHERE hst.active = 1
+		 ';
 
 		if (!is_null($limit) && intval($limit) > 0) {
 			$sql .= ' LIMIT ' . intval($limit);

@@ -29,13 +29,14 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
-					<label for="start_date" class="col-md-4 col-form-label">
-						Start Date
+					<label for="joining_date" class="col-md-4 col-form-label">
+						Joining Date
 					</label>
 					<div class="col-md-8">
-						<input type="text" id="start_date" name="start_date" maxLength="20" class="form-control" value="<?=old('start_date', $candidate->start_date) ?>">
+						<input type="date" id="joining_date" name="joining_date" maxLength="10" class="form-control" value="<?=old('joining_date', $candidate->joining_date) ?>">
 					</div><!--//.col -->
 				</div><!--//.form-group -->
+					
 
 				<div class="form-group row">
 					<label for="department" class="col-md-4 col-form-label">
@@ -45,6 +46,17 @@
 						<input type="department" id="department" name="department" maxLength="50" class="form-control" value="<?=old('department', $candidate->department) ?>">
 					</div><!--//.col -->
 				</div><!--//.form-group -->
+				
+
+				<div class="form-group row">
+					<label for="job_title" class="col-md-4 col-form-label">
+						Job Title
+					</label>
+					<div class="col-md-8">
+						<input type="job_title" id="job_title" name="job_title" maxLength="50" class="form-control" value="<?=old('job_title', $candidate->job_title) ?>">
+					</div><!--//.col -->
+				</div><!--//.form-group -->
+
 
 			</div><!--//.col -->
 

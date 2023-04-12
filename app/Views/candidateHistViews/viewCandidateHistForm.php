@@ -30,7 +30,7 @@
 								<th>Name</th>
 								<th>Email</th>
 								<th>Phone Number</th>
-								<th>Start Date</th>
+								<th>Joining Date</th>
 								<th>Department</th>
 								<th>Job Title</th>
 								<th>Manager</th>
@@ -89,7 +89,7 @@
 
 		<div class="card card-info">
 			<div class="card-header">
-				<h3 class="card-title">Candidate List</h3>
+				<h3 class="card-title">Candidate History</h3>
 				<div class="card-tools">
 					<button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
 						<i class="fas fa-minus"></i>
@@ -108,7 +108,6 @@
 					<table id="tableOfCandidate2" class="table table-striped table-hover ">
 						<thead>
 							<tr>
-								<th class="text-nowrap">Action</th>
 								<th>ID</th>
 								<th>Name</th>
 								<th>Department</th>
@@ -117,17 +116,15 @@
 								<th>Sub Task</th>
 								<th>Joining Date</th>
 								<th>Action Before/After</th>
+								<th>Completed On</th>
+								<th>Notes</th>
 								<th>Status</th>
-								<th class="text-nowrap">Action</th>
 							</tr>
 						</thead>
 						<tbody>
 
 						<?php foreach ($candidateHist as $item ) : ?>
 							<tr>
-								<td class="align-middle text-center text-nowrap">
-									<?=anchor(route_to('candidateHistview', $item->id), '<i class="fa fa-eye"></i>', ['class'=>'btn btn-sm btn-warning mr-1', 'data-id'=>$item->id]); ?> 
-								</td>
 								<td class="align-middle text-center">
 									<?=$item->id ?>
 								</td>
@@ -153,13 +150,15 @@
 									<?= esc($item->task_date) ?>
 								</td>
 								<td class="align-middle">
+									<?= esc($item->updated_at) ?>
+								</td>
+								<td class="align-middle">
+									<?= esc($item->note) ?>
+								</td>
+								<td class="align-middle">
 									<?= esc($item->status_text) ?>
 								</td>
 
-
-								<td class="align-middle text-center text-nowrap">
-									<?=anchor(route_to('candidateHistview', $item->id), '<i class="fa fa-eye"></i>', ['class'=>'btn btn-sm btn-warning mr-1', 'data-id'=>$item->id]); ?> 
-								</td>
 							</tr>
 
 						<?php endforeach; ?>

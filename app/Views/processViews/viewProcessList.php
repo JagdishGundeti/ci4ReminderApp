@@ -204,7 +204,16 @@
                         searchable: false,
                         targets: [0,lastColNr]
                     }
-                ]
+                ],
+                "createdRow": function( row, data, dataIndex){
+                	//let currentDate = new Date().toJSON().slice(0, 10);
+                	let currentDate = new Date();
+                	var rowDate = new Date(data[8]);
+	                if( rowDate < currentDate){
+	                //if( data[8] == "2023-03-14"){
+	                    $(row).css("background-color", "red");
+	                }
+	            }
             });
             
          

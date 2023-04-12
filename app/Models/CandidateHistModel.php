@@ -53,9 +53,10 @@ class CandidateHistModel extends GoBaseModel
 					hst.no_of_days,
 					DATE_ADD( cand.joining_date, INTERVAL hst.no_of_days DAY) AS task_date,
 					hst.end_date,
-					hst.created_at,
-					hst.updated_at,
-					hst.deleted_at,
+					ttph.created_at,
+					ttph.updated_at,
+					ttph.deleted_at,
+					ttph.note,
 					si.text as status_text
 				FROM hr_task ht
 						JOIN hr_sub_task hst ON (ht.id = hst.hr_task_id AND hst.active = 1)

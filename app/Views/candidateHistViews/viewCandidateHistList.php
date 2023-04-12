@@ -30,7 +30,7 @@
 								<th>Name</th>
 								<th>Email</th>
 								<th>Phone Number</th>
-								<th>Start Date</th>
+								<th>Joining Date</th>
 								<th>Department</th>
 								<th>Job Title</th>
 								<th>Manager</th>

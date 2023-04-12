@@ -30,7 +30,7 @@
 
 				<div class="form-group row">
 					<label for="start_date" class="col-md-4 col-form-label">
-						Start Date
+						Joining Date
 					</label>
 					<div class="col-md-8">
 						<input type="text" id="start_date" name="start_date" maxLength="20" class="form-control" value="<?=old('start_date', $candidateHist->start_date) ?>">

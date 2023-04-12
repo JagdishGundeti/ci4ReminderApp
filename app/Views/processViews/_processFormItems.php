@@ -55,6 +55,15 @@
 				</div><!--//.form-group -->
 
 
+				<div class="form-group row">
+					<label for="note" class="col-md-4 col-form-label">
+						Note
+					</label>
+					<div class="col-md-8">
+						<textarea rows="3" id="note" name="note" class="form-control"><?=old('note', $processItem->note) ?></textarea>
+					</div><!--//.col -->
+				</div><!--//.form-group -->
+
 
 			</div><!--//.col -->
 

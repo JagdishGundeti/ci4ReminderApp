@@ -31,6 +31,7 @@
                         </p>
                     </a>
                 </li>
+                <!--
                 <li class="nav-item has-treeview menu-open">
                     <a href="#" class="nav-link active">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -41,10 +42,13 @@
                     </a>
                     <ul class="nav nav-treeview">
                         
-                        <?= view('_partials/_leftSidebarContent'); ?>
+                        <?= 
+                        //view('_partials/_leftSidebarContent'); 
+                        $a=0;
+                        ?>
               
-                    </ul><!--//.nav nav-treeview -->
-                </li><!--//.nav-item has-treeview -->
+                    </ul><!--//.nav nav-treeview --x>
+                </li> --><!--//.nav-item has-treeview -->
                 <li class="nav-item has-treeview menu-open">
                     <a href="#" class="nav-link active">
                         <i class="nav-icon fas fa-tachometer-alt"></i>

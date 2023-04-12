@@ -30,7 +30,7 @@ class PersonModel extends GoBaseModel
 	public static $labelField = 'first_name';
 
 	public function findAllWithCities(string $selcols='*', int $limit=null, int $offset = 0) { 
-		$sql = 'SELECT t1.'.$selcols.',  t2.city_name AS cities_city_name FROM ' . $this->table . ' t1  LEFT JOIN tbl_cities t2 ON t1.city_id = t2.id'; 
+		$sql = 'SELECT t1.'.$selcols.',  t2.city_name AS cities_city_name FROM ' . $this->prefix_table . $this->table . ' t1  LEFT JOIN tbl_cities t2 ON t1.city_id = t2.id'; 
 		if (!is_null($limit) && intval($limit) > 0) {
 			$sql .= ' LIMIT ' . intval($limit);
 		}

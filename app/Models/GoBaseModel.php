@@ -31,6 +31,7 @@ abstract class GoBaseModel extends Model {
      * The name of the field (attribute) in this model which will be used to refer to as a human-friendly object name
      */
     public static $labelField;
+    public $prefix_table = 'reminder.';
 
     /**
      * Returns the model's DB table name
@@ -38,7 +39,7 @@ abstract class GoBaseModel extends Model {
      * @return string
      */
     public function getDbTableName() {
-        return $this->table;
+        return $this->prefix_table . $this->table;
     }
     
     /**
@@ -47,7 +48,7 @@ abstract class GoBaseModel extends Model {
      * @return string
      */
     public function getTableName() {
-        return $this->table;
+        return $this->prefix_table . $this->table;
     }
     
     /**
@@ -65,7 +66,7 @@ abstract class GoBaseModel extends Model {
      * @return int
      */
     public function getCount() {
-        $name = filter_var($this->table, FILTER_SANITIZE_STRING);
+        $name = filter_var($this->prefix_table . $this->table, FILTER_SANITIZE_STRING);
         $count = $this->db->table($name)->countAll();
         return $count;
     }
@@ -106,7 +107,7 @@ abstract class GoBaseModel extends Model {
         if (!empty($additionalConditions)) {
             $theseConditionsAreMet = array_merge($theseConditionsAreMet, $additionalConditions);
         }
-        $queryBuilder = $this->db->table($this->table);
+        $queryBuilder = $this->db->table($this->prefix_table . $this->table);
         $queryBuilder->select($columns2select);
         if (!empty($theseConditionsAreMet)) {
             $queryBuilder->where($theseConditionsAreMet);

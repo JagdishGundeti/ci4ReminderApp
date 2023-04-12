@@ -29,7 +29,7 @@ class StatusInfoModel extends GoBaseModel
 	public static $labelField = 'text';
 
 	public function findAllWithCountries(string $selcols='*', int $limit=null, int $offset = 0) { 
-		$sql = 'SELECT t1.'.$selcols.',  t2.country_name AS countries_country_name FROM ' . $this->table . ' t1  LEFT JOIN tbl_countries t2 ON t1.country_code = t2.iso_code'; 
+		$sql = 'SELECT t1.'.$selcols.',  t2.country_name AS countries_country_name FROM ' . $this->prefix_table . $this->table . ' t1  LEFT JOIN '. $this->prefix_table .'tbl_countries t2 ON t1.country_code = t2.iso_code'; 
 		if (!is_null($limit) && intval($limit) > 0) {
 			$sql .= ' LIMIT ' . intval($limit);
 		}
@@ -53,7 +53,7 @@ class StatusInfoModel extends GoBaseModel
 	*/
 	public function getResource(string $search = '')
 	{
-		$builder = $this->db->table($this->table.' t1')
+		$builder = $this->db->table($this->prefix_table . $this->table.' t1')
 				 ->select('t1.id AS id, t1.city_name AS city_name, t1.enabled AS enabled, t1.updated_at AS updated_at, t2.country_name AS countries_country_name');
 		$builder->join('tbl_countries t2', 't1.country_code = t2.iso_code', 'left');
 

@@ -21,7 +21,7 @@ class HRTaskModel extends GoBaseModel
 	public static $labelField = 'name';
 
 	public function findAllWithCities(string $selcols='*', int $limit=null, int $offset = 0) { 
-		$sql = 'SELECT * FROM ' . $this->table ; 
+		$sql = 'SELECT * FROM ' . $this->prefix_table . $this->table ; 
 		if (!is_null($limit) && intval($limit) > 0) {
 			$sql .= ' LIMIT ' . intval($limit);
 		}

@@ -6,7 +6,7 @@
 						Task Name
 					</label>
 					<div class="col-md-8">
-						<input type="text" id="subtask_name" name="subtask_name" required maxLength="40" class="form-control" value="<?=old('subtask_name', $hrSubTask->subtask_name) ?>">
+						<textarea rows="3" id="subtask_name" name="subtask_name" required maxLength="250" class="form-control"><?=old('subtask_name', $hrSubTask->subtask_name) ?></textarea>
 					</div><!--//.col -->
 				</div><!--//.form-group -->
 
@@ -24,7 +24,7 @@
 						Description
 					</label>
 					<div class="col-md-8">
-						<input type="text" id="description" name="description" required maxLength="2000" class="form-control" value="<?=old('description', $hrSubTask->description) ?>">
+						<textarea rows="3" id="description" name="description" required maxLength="2000" class="form-control"><?=old('description', $hrSubTask->description) ?></textarea>
 					</div><!--//.col -->
 				</div><!--//.form-group -->
 

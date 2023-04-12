@@ -278,8 +278,9 @@ class ProcessController extends GoBaseController {
 
 	protected function getStatusInfoListItems() { 
 		$statusInfoModel = new StatusInfoModel();
-		$onlyActiveOnes = true;
-		$data = $statusInfoModel->getAllForMenu('status_info_id, text','active', $onlyActiveOnes );
+		$onlyActiveOnes = 1;
+		//$data = $statusInfoModel->getAllForMenu('status_info_id, text','active', $onlyActiveOnes );
+		$data = $statusInfoModel->getAllForMenu('status_info_id, text', $onlyActiveOnes );
 
 		return $data;
 	}

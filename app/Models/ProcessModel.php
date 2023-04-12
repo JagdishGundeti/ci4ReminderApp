@@ -31,7 +31,7 @@ class ProcessModel extends GoBaseModel
 
 	public function findAllWithCities(string $selcols='*', int $limit=null, int $offset = 0) { 
 	/*
-		$sql = 'SELECT * FROM ' . $this->table .
+		$sql = 'SELECT * FROM ' . $this->prefix_table . $this->table .
 		' RIGHT JOIN  ' . $this->join_table  . ' ON process_group_id = candidate.id '
 		;
 		$sql = 'SELECT * FROM ' . 'candidate' .
@@ -56,16 +56,17 @@ class ProcessModel extends GoBaseModel
 					subtask_name,
 					candidate.joining_date,
 					hst.no_of_days,
-					DATE_ADD( joining_date, INTERVAL hst.no_of_days DAY) AS task_date,
+					-- DATE_ADD( joining_date, INTERVAL hst.no_of_days DAY) AS task_date,
+					joining_date + hst.no_of_days AS task_date,
 					hst.end_date,
 					hst.created_at,
 					hst.updated_at,
 					hst.deleted_at
-				FROM hr_task 
-						JOIN hr_sub_task hst ON hr_task.id = hst.hr_task_id 
-						JOIN candidate
+				FROM '. $this->prefix_table . 'hr_task
+						JOIN ' . $this->prefix_table . 'hr_sub_task hst ON hr_task.id = hst.hr_task_id 
+						JOIN '. $this->prefix_table . $this->join_table . ' ON 1 = 1
 				WHERE (hst.id,candidate.id) NOT IN (
-					SELECT hr_sub_task_id,process_group_id FROM task_to_process
+					SELECT hr_sub_task_id,process_group_id FROM ' . $this->prefix_table . $this->table . '
 				)'
 		;
 		
@@ -97,18 +98,19 @@ class ProcessModel extends GoBaseModel
 					subtask_name,
 					cand.joining_date,
 					hst.no_of_days,
-					DATE_ADD( cand.joining_date, INTERVAL hst.no_of_days DAY) AS task_date,
+					-- DATE_ADD( cand.joining_date, INTERVAL hst.no_of_days DAY) AS task_date,
+					cand.joining_date + hst.no_of_days AS task_date,
 					hst.end_date,
 					ttp.created_at,
 					ttp.updated_at,
 					ttp.deleted_at,
 					ttp.note,
 					si.text as status_text
-				FROM hr_task ht
-						JOIN hr_sub_task hst ON (ht.id = hst.hr_task_id AND hst.active = 1)
-						JOIN task_to_process ttp ON (hst.id = ttp.hr_sub_task_id)
-						JOIN candidate cand ON (cand.id = ttp.process_group_id AND ttp.process_group = "CAND")
-						JOIN status_info si ON (si.status_info_id = ttp.status_info_id
+				FROM '. $this->prefix_table . 'hr_task ht
+						JOIN '. $this->prefix_table . 'hr_sub_task hst ON (ht.id = hst.hr_task_id AND hst.active = 1)
+						JOIN '. $this->prefix_table . 'task_to_process ttp ON (hst.id = ttp.hr_sub_task_id)
+						JOIN '. $this->prefix_table . 'candidate cand ON (cand.id = ttp.process_group_id AND ttp.process_group = \'CAND\')
+						JOIN '. $this->prefix_table . 'status_info si ON (si.status_info_id = ttp.status_info_id
 						     AND si.status_info_id <> ' . STATUS_INFO_COMPLETED . ')'
 						 
 		;
@@ -138,11 +140,11 @@ class ProcessModel extends GoBaseModel
 	
 	public function insertCandidateIntoT2PH(int $id , $sanitizedData) { 
 
-		$sql = ' INSERT INTO task_to_process_history(task_to_process_id, hr_sub_task_id, 
+		$sql = ' INSERT INTO '. $this->prefix_table . 'task_to_process_history(task_to_process_id, hr_sub_task_id, 
 		            process_group_id, process_group, note, created_at, updated_at, deleted_at, status_info_id)
 		         SELECT
 					id, hr_sub_task_id, process_group_id, process_group, note, created_at, updated_at, deleted_at, status_info_id
-				  FROM task_to_process ttp
+				  FROM '. $this->prefix_table . 'task_to_process ttp
 				 ';
 		$sql .= ' WHERE 1 = 1 ';
 		if (!is_null($id) && intval($id) > 0) {
